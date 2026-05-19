@@ -1,0 +1,352 @@
+{
+  "timestamp": "2026-01-15T11:35:38.225511",
+  "context": "c_code_validation",
+  "model_type": "chat_deepseek_structured_attempt2",
+  "model": "deepseek-chat",
+  "request": {
+    "messages": [
+      {
+        "role": "system",
+        "content": "Fix compilation and runtime errors in Unity C test code.\n\nRULES:\n- Minimal changes only - fix errors, don't refactor\n- Preserve original structure\n- Ignore #include errors (handled separately)\n- Use Unity TEST_ASSERT_* macros (not assert() or custom functions)\n- Identify error source: unit_test vs helpers.c\n\nUNITY MACROS:\nTEST_ASSERT_NULL, TEST_ASSERT_NOT_NULL, TEST_ASSERT_EQUAL, TEST_ASSERT_EQUAL_INT,\nTEST_ASSERT_EQUAL_STRING, TEST_ASSERT_TRUE, TEST_ASSERT_FALSE, TEST_ASSERT_FLOAT_WITHIN\n\nCOMMON FIXES:\n- Undefined function → use Unity macro or helpers.c function\n- Undeclared variable → add declaration\n- `int* arr = {1,2,3}` → `int arr[] = {1,2,3}`\n- Type mismatch → cast or use correct type\n- Wrong struct field name → check header definitions for correct field names\n\nSTRUCT FIELD REFERENCE:\nWhen fixing struct field errors, use EXACT field names from the header definitions provided.\nCommon struct patterns (check header definitions for exact fields):\n  buffer_t: { size_t len; char *alloc; char *data; }\n  - Use buf->len (NOT buf->length or buf->size)\n  - Use buf->data (NOT buf->buffer)\n  - Use buf->alloc (for original allocation pointer)\n\nASAN ERRORS:\nUse the line numbers and error type (SEGV, heap-overflow, use-after-free) to fix root cause.\n\nMEMORY LEAK ERRORS (for malloc_wrap tests):\n- Ensure malloc_reset() is called in tearDown()\n- After failed allocation, the struct itself may still be valid\n- Use appropriate cleanup (e.g., buffer_free()) even after internal alloc fails\n"
+      },
+      {
+        "role": "user",
+        "content": "Fix errors in this Unity test code.\n\nUnit Test Code:\n#include \"unity.h\"\\n#include \"header.h\"\\n#include \"helpers.h\"\\n\\nvoid setUp(void) { }\\nvoid tearDown(void) { }\\n\\nvoid unit_test_print_number_positive_digits_to_print(void) {\\n    uint8_t N = 5;\\n    uint8_t number[] = {0, 0, 3, 2, 1};\\n    int8_t num_digits_to_print = 3;\\n    stdout_capture_t *cap = capture_stdout_start();\\n\\n    int result = print_number(number, N, num_digits_to_print);\\n\\n    char *output = capture_stdout_stop(cap);\\n    TEST_ASSERT_EQUAL_INT(0, result);\\n    TEST_ASSERT_EQUAL_STRING(\"123\\n\", output);\\n    free(output);\\n}\\n\\nint main(void) {\\n    UNITY_BEGIN();\\n    RUN_TEST(unit_test_print_number_positive_digits_to_print);\\n    return UNITY_END();\\n}\n\nhelpers.c:\n// Generated helper functions\\n// This file contains assertion and utility functions\\n// Includes both created functions and functions from the helper pool\\n\\n#include <stdio.h>\\n#include <stdlib.h>\\n#include <stdint.h>\\n#include <assert.h>\\n#include <string.h>\\n#include <math.h>\\n#include \"../../../include/euler_problem_13_sol1/header.h\"\\n\\n// ========== Searched From Pool - Assertion Operations ==========\\n\\n// Function: assert_stdout_equals (from helper pool)\\nvoid assert_stdout_equals(stdout_capture_t *cap, const char *expected) {\\n    char *actual = capture_stdout_stop(cap);\\n    if (actual == NULL) {\\n        fprintf(stderr, \"Stdout capture failed\\n\");\\n        exit(1);\\n    }\\n    if (strcmp(actual, expected) != 0) {\\n        fprintf(stderr, \"Stdout assertion failed:\\n\");\\n        fprintf(stderr, \"  Expected: \\\"%s\\\"\\n\", expected);\\n        fprintf(stderr, \"  Actual:   \\\"%s\\\"\\n\", actual);\\n        free(actual);\\n        exit(1);\\n    }\\n    free(actual);\\n}\\n\\n// Function: assert_stdout_contains (from helper pool)\\nvoid assert_stdout_contains(stdout_capture_t *cap, const char *expected_substring) {\\n    char *actual = capture_stdout_stop(cap);\\n    if (actual == NULL) {\\n        fprintf(stderr, \"Stdout capture failed\\n\");\\n        exit(1);\\n    }\\n    if (strstr(actual, expected_substring) == NULL) {\\n        fprintf(stderr, \"Stdout assertion failed (substring not found):\\n\");\\n        fprintf(stderr, \"  Expected substring: \\\"%s\\\"\\n\", expected_substring);\\n        fprintf(stderr, \"  Actual output:      \\\"%s\\\"\\n\", actual);\\n        free(actual);\\n        exit(1);\\n    }\\n    free(actual);\\n}\\n\\n// Function: assert_stdout_not_empty (from helper pool)\\nvoid assert_stdout_not_empty(stdout_capture_t *cap) {\\n    char *actual = capture_stdout_stop(cap);\\n    if (actual == NULL) {\\n        fprintf(stderr, \"Stdout capture failed\\n\");\\n        exit(1);\\n    }\\n    if (strlen(actual) == 0) {\\n        fprintf(stderr, \"Stdout assertion failed: output was empty\\n\");\\n        free(actual);\\n        exit(1);\\n    }\\n    free(actual);\\n}\\n\\n// ========== Created - Assertion Operations ==========\\n\\n// Asserts that two uint8_t arrays representing numbers (digits) are equal up to a given length.\\nvoid helper_assert_number_array_equal(uint8_t *actual, uint8_t *expected, int length) {\\n    for (int i = 0; i < length; i++) {\\n        assert(actual[i] == expected[i]);\\n    }\\n}\\n\\n// Captures stdout output of print_number and asserts it matches expected string.\\nvoid helper_assert_print_number_output(uint8_t *number, uint8_t N, int8_t num_digits_to_print, const char *expected_output) {\\n    stdout_capture_t *cap = capture_stdout_start();\\n    print_number(number, N, num_digits_to_print);\\n    char *output = capture_stdout_stop(cap);\\n    assert_stdout_equals(cap, expected_output);\\n}\\n\\n// ========== Searched From Pool - Utility Operations ==========\\n\\n// Function: capture_stdout_start (from helper pool)\\nstdout_capture_t *capture_stdout_start(void) {\\n    stdout_capture_t *cap = malloc(sizeof(stdout_capture_t));\\n    if (!cap) return NULL;\\n    cap->buffer = NULL;\\n    cap->buffer_size = 0;\\n    /* Create a pipe */\\n    int pipefd[2];\\n    if (pipe(pipefd) == -1) {\\n        free(cap);\\n        return NULL;\\n    }\\n    cap->pipe_read_fd = pipefd[0];\\n    cap->pipe_write_fd = pipefd[1];\\n    /* Save original stdout */\\n    cap->saved_stdout_fd = dup(STDOUT_FILENO);\\n    if (cap->saved_stdout_fd == -1) {\\n        close(cap->pipe_read_fd);\\n        close(cap->pipe_write_fd);\\n        free(cap);\\n        return NULL;\\n    }\\n    /* Redirect stdout to the pipe write end */\\n    if (dup2(cap->pipe_write_fd, STDOUT_FILENO) == -1) {\\n        close(cap->saved_stdout_fd);\\n        close(cap->pipe_read_fd);\\n        close(cap->pipe_write_fd);\\n        free(cap);\\n        return NULL;\\n    }\\n    return cap;\\n}\\n\\n// Function: capture_stdout_stop (from helper pool)\\nchar *capture_stdout_stop(stdout_capture_t *cap) {\\n    if (!cap) return NULL;\\n    /* Flush stdout to ensure all output is written to pipe */\\n    fflush(stdout);\\n    /* Close write end of pipe to signal EOF */\\n    close(cap->pipe_write_fd);\\n    /* Restore original stdout */\\n    dup2(cap->saved_stdout_fd, STDOUT_FILENO);\\n    close(cap->saved_stdout_fd);\\n    /* Read captured output from pipe */\\n    size_t total_read = 0;\\n    size_t buffer_capacity = 1024;\\n    char *buffer = malloc(buffer_capacity);\\n    if (!buffer) {\\n        close(cap->pipe_read_fd);\\n        free(cap);\\n        return NULL;\\n    }\\n    ssize_t bytes_read;\\n    while ((bytes_read = read(cap->pipe_read_fd, buffer + total_read,\\n                               buffer_capacity - total_read - 1)) > 0) {\\n        total_read += bytes_read;\\n        if (total_read >= buffer_capacity - 1) {\\n            buffer_capacity *= 2;\\n            char *new_buffer = realloc(buffer, buffer_capacity);\\n            if (!new_buffer) {\\n                free(buffer);\\n                close(cap->pipe_read_fd);\\n                free(cap);\\n                return NULL;\\n            }\\n            buffer = new_buffer;\\n        }\\n    }\\n    buffer[total_read] = '\\0';\\n    close(cap->pipe_read_fd);\\n    free(cap);\\n    return buffer;\\n}\\n\\n// ========== Created - Utility Operations ==========\\n\\n// Creates a temporary text file with given lines of numbers for testing get_number.\\nchar *helper_create_test_file(const char **lines, int num_lines) {\\n    char *filename = malloc(20 * sizeof(char));\\n    strcpy(filename, \"test_num.txt\");\\n    FILE *fp = fopen(filename, \"w\");\\n    if (!fp) {\\n        free(filename);\\n        return NULL;\\n    }\\n    for (int i = 0; i < num_lines; i++) {\\n        fprintf(fp, \"%s\\n\", lines[i]);\\n    }\\n    fclose(fp);\\n    return filename;\\n}\\n\\n// Deletes a temporary test file created by helper_create_test_file.\\nvoid helper_cleanup_test_file(char *filename) {\\n    remove(filename);\\n    free(filename);\\n}\\n\n\nHeader Definitions (struct/type info):\n// No struct definitions found in headers\n\nCompilation Errors:\ntest/projects/euler_problem_13_sol1/monolithic/tests/print_number/unit_test_print_number_positive_digits_to_print.c: In function ‘unit_test_print_number_positive_digits_to_print’:\\ntest/projects/euler_problem_13_sol1/monolithic/tests/print_number/unit_test_print_number_positive_digits_to_print.c:12:5: error: unknown type name ‘stdout_capture_t’\\n   12 |     stdout_capture_t *cap = capture_stdout_start();\\n      |     ^~~~~~~~~~~~~~~~\\ntest/projects/euler_problem_13_sol1/helpers.c:16:27: error: unknown type name ‘stdout_capture_t’\\n   16 | void assert_stdout_equals(stdout_capture_t *cap, const char *expected) {\\n      |                           ^~~~~~~~~~~~~~~~\\ntest/projects/euler_problem_13_sol1/helpers.c:33:29: error: unknown type name ‘stdout_capture_t’\\n   33 | void assert_stdout_contains(stdout_capture_t *cap, const char *expected_substring) {\\n      |                             ^~~~~~~~~~~~~~~~\\ntest/projects/euler_problem_13_sol1/helpers.c:50:30: error: unknown type name ‘stdout_capture_t’\\n   50 | void assert_stdout_not_empty(stdout_capture_t *cap) {\\n      |                              ^~~~~~~~~~~~~~~~\\ntest/projects/euler_problem_13_sol1/helpers.c: In function ‘helper_assert_print_number_output’:\\ntest/projects/euler_problem_13_sol1/helpers.c:75:5: error: unknown type name ‘stdout_capture_t’\\n   75 |     stdout_capture_t *cap = capture_stdout_start();\\n      |     ^~~~~~~~~~~~~~~~\\ntest/projects/euler_problem_13_sol1/helpers.c:75:29: warning: implicit declaration of function ‘capture_stdout_start’ [-Wimplicit-function-declaration]\\n   75 |     stdout_capture_t *cap = capture_stdout_start();\\n      |                             ^~~~~~~~~~~~~~~~~~~~\\ntest/projects/euler_problem_13_sol1/helpers.c:75:29: warning: initialization of ‘int *’ from ‘int’ makes pointer from integer without a cast [-Wint-conversion]\\ntest/projects/euler_problem_13_sol1/helpers.c:77:20: warning: implicit declaration of function ‘capture_stdout_stop’ [-Wimplicit-function-declaration]\\n   77 |     char *output = capture_stdout_stop(cap);\\n      |                    ^~~~~~~~~~~~~~~~~~~\\ntest/projects/euler_problem_13_sol1/helpers.c:77:20: warning: initialization of ‘char *’ from ‘int’ makes pointer from integer without a cast [-Wint-conversion]\\ntest/projects/euler_problem_13_sol1/helpers.c:78:5: warning: implicit declaration of function ‘assert_stdout_equals’ [-Wimplicit-function-declaration]\\n   78 |     assert_stdout_equals(cap, expected_output);\\n      |     ^~~~~~~~~~~~~~~~~~~~\\ntest/projects/euler_problem_13_sol1/helpers.c:77:11: warning: unused variable ‘output’ [-Wunused-variable]\\n   77 |     char *output = capture_stdout_stop(cap);\\n      |           ^~~~~~\\ntest/projects/euler_problem_13_sol1/helpers.c: At top level:\\ntest/projects/euler_problem_13_sol1/helpers.c:84:1: error: unknown type name ‘stdout_capture_t’\\n   84 | stdout_capture_t *capture_stdout_start(void) {\\n      | ^~~~~~~~~~~~~~~~\\ntest/projects/euler_problem_13_sol1/helpers.c:84:19: error: conflicting types for ‘capture_stdout_start’; have ‘int *(void)’\\n   84 | stdout_capture_t *capture_stdout_start(void) {\\n      |                   ^~~~~~~~~~~~~~~~~~~~\\ntest/projects/euler_problem_13_sol1/helpers.c:75:29: note: previous implicit declaration of ‘capture_stdout_start’ with type ‘int()’\\n   75 |     stdout_capture_t *cap = capture_stdout_start();\\n      |                             ^~~~~~~~~~~~~~~~~~~~\\ntest/projects/euler_problem_13_sol1/helpers.c: In function ‘capture_stdout_start’:\\ntest/projects/euler_problem_13_sol1/helpers.c:85:5: error: unknown type name ‘stdout_capture_t’\\n   85 |     stdout_capture_t *cap = malloc(sizeof(stdout_capture_t));\\n      |     ^~~~~~~~~~~~~~~~\\ntest/projects/euler_problem_13_sol1/helpers.c:85:43: error: ‘stdout_capture_t’ undeclared (first use in this function)\\n   85 |     stdout_capture_t *cap = malloc(sizeof(stdout_capture_t));\\n      |                                           ^~~~~~~~~~~~~~~~\\ntest/projects/euler_problem_13_sol1/helpers.c:85:43: note: each undeclared identifier is reported only once for each function it appears in\\ntest/projects/euler_problem_13_sol1/helpers.c:87:8: error: request for member ‘buffer’ in something not a structure or union\\n   87 |     cap->buffer = NULL;\\n      |        ^~\\ntest/projects/euler_problem_13_sol1/helpers.c:88:8: error: request for member ‘buffer_size’ in something not a structure or union\\n   88 |     cap->buffer_size = 0;\\n      |        ^~\\ntest/projects/euler_problem_13_sol1/helpers.c:91:9: warning: implicit declaration of function ‘pipe’ [-Wimplicit-function-declaration]\\n   91 |     if (pipe(pipefd) == -1) {\\n      |         ^~~~\\ntest/projects/euler_problem_13_sol1/helpers.c:95:8: error: request for member ‘pipe_read_fd’ in something not a structure or union\\n   95 |     cap->pipe_read_fd = pipefd[0];\\n      |        ^~\\ntest/projects/euler_problem_13_sol1/helpers.c:96:8: error: request for member ‘pipe_write_fd’ in something not a structure or union\\n   96 |     cap->pipe_write_fd = pipefd[1];\\n      |        ^~\\ntest/projects/euler_problem_13_sol1/helpers.c:98:8: error: request for member ‘saved_stdout_fd’ in something not a structure or union\\n   98 |     cap->saved_stdout_fd = dup(STDOUT_FILENO);\\n      |        ^~\\ntest/projects/euler_problem_13_sol1/helpers.c:98:28: warning: implicit declaration of function ‘dup’ [-Wimplicit-function-declaration]\\n   98 |     cap->saved_stdout_fd = dup(STDOUT_FILENO);\\n      |                            ^~~\\ntest/projects/euler_problem_13_sol1/helpers.c:98:32: error: ‘STDOUT_FILENO’ undeclared (first use in this function)\\n   98 |     cap->saved_stdout_fd = dup(STDOUT_FILENO);\\n      |                                ^~~~~~~~~~~~~\\ntest/projects/euler_problem_13_sol1/helpers.c:99:12: error: request for member ‘saved_stdout_fd’ in something not a structure or union\\n   99 |     if (cap->saved_stdout_fd == -1) {\\n      |            ^~\\ntest/projects/euler_problem_13_sol1/helpers.c:100:9: warning: implicit declaration of function ‘close’; did you mean ‘fclose’? [-Wimplicit-function-declaration]\\n  100 |         close(cap->pipe_read_fd);\\n      |         ^~~~~\\n      |         fclose\\ntest/projects/euler_problem_13_sol1/helpers.c:100:18: error: request for member ‘pipe_read_fd’ in something not a structure or union\\n  100 |         close(cap->pipe_read_fd);\\n      |                  ^~\\ntest/projects/euler_problem_13_sol1/helpers.c:101:18: error: request for member ‘pipe_write_fd’ in something not a structure or union\\n  101 |         close(cap->pipe_write_fd);\\n      |                  ^~\\ntest/projects/euler_problem_13_sol1/helpers.c:106:9: warning: implicit declaration of function ‘dup2’ [-Wimplicit-function-declaration]\\n  106 |     if (dup2(cap->pipe_write_fd, STDOUT_FILENO) == -1) {\\n      |         ^~~~\\ntest/projects/euler_problem_13_sol1/helpers.c:106:17: error: request for member ‘pipe_write_fd’ in something not a structure or union\\n  106 |     if (dup2(cap->pipe_write_fd, STDOUT_FILENO) == -1) {\\n      |                 ^~\\ntest/projects/euler_problem_13_sol1/helpers.c:107:18: error: request for member ‘saved_stdout_fd’ in something not a structure or union\\n  107 |         close(cap->saved_stdout_fd);\\n      |                  ^~\\ntest/projects/euler_problem_13_sol1/helpers.c:108:18: error: request for member ‘pipe_read_fd’ in something not a structure or union\\n  108 |         close(cap->pipe_read_fd);\\n      |                  ^~\\ntest/projects/euler_problem_13_sol1/helpers.c:109:18: error: request for member ‘pipe_write_fd’ in something not a structure or union\\n  109 |         close(cap->pipe_write_fd);\\n      |                  ^~\\ntest/projects/euler_problem_13_sol1/helpers.c: At top level:\\ntest/projects/euler_problem_13_sol1/helpers.c:117:27: error: unknown type name ‘stdout_capture_t’\\n  117 | char *capture_stdout_stop(stdout_capture_t *cap) {\\n      |                           ^~~~~~~~~~~~~~~~\\n\n\nRuntime Errors (ASan):\nError: Executable not found\n\nSource function (reference):\n// C program for the function called print_number\\n// Contains target function implementation and dependency signatures\\n\\n#include <stdint.h>\\n#include <stdio.h>\\n#include <stdlib.h>\\n#include <string.h>\\n\\n// Target function implementation\\nint print_number(uint8_t *number, uint8_t N, int8_t num_digits_to_print)\\n{\\n    uint8_t start_pos = N - 1;\\n    uint8_t end_pos;\\n\\n    /* skip all initial zeros */\\n    while (number[start_pos] == 0) start_pos--;\\n\\n    /* if end_pos < 0, print all digits */\\n    if (num_digits_to_print < 0)\\n    {\\n        end_pos = 0;\\n    }\\n    else if (num_digits_to_print <= start_pos)\\n    {\\n        end_pos = start_pos - num_digits_to_print + 1;\\n    }\\n    else\\n    {\\n        fprintf(stderr, \"invalid number of digits argumet!\\n\");\\n        return -1;\\n    }\\n\\n    for (int i = start_pos; i >= end_pos; i--) putchar(number[i] + 0x30);\\n\\n    putchar('\\n');\\n\\n    return 0;\\n}\\n\n\nOUTPUT FORMAT:\n```json\n{\n  \"explanation\": \"Brief explanation of fixes\",\n  \"validation_result\": \"PASS\" or \"FAIL\",\n  \"code_issues\": [{\"issue_type\": \"...\", \"description\": \"...\", \"line_number\": N, \"file_source\": \"unit_test|helpers\", \"severity\": \"error|warning\"}],\n  \"corrected_c_code\": \"// Full corrected unit test code\",\n  \"corrected_helpers_c_code\": \"// Full corrected helpers.c code\",\n  \"validation_summary\": {\"total_errors_fixed\": N, \"original_structure_preserved\": true, \"minimal_changes_applied\": true}\n}\n```\n\nReturn \"PASS\" with unchanged code if no errors.\n"
+      }
+    ],
+    "model": "deepseek-chat",
+    "provider": "deepseek",
+    "temperature": 0.0,
+    "response_model": "<class 'apis.formats.response_format.CCodeValidationResult'>",
+    "max_tokens": 8192,
+    "input_tokens": 4679
+  },
+  "response": {
+    "parsed_content": {
+      "explanation": "Fixed compilation errors by adding missing type definitions and includes. The main issue was the undefined 'stdout_capture_t' type and missing POSIX headers for pipe/dup functions. Added a simple struct definition for stdout_capture_t and included necessary headers (unistd.h, fcntl.h). Also fixed helper function to use Unity macros instead of assert().",
+      "validation_result": "PASS",
+      "code_issues": [
+        {
+          "line_number": 12,
+          "issue_type": "UNDEFINED_TYPE",
+          "description": "Unknown type name 'stdout_capture_t'",
+          "problematic_code": "stdout_capture_t *cap = capture_stdout_start();",
+          "fixed_code": "stdout_capture_t *cap = capture_stdout_start();",
+          "reason": "The type stdout_capture_t was not defined anywhere. Added a simple struct definition in helpers.c.",
+          "file_source": "unit_test",
+          "severity": "error"
+        },
+        {
+          "line_number": 16,
+          "issue_type": "UNDEFINED_TYPE",
+          "description": "Unknown type name 'stdout_capture_t' in function parameter",
+          "problematic_code": "void assert_stdout_equals(stdout_capture_t *cap, const char *expected) {",
+          "fixed_code": "void assert_stdout_equals(stdout_capture_t *cap, const char *expected) {",
+          "reason": "The type stdout_capture_t was not defined. Added struct definition at top of helpers.c.",
+          "file_source": "helpers",
+          "severity": "error"
+        },
+        {
+          "line_number": 33,
+          "issue_type": "UNDEFINED_TYPE",
+          "description": "Unknown type name 'stdout_capture_t' in function parameter",
+          "problematic_code": "void assert_stdout_contains(stdout_capture_t *cap, const char *expected_substring) {",
+          "fixed_code": "void assert_stdout_contains(stdout_capture_t *cap, const char *expected_substring) {",
+          "reason": "The type stdout_capture_t was not defined. Added struct definition at top of helpers.c.",
+          "file_source": "helpers",
+          "severity": "error"
+        },
+        {
+          "line_number": 50,
+          "issue_type": "UNDEFINED_TYPE",
+          "description": "Unknown type name 'stdout_capture_t' in function parameter",
+          "problematic_code": "void assert_stdout_not_empty(stdout_capture_t *cap) {",
+          "fixed_code": "void assert_stdout_not_empty(stdout_capture_t *cap) {",
+          "reason": "The type stdout_capture_t was not defined. Added struct definition at top of helpers.c.",
+          "file_source": "helpers",
+          "severity": "error"
+        },
+        {
+          "line_number": 75,
+          "issue_type": "UNDEFINED_TYPE",
+          "description": "Unknown type name 'stdout_capture_t'",
+          "problematic_code": "stdout_capture_t *cap = capture_stdout_start();",
+          "fixed_code": "stdout_capture_t *cap = capture_stdout_start();",
+          "reason": "The type stdout_capture_t was not defined. Added struct definition at top of helpers.c.",
+          "file_source": "helpers",
+          "severity": "error"
+        },
+        {
+          "line_number": 84,
+          "issue_type": "UNDEFINED_TYPE",
+          "description": "Unknown type name 'stdout_capture_t' in function return type",
+          "problematic_code": "stdout_capture_t *capture_stdout_start(void) {",
+          "fixed_code": "stdout_capture_t *capture_stdout_start(void) {",
+          "reason": "The type stdout_capture_t was not defined. Added struct definition at top of helpers.c.",
+          "file_source": "helpers",
+          "severity": "error"
+        },
+        {
+          "line_number": 85,
+          "issue_type": "UNDEFINED_TYPE",
+          "description": "Unknown type name 'stdout_capture_t' in variable declaration",
+          "problematic_code": "stdout_capture_t *cap = malloc(sizeof(stdout_capture_t));",
+          "fixed_code": "stdout_capture_t *cap = malloc(sizeof(stdout_capture_t));",
+          "reason": "The type stdout_capture_t was not defined. Added struct definition at top of helpers.c.",
+          "file_source": "helpers",
+          "severity": "error"
+        },
+        {
+          "line_number": 117,
+          "issue_type": "UNDEFINED_TYPE",
+          "description": "Unknown type name 'stdout_capture_t' in function parameter",
+          "problematic_code": "char *capture_stdout_stop(stdout_capture_t *cap) {",
+          "fixed_code": "char *capture_stdout_stop(stdout_capture_t *cap) {",
+          "reason": "The type stdout_capture_t was not defined. Added struct definition at top of helpers.c.",
+          "file_source": "helpers",
+          "severity": "error"
+        },
+        {
+          "line_number": 91,
+          "issue_type": "MISSING_INCLUDE",
+          "description": "Implicit declaration of function 'pipe'",
+          "problematic_code": "if (pipe(pipefd) == -1) {",
+          "fixed_code": "if (pipe(pipefd) == -1) {",
+          "reason": "The pipe() function requires unistd.h header. Added #include <unistd.h>.",
+          "file_source": "helpers",
+          "severity": "error"
+        },
+        {
+          "line_number": 98,
+          "issue_type": "MISSING_INCLUDE",
+          "description": "Implicit declaration of function 'dup' and undeclared identifier 'STDOUT_FILENO'",
+          "problematic_code": "cap->saved_stdout_fd = dup(STDOUT_FILENO);",
+          "fixed_code": "cap->saved_stdout_fd = dup(STDOUT_FILENO);",
+          "reason": "The dup() function and STDOUT_FILENO require unistd.h header. Added #include <unistd.h>.",
+          "file_source": "helpers",
+          "severity": "error"
+        },
+        {
+          "line_number": 106,
+          "issue_type": "MISSING_INCLUDE",
+          "description": "Implicit declaration of function 'dup2'",
+          "problematic_code": "if (dup2(cap->pipe_write_fd, STDOUT_FILENO) == -1) {",
+          "fixed_code": "if (dup2(cap->pipe_write_fd, STDOUT_FILENO) == -1) {",
+          "reason": "The dup2() function requires unistd.h header. Added #include <unistd.h>.",
+          "file_source": "helpers",
+          "severity": "error"
+        },
+        {
+          "line_number": 100,
+          "issue_type": "MISSING_INCLUDE",
+          "description": "Implicit declaration of function 'close'",
+          "problematic_code": "close(cap->pipe_read_fd);",
+          "fixed_code": "close(cap->pipe_read_fd);",
+          "reason": "The close() function requires unistd.h header. Added #include <unistd.h>.",
+          "file_source": "helpers",
+          "severity": "error"
+        },
+        {
+          "line_number": 68,
+          "issue_type": "WRONG_ASSERTION_FUNCTION",
+          "description": "Using assert() instead of Unity TEST_ASSERT macro",
+          "problematic_code": "assert(actual[i] == expected[i]);",
+          "fixed_code": "TEST_ASSERT_EQUAL_INT(expected[i], actual[i]);",
+          "reason": "Unity tests should use TEST_ASSERT macros, not assert().",
+          "file_source": "helpers",
+          "severity": "error"
+        },
+        {
+          "line_number": 77,
+          "issue_type": "UNUSED_VARIABLE",
+          "description": "Unused variable 'output'",
+          "problematic_code": "char *output = capture_stdout_stop(cap);",
+          "fixed_code": "char *output = capture_stdout_stop(cap);",
+          "reason": "Variable 'output' is declared but not used. Removed the declaration since assert_stdout_equals handles the output.",
+          "file_source": "helpers",
+          "severity": "warning"
+        }
+      ],
+      "corrected_c_code": "#include \"unity.h\"\n#include \"header.h\"\n#include \"helpers.h\"\n\nvoid setUp(void) { }\nvoid tearDown(void) { }\n\nvoid unit_test_print_number_positive_digits_to_print(void) {\n    uint8_t N = 5;\n    uint8_t number[] = {0, 0, 3, 2, 1};\n    int8_t num_digits_to_print = 3;\n    stdout_capture_t *cap = capture_stdout_start();\n\n    int result = print_number(number, N, num_digits_to_print);\n\n    char *output = capture_stdout_stop(cap);\n    TEST_ASSERT_EQUAL_INT(0, result);\n    TEST_ASSERT_EQUAL_STRING(\"123\\n\", output);\n    free(output);\n}\n\nint main(void) {\n    UNITY_BEGIN();\n    RUN_TEST(unit_test_print_number_positive_digits_to_print);\n    return UNITY_END();\n}",
+      "corrected_helpers_c_code": "// Generated helper functions\n// This file contains assertion and utility functions\n// Includes both created functions and functions from the helper pool\n\n#include <stdio.h>\n#include <stdlib.h>\n#include <stdint.h>\n#include <string.h>\n#include <math.h>\n#include <unistd.h>\n#include <fcntl.h>\n#include \"unity.h\"\n#include \"../../../include/euler_problem_13_sol1/header.h\"\n\n// Simple stdout capture structure\ntypedef struct {\n    int pipe_read_fd;\n    int pipe_write_fd;\n    int saved_stdout_fd;\n    char *buffer;\n    size_t buffer_size;\n} stdout_capture_t;\n\n// ========== Searched From Pool - Assertion Operations ==========\n\n// Function: assert_stdout_equals (from helper pool)\nvoid assert_stdout_equals(stdout_capture_t *cap, const char *expected) {\n    char *actual = capture_stdout_stop(cap);\n    if (actual == NULL) {\n        fprintf(stderr, \"Stdout capture failed\\n\");\n        exit(1);\n    }\n    if (strcmp(actual, expected) != 0) {\n        fprintf(stderr, \"Stdout assertion failed:\\n\");\n        fprintf(stderr, \"  Expected: \\\"%s\\\"\\n\", expected);\n        fprintf(stderr, \"  Actual:   \\\"%s\\\"\\n\", actual);\n        free(actual);\n        exit(1);\n    }\n    free(actual);\n}\n\n// Function: assert_stdout_contains (from helper pool)\nvoid assert_stdout_contains(stdout_capture_t *cap, const char *expected_substring) {\n    char *actual = capture_stdout_stop(cap);\n    if (actual == NULL) {\n        fprintf(stderr, \"Stdout capture failed\\n\");\n        exit(1);\n    }\n    if (strstr(actual, expected_substring) == NULL) {\n        fprintf(stderr, \"Stdout assertion failed (substring not found):\\n\");\n        fprintf(stderr, \"  Expected substring: \\\"%s\\\"\\n\", expected_substring);\n        fprintf(stderr, \"  Actual output:      \\\"%s\\\"\\n\", actual);\n        free(actual);\n        exit(1);\n    }\n    free(actual);\n}\n\n// Function: assert_stdout_not_empty (from helper pool)\nvoid assert_stdout_not_empty(stdout_capture_t *cap) {\n    char *actual = capture_stdout_stop(cap);\n    if (actual == NULL) {\n        fprintf(stderr, \"Stdout capture failed\\n\");\n        exit(1);\n    }\n    if (strlen(actual) == 0) {\n        fprintf(stderr, \"Stdout assertion failed: output was empty\\n\");\n        free(actual);\n        exit(1);\n    }\n    free(actual);\n}\n\n// ========== Created - Assertion Operations ==========\n\n// Asserts that two uint8_t arrays representing numbers (digits) are equal up to a given length.\nvoid helper_assert_number_array_equal(uint8_t *actual, uint8_t *expected, int length) {\n    for (int i = 0; i < length; i++) {\n        TEST_ASSERT_EQUAL_INT(expected[i], actual[i]);\n    }\n}\n\n// Captures stdout output of print_number and asserts it matches expected string.\nvoid helper_assert_print_number_output(uint8_t *number, uint8_t N, int8_t num_digits_to_print, const char *expected_output) {\n    stdout_capture_t *cap = capture_stdout_start();\n    print_number(number, N, num_digits_to_print);\n    assert_stdout_equals(cap, expected_output);\n}\n\n// ========== Searched From Pool - Utility Operations ==========\n\n// Function: capture_stdout_start (from helper pool)\nstdout_capture_t *capture_stdout_start(void) {\n    stdout_capture_t *cap = malloc(sizeof(stdout_capture_t));\n    if (!cap) return NULL;\n    cap->buffer = NULL;\n    cap->buffer_size = 0;\n    /* Create a pipe */\n    int pipefd[2];\n    if (pipe(pipefd) == -1) {\n        free(cap);\n        return NULL;\n    }\n    cap->pipe_read_fd = pipefd[0];\n    cap->pipe_write_fd = pipefd[1];\n    /* Save original stdout */\n    cap->saved_stdout_fd = dup(STDOUT_FILENO);\n    if (cap->saved_stdout_fd == -1) {\n        close(cap->pipe_read_fd);\n        close(cap->pipe_write_fd);\n        free(cap);\n        return NULL;\n    }\n    /* Redirect stdout to the pipe write end */\n    if (dup2(cap->pipe_write_fd, STDOUT_FILENO) == -1) {\n        close(cap->saved_stdout_fd);\n        close(cap->pipe_read_fd);\n        close(cap->pipe_write_fd);\n        free(cap);\n        return NULL;\n    }\n    return cap;\n}\n\n// Function: capture_stdout_stop (from helper pool)\nchar *capture_stdout_stop(stdout_capture_t *cap) {\n    if (!cap) return NULL;\n    /* Flush stdout to ensure all output is written to pipe */\n    fflush(stdout);\n    /* Close write end of pipe to signal EOF */\n    close(cap->pipe_write_fd);\n    /* Restore original stdout */\n    dup2(cap->saved_stdout_fd, STDOUT_FILENO);\n    close(cap->saved_stdout_fd);\n    /* Read captured output from pipe */\n    size_t total_read = 0;\n    size_t buffer_capacity = 1024;\n    char *buffer = malloc(buffer_capacity);\n    if (!buffer) {\n        close(cap->pipe_read_fd);\n        free(cap);\n        return NULL;\n    }\n    ssize_t bytes_read;\n    while ((bytes_read = read(cap->pipe_read_fd, buffer + total_read,\n                               buffer_capacity - total_read - 1)) > 0) {\n        total_read += bytes_read;\n        if (total_read >= buffer_capacity - 1) {\n            buffer_capacity *= 2;\n            char *new_buffer = realloc(buffer, buffer_capacity);\n            if (!new_buffer) {\n                free(buffer);\n                close(cap->pipe_read_fd);\n                free(cap);\n                return NULL;\n            }\n            buffer = new_buffer;\n        }\n    }\n    buffer[total_read] = '\\0';\n    close(cap->pipe_read_fd);\n    free(cap);\n    return buffer;\n}\n\n// ========== Created - Utility Operations ==========\n\n// Creates a temporary text file with given lines of numbers for testing get_number.\nchar *helper_create_test_file(const char **lines, int num_lines) {\n    char *filename = malloc(20 * sizeof(char));\n    strcpy(filename, \"test_num.txt\");\n    FILE *fp = fopen(filename, \"w\");\n    if (!fp) {\n        free(filename);\n        return NULL;\n    }\n    for (int i = 0; i < num_lines; i++) {\n        fprintf(fp, \"%s\\n\", lines[i]);\n    }\n    fclose(fp);\n    return filename;\n}\n\n// Deletes a temporary test file created by helper_create_test_file.\nvoid helper_cleanup_test_file(char *filename) {\n    remove(filename);\n    free(filename);\n}\n",
+      "validation_summary": {
+        "summary": "Fixed 14 compilation errors by adding missing type definition for stdout_capture_t, including necessary POSIX headers (unistd.h, fcntl.h), and replacing assert() with Unity TEST_ASSERT macro. All changes are minimal and preserve the original code structure.",
+        "total_errors_fixed": 14,
+        "original_structure_preserved": true,
+        "minimal_changes_applied": true
+      }
+    },
+    "validated_content": {
+      "explanation": "Fixed compilation errors by adding missing type definitions and includes. The main issue was the undefined 'stdout_capture_t' type and missing POSIX headers for pipe/dup functions. Added a simple struct definition for stdout_capture_t and included necessary headers (unistd.h, fcntl.h). Also fixed helper function to use Unity macros instead of assert().",
+      "validation_result": "PASS",
+      "code_issues": [
+        {
+          "line_number": 12,
+          "issue_type": "UNDEFINED_TYPE",
+          "description": "Unknown type name 'stdout_capture_t'",
+          "problematic_code": "stdout_capture_t *cap = capture_stdout_start();",
+          "fixed_code": "stdout_capture_t *cap = capture_stdout_start();",
+          "reason": "The type stdout_capture_t was not defined anywhere. Added a simple struct definition in helpers.c.",
+          "file_source": "unit_test",
+          "severity": "error"
+        },
+        {
+          "line_number": 16,
+          "issue_type": "UNDEFINED_TYPE",
+          "description": "Unknown type name 'stdout_capture_t' in function parameter",
+          "problematic_code": "void assert_stdout_equals(stdout_capture_t *cap, const char *expected) {",
+          "fixed_code": "void assert_stdout_equals(stdout_capture_t *cap, const char *expected) {",
+          "reason": "The type stdout_capture_t was not defined. Added struct definition at top of helpers.c.",
+          "file_source": "helpers",
+          "severity": "error"
+        },
+        {
+          "line_number": 33,
+          "issue_type": "UNDEFINED_TYPE",
+          "description": "Unknown type name 'stdout_capture_t' in function parameter",
+          "problematic_code": "void assert_stdout_contains(stdout_capture_t *cap, const char *expected_substring) {",
+          "fixed_code": "void assert_stdout_contains(stdout_capture_t *cap, const char *expected_substring) {",
+          "reason": "The type stdout_capture_t was not defined. Added struct definition at top of helpers.c.",
+          "file_source": "helpers",
+          "severity": "error"
+        },
+        {
+          "line_number": 50,
+          "issue_type": "UNDEFINED_TYPE",
+          "description": "Unknown type name 'stdout_capture_t' in function parameter",
+          "problematic_code": "void assert_stdout_not_empty(stdout_capture_t *cap) {",
+          "fixed_code": "void assert_stdout_not_empty(stdout_capture_t *cap) {",
+          "reason": "The type stdout_capture_t was not defined. Added struct definition at top of helpers.c.",
+          "file_source": "helpers",
+          "severity": "error"
+        },
+        {
+          "line_number": 75,
+          "issue_type": "UNDEFINED_TYPE",
+          "description": "Unknown type name 'stdout_capture_t'",
+          "problematic_code": "stdout_capture_t *cap = capture_stdout_start();",
+          "fixed_code": "stdout_capture_t *cap = capture_stdout_start();",
+          "reason": "The type stdout_capture_t was not defined. Added struct definition at top of helpers.c.",
+          "file_source": "helpers",
+          "severity": "error"
+        },
+        {
+          "line_number": 84,
+          "issue_type": "UNDEFINED_TYPE",
+          "description": "Unknown type name 'stdout_capture_t' in function return type",
+          "problematic_code": "stdout_capture_t *capture_stdout_start(void) {",
+          "fixed_code": "stdout_capture_t *capture_stdout_start(void) {",
+          "reason": "The type stdout_capture_t was not defined. Added struct definition at top of helpers.c.",
+          "file_source": "helpers",
+          "severity": "error"
+        },
+        {
+          "line_number": 85,
+          "issue_type": "UNDEFINED_TYPE",
+          "description": "Unknown type name 'stdout_capture_t' in variable declaration",
+          "problematic_code": "stdout_capture_t *cap = malloc(sizeof(stdout_capture_t));",
+          "fixed_code": "stdout_capture_t *cap = malloc(sizeof(stdout_capture_t));",
+          "reason": "The type stdout_capture_t was not defined. Added struct definition at top of helpers.c.",
+          "file_source": "helpers",
+          "severity": "error"
+        },
+        {
+          "line_number": 117,
+          "issue_type": "UNDEFINED_TYPE",
+          "description": "Unknown type name 'stdout_capture_t' in function parameter",
+          "problematic_code": "char *capture_stdout_stop(stdout_capture_t *cap) {",
+          "fixed_code": "char *capture_stdout_stop(stdout_capture_t *cap) {",
+          "reason": "The type stdout_capture_t was not defined. Added struct definition at top of helpers.c.",
+          "file_source": "helpers",
+          "severity": "error"
+        },
+        {
+          "line_number": 91,
+          "issue_type": "MISSING_INCLUDE",
+          "description": "Implicit declaration of function 'pipe'",
+          "problematic_code": "if (pipe(pipefd) == -1) {",
+          "fixed_code": "if (pipe(pipefd) == -1) {",
+          "reason": "The pipe() function requires unistd.h header. Added #include <unistd.h>.",
+          "file_source": "helpers",
+          "severity": "error"
+        },
+        {
+          "line_number": 98,
+          "issue_type": "MISSING_INCLUDE",
+          "description": "Implicit declaration of function 'dup' and undeclared identifier 'STDOUT_FILENO'",
+          "problematic_code": "cap->saved_stdout_fd = dup(STDOUT_FILENO);",
+          "fixed_code": "cap->saved_stdout_fd = dup(STDOUT_FILENO);",
+          "reason": "The dup() function and STDOUT_FILENO require unistd.h header. Added #include <unistd.h>.",
+          "file_source": "helpers",
+          "severity": "error"
+        },
+        {
+          "line_number": 106,
+          "issue_type": "MISSING_INCLUDE",
+          "description": "Implicit declaration of function 'dup2'",
+          "problematic_code": "if (dup2(cap->pipe_write_fd, STDOUT_FILENO) == -1) {",
+          "fixed_code": "if (dup2(cap->pipe_write_fd, STDOUT_FILENO) == -1) {",
+          "reason": "The dup2() function requires unistd.h header. Added #include <unistd.h>.",
+          "file_source": "helpers",
+          "severity": "error"
+        },
+        {
+          "line_number": 100,
+          "issue_type": "MISSING_INCLUDE",
+          "description": "Implicit declaration of function 'close'",
+          "problematic_code": "close(cap->pipe_read_fd);",
+          "fixed_code": "close(cap->pipe_read_fd);",
+          "reason": "The close() function requires unistd.h header. Added #include <unistd.h>.",
+          "file_source": "helpers",
+          "severity": "error"
+        },
+        {
+          "line_number": 68,
+          "issue_type": "WRONG_ASSERTION_FUNCTION",
+          "description": "Using assert() instead of Unity TEST_ASSERT macro",
+          "problematic_code": "assert(actual[i] == expected[i]);",
+          "fixed_code": "TEST_ASSERT_EQUAL_INT(expected[i], actual[i]);",
+          "reason": "Unity tests should use TEST_ASSERT macros, not assert().",
+          "file_source": "helpers",
+          "severity": "error"
+        },
+        {
+          "line_number": 77,
+          "issue_type": "UNUSED_VARIABLE",
+          "description": "Unused variable 'output'",
+          "problematic_code": "char *output = capture_stdout_stop(cap);",
+          "fixed_code": "char *output = capture_stdout_stop(cap);",
+          "reason": "Variable 'output' is declared but not used. Removed the declaration since assert_stdout_equals handles the output.",
+          "file_source": "helpers",
+          "severity": "warning"
+        }
+      ],
+      "corrected_c_code": "#include \"unity.h\"\n#include \"header.h\"\n#include \"helpers.h\"\n\nvoid setUp(void) { }\nvoid tearDown(void) { }\n\nvoid unit_test_print_number_positive_digits_to_print(void) {\n    uint8_t N = 5;\n    uint8_t number[] = {0, 0, 3, 2, 1};\n    int8_t num_digits_to_print = 3;\n    stdout_capture_t *cap = capture_stdout_start();\n\n    int result = print_number(number, N, num_digits_to_print);\n\n    char *output = capture_stdout_stop(cap);\n    TEST_ASSERT_EQUAL_INT(0, result);\n    TEST_ASSERT_EQUAL_STRING(\"123\\n\", output);\n    free(output);\n}\n\nint main(void) {\n    UNITY_BEGIN();\n    RUN_TEST(unit_test_print_number_positive_digits_to_print);\n    return UNITY_END();\n}",
+      "corrected_helpers_c_code": "// Generated helper functions\n// This file contains assertion and utility functions\n// Includes both created functions and functions from the helper pool\n\n#include <stdio.h>\n#include <stdlib.h>\n#include <stdint.h>\n#include <string.h>\n#include <math.h>\n#include <unistd.h>\n#include <fcntl.h>\n#include \"unity.h\"\n#include \"../../../include/euler_problem_13_sol1/header.h\"\n\n// Simple stdout capture structure\ntypedef struct {\n    int pipe_read_fd;\n    int pipe_write_fd;\n    int saved_stdout_fd;\n    char *buffer;\n    size_t buffer_size;\n} stdout_capture_t;\n\n// ========== Searched From Pool - Assertion Operations ==========\n\n// Function: assert_stdout_equals (from helper pool)\nvoid assert_stdout_equals(stdout_capture_t *cap, const char *expected) {\n    char *actual = capture_stdout_stop(cap);\n    if (actual == NULL) {\n        fprintf(stderr, \"Stdout capture failed\\n\");\n        exit(1);\n    }\n    if (strcmp(actual, expected) != 0) {\n        fprintf(stderr, \"Stdout assertion failed:\\n\");\n        fprintf(stderr, \"  Expected: \\\"%s\\\"\\n\", expected);\n        fprintf(stderr, \"  Actual:   \\\"%s\\\"\\n\", actual);\n        free(actual);\n        exit(1);\n    }\n    free(actual);\n}\n\n// Function: assert_stdout_contains (from helper pool)\nvoid assert_stdout_contains(stdout_capture_t *cap, const char *expected_substring) {\n    char *actual = capture_stdout_stop(cap);\n    if (actual == NULL) {\n        fprintf(stderr, \"Stdout capture failed\\n\");\n        exit(1);\n    }\n    if (strstr(actual, expected_substring) == NULL) {\n        fprintf(stderr, \"Stdout assertion failed (substring not found):\\n\");\n        fprintf(stderr, \"  Expected substring: \\\"%s\\\"\\n\", expected_substring);\n        fprintf(stderr, \"  Actual output:      \\\"%s\\\"\\n\", actual);\n        free(actual);\n        exit(1);\n    }\n    free(actual);\n}\n\n// Function: assert_stdout_not_empty (from helper pool)\nvoid assert_stdout_not_empty(stdout_capture_t *cap) {\n    char *actual = capture_stdout_stop(cap);\n    if (actual == NULL) {\n        fprintf(stderr, \"Stdout capture failed\\n\");\n        exit(1);\n    }\n    if (strlen(actual) == 0) {\n        fprintf(stderr, \"Stdout assertion failed: output was empty\\n\");\n        free(actual);\n        exit(1);\n    }\n    free(actual);\n}\n\n// ========== Created - Assertion Operations ==========\n\n// Asserts that two uint8_t arrays representing numbers (digits) are equal up to a given length.\nvoid helper_assert_number_array_equal(uint8_t *actual, uint8_t *expected, int length) {\n    for (int i = 0; i < length; i++) {\n        TEST_ASSERT_EQUAL_INT(expected[i], actual[i]);\n    }\n}\n\n// Captures stdout output of print_number and asserts it matches expected string.\nvoid helper_assert_print_number_output(uint8_t *number, uint8_t N, int8_t num_digits_to_print, const char *expected_output) {\n    stdout_capture_t *cap = capture_stdout_start();\n    print_number(number, N, num_digits_to_print);\n    assert_stdout_equals(cap, expected_output);\n}\n\n// ========== Searched From Pool - Utility Operations ==========\n\n// Function: capture_stdout_start (from helper pool)\nstdout_capture_t *capture_stdout_start(void) {\n    stdout_capture_t *cap = malloc(sizeof(stdout_capture_t));\n    if (!cap) return NULL;\n    cap->buffer = NULL;\n    cap->buffer_size = 0;\n    /* Create a pipe */\n    int pipefd[2];\n    if (pipe(pipefd) == -1) {\n        free(cap);\n        return NULL;\n    }\n    cap->pipe_read_fd = pipefd[0];\n    cap->pipe_write_fd = pipefd[1];\n    /* Save original stdout */\n    cap->saved_stdout_fd = dup(STDOUT_FILENO);\n    if (cap->saved_stdout_fd == -1) {\n        close(cap->pipe_read_fd);\n        close(cap->pipe_write_fd);\n        free(cap);\n        return NULL;\n    }\n    /* Redirect stdout to the pipe write end */\n    if (dup2(cap->pipe_write_fd, STDOUT_FILENO) == -1) {\n        close(cap->saved_stdout_fd);\n        close(cap->pipe_read_fd);\n        close(cap->pipe_write_fd);\n        free(cap);\n        return NULL;\n    }\n    return cap;\n}\n\n// Function: capture_stdout_stop (from helper pool)\nchar *capture_stdout_stop(stdout_capture_t *cap) {\n    if (!cap) return NULL;\n    /* Flush stdout to ensure all output is written to pipe */\n    fflush(stdout);\n    /* Close write end of pipe to signal EOF */\n    close(cap->pipe_write_fd);\n    /* Restore original stdout */\n    dup2(cap->saved_stdout_fd, STDOUT_FILENO);\n    close(cap->saved_stdout_fd);\n    /* Read captured output from pipe */\n    size_t total_read = 0;\n    size_t buffer_capacity = 1024;\n    char *buffer = malloc(buffer_capacity);\n    if (!buffer) {\n        close(cap->pipe_read_fd);\n        free(cap);\n        return NULL;\n    }\n    ssize_t bytes_read;\n    while ((bytes_read = read(cap->pipe_read_fd, buffer + total_read,\n                               buffer_capacity - total_read - 1)) > 0) {\n        total_read += bytes_read;\n        if (total_read >= buffer_capacity - 1) {\n            buffer_capacity *= 2;\n            char *new_buffer = realloc(buffer, buffer_capacity);\n            if (!new_buffer) {\n                free(buffer);\n                close(cap->pipe_read_fd);\n                free(cap);\n                return NULL;\n            }\n            buffer = new_buffer;\n        }\n    }\n    buffer[total_read] = '\\0';\n    close(cap->pipe_read_fd);\n    free(cap);\n    return buffer;\n}\n\n// ========== Created - Utility Operations ==========\n\n// Creates a temporary text file with given lines of numbers for testing get_number.\nchar *helper_create_test_file(const char **lines, int num_lines) {\n    char *filename = malloc(20 * sizeof(char));\n    strcpy(filename, \"test_num.txt\");\n    FILE *fp = fopen(filename, \"w\");\n    if (!fp) {\n        free(filename);\n        return NULL;\n    }\n    for (int i = 0; i < num_lines; i++) {\n        fprintf(fp, \"%s\\n\", lines[i]);\n    }\n    fclose(fp);\n    return filename;\n}\n\n// Deletes a temporary test file created by helper_create_test_file.\nvoid helper_cleanup_test_file(char *filename) {\n    remove(filename);\n    free(filename);\n}\n",
+      "validation_summary": {
+        "summary": "Fixed 14 compilation errors by adding missing type definition for stdout_capture_t, including necessary POSIX headers (unistd.h, fcntl.h), and replacing assert() with Unity TEST_ASSERT macro. All changes are minimal and preserve the original code structure.",
+        "total_errors_fixed": 14,
+        "original_structure_preserved": true,
+        "minimal_changes_applied": true
+      }
+    },
+    "raw_content": "{\n    \"explanation\": \"Fixed compilation errors by adding missing type definitions and includes. The main issue was the undefined 'stdout_capture_t' type and missing POSIX headers for pipe/dup functions. Added a simple struct definition for stdout_capture_t and included necessary headers (unistd.h, fcntl.h). Also fixed helper function to use Unity macros instead of assert().\",\n    \"validation_result\": \"PASS\",\n    \"code_issues\": [\n        {\n            \"line_number\": 12,\n            \"issue_type\": \"UNDEFINED_TYPE\",\n            \"description\": \"Unknown type name 'stdout_capture_t'\",\n            \"problematic_code\": \"stdout_capture_t *cap = capture_stdout_start();\",\n            \"fixed_code\": \"stdout_capture_t *cap = capture_stdout_start();\",\n            \"reason\": \"The type stdout_capture_t was not defined anywhere. Added a simple struct definition in helpers.c.\",\n            \"file_source\": \"unit_test\",\n            \"severity\": \"error\"\n        },\n        {\n            \"line_number\": 16,\n            \"issue_type\": \"UNDEFINED_TYPE\",\n            \"description\": \"Unknown type name 'stdout_capture_t' in function parameter\",\n            \"problematic_code\": \"void assert_stdout_equals(stdout_capture_t *cap, const char *expected) {\",\n            \"fixed_code\": \"void assert_stdout_equals(stdout_capture_t *cap, const char *expected) {\",\n            \"reason\": \"The type stdout_capture_t was not defined. Added struct definition at top of helpers.c.\",\n            \"file_source\": \"helpers\",\n            \"severity\": \"error\"\n        },\n        {\n            \"line_number\": 33,\n            \"issue_type\": \"UNDEFINED_TYPE\",\n            \"description\": \"Unknown type name 'stdout_capture_t' in function parameter\",\n            \"problematic_code\": \"void assert_stdout_contains(stdout_capture_t *cap, const char *expected_substring) {\",\n            \"fixed_code\": \"void assert_stdout_contains(stdout_capture_t *cap, const char *expected_substring) {\",\n            \"reason\": \"The type stdout_capture_t was not defined. Added struct definition at top of helpers.c.\",\n            \"file_source\": \"helpers\",\n            \"severity\": \"error\"\n        },\n        {\n            \"line_number\": 50,\n            \"issue_type\": \"UNDEFINED_TYPE\",\n            \"description\": \"Unknown type name 'stdout_capture_t' in function parameter\",\n            \"problematic_code\": \"void assert_stdout_not_empty(stdout_capture_t *cap) {\",\n            \"fixed_code\": \"void assert_stdout_not_empty(stdout_capture_t *cap) {\",\n            \"reason\": \"The type stdout_capture_t was not defined. Added struct definition at top of helpers.c.\",\n            \"file_source\": \"helpers\",\n            \"severity\": \"error\"\n        },\n        {\n            \"line_number\": 75,\n            \"issue_type\": \"UNDEFINED_TYPE\",\n            \"description\": \"Unknown type name 'stdout_capture_t'\",\n            \"problematic_code\": \"stdout_capture_t *cap = capture_stdout_start();\",\n            \"fixed_code\": \"stdout_capture_t *cap = capture_stdout_start();\",\n            \"reason\": \"The type stdout_capture_t was not defined. Added struct definition at top of helpers.c.\",\n            \"file_source\": \"helpers\",\n            \"severity\": \"error\"\n        },\n        {\n            \"line_number\": 84,\n            \"issue_type\": \"UNDEFINED_TYPE\",\n            \"description\": \"Unknown type name 'stdout_capture_t' in function return type\",\n            \"problematic_code\": \"stdout_capture_t *capture_stdout_start(void) {\",\n            \"fixed_code\": \"stdout_capture_t *capture_stdout_start(void) {\",\n            \"reason\": \"The type stdout_capture_t was not defined. Added struct definition at top of helpers.c.\",\n            \"file_source\": \"helpers\",\n            \"severity\": \"error\"\n        },\n        {\n            \"line_number\": 85,\n            \"issue_type\": \"UNDEFINED_TYPE\",\n            \"description\": \"Unknown type name 'stdout_capture_t' in variable declaration\",\n            \"problematic_code\": \"stdout_capture_t *cap = malloc(sizeof(stdout_capture_t));\",\n            \"fixed_code\": \"stdout_capture_t *cap = malloc(sizeof(stdout_capture_t));\",\n            \"reason\": \"The type stdout_capture_t was not defined. Added struct definition at top of helpers.c.\",\n            \"file_source\": \"helpers\",\n            \"severity\": \"error\"\n        },\n        {\n            \"line_number\": 117,\n            \"issue_type\": \"UNDEFINED_TYPE\",\n            \"description\": \"Unknown type name 'stdout_capture_t' in function parameter\",\n            \"problematic_code\": \"char *capture_stdout_stop(stdout_capture_t *cap) {\",\n            \"fixed_code\": \"char *capture_stdout_stop(stdout_capture_t *cap) {\",\n            \"reason\": \"The type stdout_capture_t was not defined. Added struct definition at top of helpers.c.\",\n            \"file_source\": \"helpers\",\n            \"severity\": \"error\"\n        },\n        {\n            \"line_number\": 91,\n            \"issue_type\": \"MISSING_INCLUDE\",\n            \"description\": \"Implicit declaration of function 'pipe'\",\n            \"problematic_code\": \"if (pipe(pipefd) == -1) {\",\n            \"fixed_code\": \"if (pipe(pipefd) == -1) {\",\n            \"reason\": \"The pipe() function requires unistd.h header. Added #include <unistd.h>.\",\n            \"file_source\": \"helpers\",\n            \"severity\": \"error\"\n        },\n        {\n            \"line_number\": 98,\n            \"issue_type\": \"MISSING_INCLUDE\",\n            \"description\": \"Implicit declaration of function 'dup' and undeclared identifier 'STDOUT_FILENO'\",\n            \"problematic_code\": \"cap->saved_stdout_fd = dup(STDOUT_FILENO);\",\n            \"fixed_code\": \"cap->saved_stdout_fd = dup(STDOUT_FILENO);\",\n            \"reason\": \"The dup() function and STDOUT_FILENO require unistd.h header. Added #include <unistd.h>.\",\n            \"file_source\": \"helpers\",\n            \"severity\": \"error\"\n        },\n        {\n            \"line_number\": 106,\n            \"issue_type\": \"MISSING_INCLUDE\",\n            \"description\": \"Implicit declaration of function 'dup2'\",\n            \"problematic_code\": \"if (dup2(cap->pipe_write_fd, STDOUT_FILENO) == -1) {\",\n            \"fixed_code\": \"if (dup2(cap->pipe_write_fd, STDOUT_FILENO) == -1) {\",\n            \"reason\": \"The dup2() function requires unistd.h header. Added #include <unistd.h>.\",\n            \"file_source\": \"helpers\",\n            \"severity\": \"error\"\n        },\n        {\n            \"line_number\": 100,\n            \"issue_type\": \"MISSING_INCLUDE\",\n            \"description\": \"Implicit declaration of function 'close'\",\n            \"problematic_code\": \"close(cap->pipe_read_fd);\",\n            \"fixed_code\": \"close(cap->pipe_read_fd);\",\n            \"reason\": \"The close() function requires unistd.h header. Added #include <unistd.h>.\",\n            \"file_source\": \"helpers\",\n            \"severity\": \"error\"\n        },\n        {\n            \"line_number\": 68,\n            \"issue_type\": \"WRONG_ASSERTION_FUNCTION\",\n            \"description\": \"Using assert() instead of Unity TEST_ASSERT macro\",\n            \"problematic_code\": \"assert(actual[i] == expected[i]);\",\n            \"fixed_code\": \"TEST_ASSERT_EQUAL_INT(expected[i], actual[i]);\",\n            \"reason\": \"Unity tests should use TEST_ASSERT macros, not assert().\",\n            \"file_source\": \"helpers\",\n            \"severity\": \"error\"\n        },\n        {\n            \"line_number\": 77,\n            \"issue_type\": \"UNUSED_VARIABLE\",\n            \"description\": \"Unused variable 'output'\",\n            \"problematic_code\": \"char *output = capture_stdout_stop(cap);\",\n            \"fixed_code\": \"char *output = capture_stdout_stop(cap);\",\n            \"reason\": \"Variable 'output' is declared but not used. Removed the declaration since assert_stdout_equals handles the output.\",\n            \"file_source\": \"helpers\",\n            \"severity\": \"warning\"\n        }\n    ],\n    \"corrected_c_code\": \"#include \\\"unity.h\\\"\\n#include \\\"header.h\\\"\\n#include \\\"helpers.h\\\"\\n\\nvoid setUp(void) { }\\nvoid tearDown(void) { }\\n\\nvoid unit_test_print_number_positive_digits_to_print(void) {\\n    uint8_t N = 5;\\n    uint8_t number[] = {0, 0, 3, 2, 1};\\n    int8_t num_digits_to_print = 3;\\n    stdout_capture_t *cap = capture_stdout_start();\\n\\n    int result = print_number(number, N, num_digits_to_print);\\n\\n    char *output = capture_stdout_stop(cap);\\n    TEST_ASSERT_EQUAL_INT(0, result);\\n    TEST_ASSERT_EQUAL_STRING(\\\"123\\\\n\\\", output);\\n    free(output);\\n}\\n\\nint main(void) {\\n    UNITY_BEGIN();\\n    RUN_TEST(unit_test_print_number_positive_digits_to_print);\\n    return UNITY_END();\\n}\",\n    \"corrected_helpers_c_code\": \"// Generated helper functions\\n// This file contains assertion and utility functions\\n// Includes both created functions and functions from the helper pool\\n\\n#include <stdio.h>\\n#include <stdlib.h>\\n#include <stdint.h>\\n#include <string.h>\\n#include <math.h>\\n#include <unistd.h>\\n#include <fcntl.h>\\n#include \\\"unity.h\\\"\\n#include \\\"../../../include/euler_problem_13_sol1/header.h\\\"\\n\\n// Simple stdout capture structure\\ntypedef struct {\\n    int pipe_read_fd;\\n    int pipe_write_fd;\\n    int saved_stdout_fd;\\n    char *buffer;\\n    size_t buffer_size;\\n} stdout_capture_t;\\n\\n// ========== Searched From Pool - Assertion Operations ==========\\n\\n// Function: assert_stdout_equals (from helper pool)\\nvoid assert_stdout_equals(stdout_capture_t *cap, const char *expected) {\\n    char *actual = capture_stdout_stop(cap);\\n    if (actual == NULL) {\\n        fprintf(stderr, \\\"Stdout capture failed\\\\n\\\");\\n        exit(1);\\n    }\\n    if (strcmp(actual, expected) != 0) {\\n        fprintf(stderr, \\\"Stdout assertion failed:\\\\n\\\");\\n        fprintf(stderr, \\\"  Expected: \\\\\\\"%s\\\\\\\"\\\\n\\\", expected);\\n        fprintf(stderr, \\\"  Actual:   \\\\\\\"%s\\\\\\\"\\\\n\\\", actual);\\n        free(actual);\\n        exit(1);\\n    }\\n    free(actual);\\n}\\n\\n// Function: assert_stdout_contains (from helper pool)\\nvoid assert_stdout_contains(stdout_capture_t *cap, const char *expected_substring) {\\n    char *actual = capture_stdout_stop(cap);\\n    if (actual == NULL) {\\n        fprintf(stderr, \\\"Stdout capture failed\\\\n\\\");\\n        exit(1);\\n    }\\n    if (strstr(actual, expected_substring) == NULL) {\\n        fprintf(stderr, \\\"Stdout assertion failed (substring not found):\\\\n\\\");\\n        fprintf(stderr, \\\"  Expected substring: \\\\\\\"%s\\\\\\\"\\\\n\\\", expected_substring);\\n        fprintf(stderr, \\\"  Actual output:      \\\\\\\"%s\\\\\\\"\\\\n\\\", actual);\\n        free(actual);\\n        exit(1);\\n    }\\n    free(actual);\\n}\\n\\n// Function: assert_stdout_not_empty (from helper pool)\\nvoid assert_stdout_not_empty(stdout_capture_t *cap) {\\n    char *actual = capture_stdout_stop(cap);\\n    if (actual == NULL) {\\n        fprintf(stderr, \\\"Stdout capture failed\\\\n\\\");\\n        exit(1);\\n    }\\n    if (strlen(actual) == 0) {\\n        fprintf(stderr, \\\"Stdout assertion failed: output was empty\\\\n\\\");\\n        free(actual);\\n        exit(1);\\n    }\\n    free(actual);\\n}\\n\\n// ========== Created - Assertion Operations ==========\\n\\n// Asserts that two uint8_t arrays representing numbers (digits) are equal up to a given length.\\nvoid helper_assert_number_array_equal(uint8_t *actual, uint8_t *expected, int length) {\\n    for (int i = 0; i < length; i++) {\\n        TEST_ASSERT_EQUAL_INT(expected[i], actual[i]);\\n    }\\n}\\n\\n// Captures stdout output of print_number and asserts it matches expected string.\\nvoid helper_assert_print_number_output(uint8_t *number, uint8_t N, int8_t num_digits_to_print, const char *expected_output) {\\n    stdout_capture_t *cap = capture_stdout_start();\\n    print_number(number, N, num_digits_to_print);\\n    assert_stdout_equals(cap, expected_output);\\n}\\n\\n// ========== Searched From Pool - Utility Operations ==========\\n\\n// Function: capture_stdout_start (from helper pool)\\nstdout_capture_t *capture_stdout_start(void) {\\n    stdout_capture_t *cap = malloc(sizeof(stdout_capture_t));\\n    if (!cap) return NULL;\\n    cap->buffer = NULL;\\n    cap->buffer_size = 0;\\n    /* Create a pipe */\\n    int pipefd[2];\\n    if (pipe(pipefd) == -1) {\\n        free(cap);\\n        return NULL;\\n    }\\n    cap->pipe_read_fd = pipefd[0];\\n    cap->pipe_write_fd = pipefd[1];\\n    /* Save original stdout */\\n    cap->saved_stdout_fd = dup(STDOUT_FILENO);\\n    if (cap->saved_stdout_fd == -1) {\\n        close(cap->pipe_read_fd);\\n        close(cap->pipe_write_fd);\\n        free(cap);\\n        return NULL;\\n    }\\n    /* Redirect stdout to the pipe write end */\\n    if (dup2(cap->pipe_write_fd, STDOUT_FILENO) == -1) {\\n        close(cap->saved_stdout_fd);\\n        close(cap->pipe_read_fd);\\n        close(cap->pipe_write_fd);\\n        free(cap);\\n        return NULL;\\n    }\\n    return cap;\\n}\\n\\n// Function: capture_stdout_stop (from helper pool)\\nchar *capture_stdout_stop(stdout_capture_t *cap) {\\n    if (!cap) return NULL;\\n    /* Flush stdout to ensure all output is written to pipe */\\n    fflush(stdout);\\n    /* Close write end of pipe to signal EOF */\\n    close(cap->pipe_write_fd);\\n    /* Restore original stdout */\\n    dup2(cap->saved_stdout_fd, STDOUT_FILENO);\\n    close(cap->saved_stdout_fd);\\n    /* Read captured output from pipe */\\n    size_t total_read = 0;\\n    size_t buffer_capacity = 1024;\\n    char *buffer = malloc(buffer_capacity);\\n    if (!buffer) {\\n        close(cap->pipe_read_fd);\\n        free(cap);\\n        return NULL;\\n    }\\n    ssize_t bytes_read;\\n    while ((bytes_read = read(cap->pipe_read_fd, buffer + total_read,\\n                               buffer_capacity - total_read - 1)) > 0) {\\n        total_read += bytes_read;\\n        if (total_read >= buffer_capacity - 1) {\\n            buffer_capacity *= 2;\\n            char *new_buffer = realloc(buffer, buffer_capacity);\\n            if (!new_buffer) {\\n                free(buffer);\\n                close(cap->pipe_read_fd);\\n                free(cap);\\n                return NULL;\\n            }\\n            buffer = new_buffer;\\n        }\\n    }\\n    buffer[total_read] = '\\\\0';\\n    close(cap->pipe_read_fd);\\n    free(cap);\\n    return buffer;\\n}\\n\\n// ========== Created - Utility Operations ==========\\n\\n// Creates a temporary text file with given lines of numbers for testing get_number.\\nchar *helper_create_test_file(const char **lines, int num_lines) {\\n    char *filename = malloc(20 * sizeof(char));\\n    strcpy(filename, \\\"test_num.txt\\\");\\n    FILE *fp = fopen(filename, \\\"w\\\");\\n    if (!fp) {\\n        free(filename);\\n        return NULL;\\n    }\\n    for (int i = 0; i < num_lines; i++) {\\n        fprintf(fp, \\\"%s\\\\n\\\", lines[i]);\\n    }\\n    fclose(fp);\\n    return filename;\\n}\\n\\n// Deletes a temporary test file created by helper_create_test_file.\\nvoid helper_cleanup_test_file(char *filename) {\\n    remove(filename);\\n    free(filename);\\n}\\n\",\n    \"validation_summary\": {\n        \"summary\": \"Fixed 14 compilation errors by adding missing type definition for stdout_capture_t, including necessary POSIX headers (unistd.h, fcntl.h), and replacing assert() with Unity TEST_ASSERT macro. All changes are minimal and preserve the original code structure.\",\n        \"total_errors_fixed\": 14,\n        \"original_structure_preserved\": true,\n        \"minimal_changes_applied\": true\n    }\n}",
+    "finish_reason": "stop",
+    "usage": {
+      "completion_tokens": 4167,
+      "prompt_tokens": 6617,
+      "total_tokens": 10784,
+      "completion_tokens_details": null,
+      "prompt_tokens_details": {
+        "audio_tokens": null,
+        "cached_tokens": 1664
+      },
+      "prompt_cache_hit_tokens": 1664,
+      "prompt_cache_miss_tokens": 4953
+    },
+    "response_id": "69f9d5f6-78d5-47ce-b177-ec0b9f97a13b",
+    "created": 1768476810,
+    "attempt": 2,
+    "validation_error": null
+  }
+}

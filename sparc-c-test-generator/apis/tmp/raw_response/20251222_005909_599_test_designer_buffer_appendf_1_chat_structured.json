@@ -1,0 +1,289 @@
+{
+  "timestamp": "2025-12-22T00:59:09.599495",
+  "context": "test_designer_buffer_appendf_1",
+  "model_type": "chat_structured",
+  "model": "gpt-4.1-2025-04-14",
+  "request": {
+    "messages": [
+      {
+        "role": "system",
+        "content": "You are a C test designer. Design high-level test scenarios (WHAT to test), not C code (HOW).\n\nROLE: Phase 1 of dual-phase architecture\n- You: Design test for ONE execution path\n- Phase 2: Converts your design to C code\n\nINPUTS PROVIDED:\n- Function signature, description, implementation (source code)\n- ONE target execution path with conditions\n- Operation map (available helper functions)\n\nYOUR TASKS:\n1. Analyze path: What conditions trigger it? What inputs? Expected behavior?\n2. Study implementation: Understand branches, variables, edge cases for this path\n3. Design test: Choose inputs that trigger path conditions (boundary, normal, edge, error cases)\n4. Specify helpers: Assertions, utilities, dependencies from operation map\n5. Define expectations: Return values, side effects, state changes, invariants\n6. Provide rationale: Why this test matters, what bugs it catches\n\nNO MOCKING ALLOWED:\nDo NOT design tests requiring: mock functions, forced failures, simulated allocation failures, faked system calls.\nONLY use: Real inputs, natural error conditions (NULL, invalid params), actual boundary values.\n\nExample - WRONG: \"Test malloc failure handling\" (requires mock_malloc_fail)\nExample - RIGHT: \"Test NULL pointer handling\" (pass NULL directly)\n\nSUCCESS CRITERIA:\n✓ Test exercises the target path with correct inputs\n✓ All assertions, helpers, dependencies specified\n✓ Rationale clear and convincing\n✓ Memory management specified (setup/cleanup)\n✓ Valid JSON output with all required fields\n✓ Test naming: test_<function>_<path_scenario>\n\nOUTPUT: JSON object with metadata, test_scenarios array (1 scenario for the path), test_suite_summary.\n"
+      },
+      {
+        "role": "user",
+        "content": "Design a test for the following execution path.\n\nFUNCTION UNDER TEST:\nName: buffer_appendf\nSignature: int buffer_appendf(buffer_t *self, const char *format, ...)\nDescription: /**\n * @brief Appends a formatted string to the end of a buffer.\n *\n * Formats a string using printf-style arguments and appends it to the buffer,\n * resizing the buffer as needed. The buffer is modified in-place to include\n * the new data at its end.\n *\n * @param self Pointer to the buffer to append to. Must not be NULL and must be initialized.\n * @param format printf-style format string. Must not be NULL.\n * @param ... Additional arguments for the format string.\n *\n * @return Returns 0 on success, or -1 if memory allocation or formatting fails.\n *\n * @note The buffer is resized internally as needed. On error, the buffer remains unchanged.\n */\nDependencies: buffer_length, buffer_resize\n\nFUNCTION IMPLEMENTATION:\n```c\n// C program for the function called buffer_appendf\n// Contains target function implementation and dependency signatures\n\n#include <string.h>\n#include <stdio.h>\n#include <stdarg.h>\n#include <stdlib.h>\n#include <ctype.h>\n#include <sys/types.h>\n#include \"buffer.h\"\n\n// Forward declarations for dependency functions\nsize_t\nbuffer_length(buffer_t *self);\nint\nbuffer_resize(buffer_t *self, size_t n);\n\n// Target function implementation\nint buffer_appendf(buffer_t *self, const char *format, ...) {\n  va_list ap;\n  va_list tmpa;\n  char *dst = NULL;\n  int length = 0;\n  int required = 0;\n  int bytes = 0;\n\n  va_start(ap, format);\n\n  length = buffer_length(self);\n\n  // First, we compute how many bytes are needed\n  // for the formatted string and allocate that\n  // much more space in the buffer.\n  va_copy(tmpa, ap);\n  required = vsnprintf(NULL, 0, format, tmpa);\n  va_end(tmpa);\n  if (-1 == buffer_resize(self, length + required)) {\n    va_end(ap);\n    return -1;\n  }\n\n  // Next format the string into the space that we\n  // have made room for.\n  dst = self->data + length;\n  bytes = vsnprintf(dst, 1 + required, format, ap);\n  va_end(ap);\n\n  return bytes < 0\n    ? -1\n    : 0;\n}\n\n```\n\nTARGET EXECUTION PATH:\nPath 1: START | START --> STATEMENT | va_list ap; --> STATEMENT | va_list tmpa; --> STATEMENT | char *dst = NULL; --> STATEMENT | int length = 0; --> STATEMENT | int required = 0; --> STATEMENT | int bytes = 0; --> STATEMENT | va_start(ap, format); --> STATEMENT | length = buffer_length(self); --> STATEMENT | va_copy(tmpa, ap); --> STATEMENT | required = vsnprintf(NULL, 0, format, tmpa); --> STATEMENT | va_end(tmpa); --> CONDITION | if-else head --> STATEMENT | (-1 == buffer_resize(self, length + required)) --> STATEMENT | va_end(ap); --> RETURN | return -1;\n\nIMPORTANT: Choose inputs that satisfy this path's conditions.\n\nAVAILABLE HELPERS (operation_map.json):\n{\\n  \"dependency_analysis\": {\\n    \"source_functions\": [\\n      {\\n        \"name\": \"buffer_append\",\\n        \"paths\": [\\n          {\\n            \"path_id\": 1,\\n            \"path\": \"START | START --> RETURN | return buffer_append_n(self, str, strlen(str));\"\\n          }\\n        ]\\n      },\\n      {\\n        \"name\": \"buffer_append_n\",\\n        \"paths\": [\\n          {\\n            \"path_id\": 1,\\n            \"path\": \"START | START --> STATEMENT | size_t prev = strlen(self->data); --> STATEMENT | size_t needed = len + prev; --> CONDITION | if-else head --> STATEMENT | (self->len > needed) --> MERGE | if-else merge --> STATEMENT | int ret = buffer_resize(self, needed); --> CONDITION | if-else head --> STATEMENT | (-1 == ret) --> RETURN | return -1;\"\\n          },\\n          {\\n            \"path_id\": 2,\\n            \"path\": \"START | START --> STATEMENT | size_t prev = strlen(self->data); --> STATEMENT | size_t needed = len + prev; --> CONDITION | if-else head --> STATEMENT | (self->len > needed) --> MERGE | if-else merge --> STATEMENT | int ret = buffer_resize(self, needed); --> CONDITION | if-else head --> STATEMENT | (-1 == ret) --> MERGE | if-else merge --> STATEMENT | strncat(self->data, str, len); --> RETURN | return 0;\"\\n          },\\n          {\\n            \"path_id\": 3,\\n            \"path\": \"START | START --> STATEMENT | size_t prev = strlen(self->data); --> STATEMENT | size_t needed = len + prev; --> CONDITION | if-else head --> STATEMENT | (self->len > needed) --> STATEMENT | strncat(self->data, str, len); --> RETURN | return 0;\"\\n          }\\n        ]\\n      },\\n      {\\n        \"name\": \"buffer_appendf\",\\n        \"paths\": [\\n          {\\n            \"path_id\": 1,\\n            \"path\": \"START | START --> STATEMENT | va_list ap; --> STATEMENT | va_list tmpa; --> STATEMENT | char *dst = NULL; --> STATEMENT | int length = 0; --> STATEMENT | int required = 0; --> STATEMENT | int bytes = 0; --> STATEMENT | va_start(ap, format); --> STATEMENT | length = buffer_length(self); --> STATEMENT | va_copy(tmpa, ap); --> STATEMENT | required = vsnprintf(NULL, 0, format, tmpa); --> STATEMENT | va_end(tmpa); --> CONDITION | if-else head --> STATEMENT | (-1 == buffer_resize(self, length + required)) --> STATEMENT | va_end(ap); --> RETURN | return -1;\"\\n          },\\n          {\\n            \"path_id\": 2,\\n            \"path\": \"START | START --> STATEMENT | va_list ap; --> STATEMENT | va_list tmpa; --> STATEMENT | char *dst = NULL; --> STATEMENT | int length = 0; --> STATEMENT | int required = 0; --> STATEMENT | int bytes = 0; --> STATEMENT | va_start(ap, format); --> STATEMENT | length = buffer_length(self); --> STATEMENT | va_copy(tmpa, ap); --> STATEMENT | required = vsnprintf(NULL, 0, format, tmpa); --> STATEMENT | va_end(tmpa); --> CONDITION | if-else head --> STATEMENT | (-1 == buffer_resize(self, length + required)) --> MERGE | if-else merge --> STATEMENT | dst = self->data + length; --> STATEMENT | bytes = vsnprintf(dst, 1 + required, format, ap); --> STATEMENT | va_end(ap); --> RETURN | return bytes < 0\\n    ? -1\\n    : 0;\"\\n          }\\n        ]\\n      },\\n      {\\n        \"name\": \"buffer_clear\",\\n        \"paths\": [\\n          {\\n            \"path_id\": 1,\\n            \"path\": \"START | START --> STATEMENT | buffer_fill(self, 0); --> RETURN | implicit return\"\\n          }\\n        ]\\n      },\\n      {\\n        \"name\": \"buffer_compact\",\\n        \"paths\": [\\n          {\\n            \"path_id\": 1,\\n            \"path\": \"START | START --> STATEMENT | size_t len = buffer_length(self); --> STATEMENT | size_t rem = self->len - len; --> STATEMENT | char *buf = calloc(len + 1, 1); --> CONDITION | if-else head --> STATEMENT | (!buf) --> MERGE | if-else merge --> STATEMENT | memcpy(buf, self->data, len); --> STATEMENT | free(self->alloc); --> STATEMENT | self->len = len; --> STATEMENT | self->data = self->alloc = buf; --> RETURN | return rem;\"\\n          },\\n          {\\n            \"path_id\": 2,\\n            \"path\": \"START | START --> STATEMENT | size_t len = buffer_length(self); --> STATEMENT | size_t rem = self->len - len; --> STATEMENT | char *buf = calloc(len + 1, 1); --> CONDITION | if-else head --> STATEMENT | (!buf) --> RETURN | return -1;\"\\n          }\\n        ]\\n      },\\n      {\\n        \"name\": \"buffer_equals\",\\n        \"paths\": [\\n          {\\n            \"path_id\": 1,\\n            \"path\": \"START | START --> RETURN | return 0 == strcmp(self->data, other->data);\"\\n          }\\n        ]\\n      },\\n      {\\n        \"name\": \"buffer_fill\",\\n        \"paths\": [\\n          {\\n            \"path_id\": 1,\\n            \"path\": \"START | START --> STATEMENT | memset(self->data, c, self->len); --> RETURN | implicit return\"\\n          }\\n        ]\\n      },\\n      {\\n        \"name\": \"buffer_free\",\\n        \"paths\": [\\n          {\\n            \"path_id\": 1,\\n            \"path\": \"START | START --> STATEMENT | free(self->alloc); --> STATEMENT | free(self); --> RETURN | implicit return\"\\n          }\\n        ]\\n      },\\n      {\\n        \"name\": \"buffer_indexof\",\\n        \"paths\": [\\n          {\\n            \"path_id\": 1,\\n            \"path\": \"START | START --> STATEMENT | char *sub = strstr(self->data, str); --> CONDITION | if-else head --> STATEMENT | (!sub) --> RETURN | return -1;\"\\n          },\\n          {\\n            \"path_id\": 2,\\n            \"path\": \"START | START --> STATEMENT | char *sub = strstr(self->data, str); --> CONDITION | if-else head --> STATEMENT | (!sub) --> MERGE | if-else merge --> RETURN | return sub - self->data;\"\\n          }\\n        ]\\n      },\\n      {\\n        \"name\": \"buffer_length\",\\n        \"paths\": [\\n          {\\n            \"path_id\": 1,\\n            \"path\": \"START | START --> RETURN | return strlen(self->data);\"\\n          }\\n        ]\\n      },\\n      {\\n        \"name\": \"buffer_new\",\\n        \"paths\": [\\n          {\\n            \"path_id\": 1,\\n            \"path\": \"START | START --> RETURN | return buffer_new_with_size(BUFFER_DEFAULT_SIZE);\"\\n          }\\n        ]\\n      },\\n      {\\n        \"name\": \"buffer_new_with_copy\",\\n        \"paths\": [\\n          {\\n            \"path_id\": 1,\\n            \"path\": \"START | START --> STATEMENT | size_t len = strlen(str); --> STATEMENT | buffer_t *self = buffer_new_with_size(len); --> CONDITION | if-else head --> STATEMENT | (!self) --> RETURN | return NULL;\"\\n          },\\n          {\\n            \"path_id\": 2,\\n            \"path\": \"START | START --> STATEMENT | size_t len = strlen(str); --> STATEMENT | buffer_t *self = buffer_new_with_size(len); --> CONDITION | if-else head --> STATEMENT | (!self) --> MERGE | if-else merge --> STATEMENT | memcpy(self->alloc, str, len); --> STATEMENT | self->data = self->alloc; --> RETURN | return self;\"\\n          }\\n        ]\\n      },\\n      {\\n        \"name\": \"buffer_new_with_size\",\\n        \"paths\": [\\n          {\\n            \"path_id\": 1,\\n            \"path\": \"START | START --> STATEMENT | buffer_t *self = malloc(sizeof(buffer_t)); --> CONDITION | if-else head --> STATEMENT | (!self) --> RETURN | return NULL;\"\\n          },\\n          {\\n            \"path_id\": 2,\\n            \"path\": \"START | START --> STATEMENT | buffer_t *self = malloc(sizeof(buffer_t)); --> CONDITION | if-else head --> STATEMENT | (!self) --> MERGE | if-else merge --> STATEMENT | self->len = n; --> STATEMENT | self->data = self->alloc = calloc(n + 1, 1); --> RETURN | return self;\"\\n          }\\n        ]\\n      },\\n      {\\n        \"name\": \"buffer_new_with_string\",\\n        \"paths\": [\\n          {\\n            \"path_id\": 1,\\n            \"path\": \"START | START --> RETURN | return buffer_new_with_string_length(str, strlen(str));\"\\n          }\\n        ]\\n      },\\n      {\\n        \"name\": \"buffer_new_with_string_length\",\\n        \"paths\": [\\n          {\\n            \"path_id\": 1,\\n            \"path\": \"START | START --> STATEMENT | buffer_t *self = malloc(sizeof(buffer_t)); --> CONDITION | if-else head --> STATEMENT | (!self) --> RETURN | return NULL;\"\\n          },\\n          {\\n            \"path_id\": 2,\\n            \"path\": \"START | START --> STATEMENT | buffer_t *self = malloc(sizeof(buffer_t)); --> CONDITION | if-else head --> STATEMENT | (!self) --> MERGE | if-else merge --> STATEMENT | self->len = len; --> STATEMENT | self->data = self->alloc = str; --> RETURN | return self;\"\\n          }\\n        ]\\n      },\\n      {\\n        \"name\": \"buffer_prepend\",\\n        \"paths\": [\\n          {\\n            \"path_id\": 1,\\n            \"path\": \"START | START --> STATEMENT | size_t len = strlen(str); --> STATEMENT | size_t prev = strlen(self->data); --> STATEMENT | size_t needed = len + prev; --> CONDITION | if-else head --> STATEMENT | (self->len > needed) --> MERGE | if-else merge --> STATEMENT | int ret = buffer_resize(self, needed); --> CONDITION | if-else head --> STATEMENT | (-1 == ret) --> RETURN | return -1;\"\\n          },\\n          {\\n            \"path_id\": 2,\\n            \"path\": \"START | START --> STATEMENT | size_t len = strlen(str); --> STATEMENT | size_t prev = strlen(self->data); --> STATEMENT | size_t needed = len + prev; --> CONDITION | if-else head --> STATEMENT | (self->len > needed) --> GOTO | move --> LABEL | move --> STATEMENT | memmove(self->data + len, self->data, len + 1); --> STATEMENT | memcpy(self->data, str, len); --> RETURN | return 0;\"\\n          },\\n          {\\n            \"path_id\": 3,\\n            \"path\": \"START | START --> STATEMENT | size_t len = strlen(str); --> STATEMENT | size_t prev = strlen(self->data); --> STATEMENT | size_t needed = len + prev; --> CONDITION | if-else head --> STATEMENT | (self->len > needed) --> MERGE | if-else merge --> STATEMENT | int ret = buffer_resize(self, needed); --> CONDITION | if-else head --> STATEMENT | (-1 == ret) --> MERGE | if-else merge --> LABEL | move --> STATEMENT | memmove(self->data + len, self->data, len + 1); --> STATEMENT | memcpy(self->data, str, len); --> RETURN | return 0;\"\\n          }\\n        ]\\n      },\\n      {\\n        \"name\": \"buffer_print\",\\n        \"paths\": [\\n          {\\n            \"path_id\": 1,\\n            \"path\": \"START | START --> STATEMENT | size_t len = self->len; --> STATEMENT | printf(\\\\ --> EMPTY | loop head --> STATEMENT | int i = 0; --> STATEMENT | i < len --> FOR_EXIT | loop exit --> STATEMENT | printf(\\\\ --> RETURN | implicit return\"\\n          }\\n        ]\\n      },\\n      {\\n        \"name\": \"buffer_resize\",\\n        \"paths\": [\\n          {\\n            \"path_id\": 1,\\n            \"path\": \"START | START --> STATEMENT | n = nearest_multiple_of(1024, n); --> STATEMENT | self->len = n; --> STATEMENT | self->alloc = self->data = realloc(self->alloc, n + 1); --> CONDITION | if-else head --> STATEMENT | (!self->alloc) --> RETURN | return -1;\"\\n          },\\n          {\\n            \"path_id\": 2,\\n            \"path\": \"START | START --> STATEMENT | n = nearest_multiple_of(1024, n); --> STATEMENT | self->len = n; --> STATEMENT | self->alloc = self->data = realloc(self->alloc, n + 1); --> CONDITION | if-else head --> STATEMENT | (!self->alloc) --> MERGE | if-else merge -->  --> RETURN | return 0;\"\\n          }\\n        ]\\n      },\\n      {\\n        \"name\": \"buffer_size\",\\n        \"paths\": [\\n          {\\n            \"path_id\": 1,\\n            \"path\": \"START | START --> RETURN | return self->len;\"\\n          }\\n        ]\\n      },\\n      {\\n        \"name\": \"buffer_slice\",\\n        \"paths\": [\\n          {\\n            \"path_id\": 1,\\n            \"path\": \"START | START --> STATEMENT | size_t len = strlen(buf->data); --> CONDITION | if-else head --> STATEMENT | (to < from) --> MERGE | if-else merge --> CONDITION | if-else head --> STATEMENT | (to < 0) --> STATEMENT | to = len - ~to; --> MERGE | if-else merge --> CONDITION | if-else head --> STATEMENT | (to > len) --> STATEMENT | to = len; --> MERGE | if-else merge --> STATEMENT | size_t n = to - from; --> STATEMENT | buffer_t *self = buffer_new_with_size(n); --> STATEMENT | memcpy(self->data, buf->data + from, n); --> RETURN | return self;\"\\n          },\\n          {\\n            \"path_id\": 2,\\n            \"path\": \"START | START --> STATEMENT | size_t len = strlen(buf->data); --> CONDITION | if-else head --> STATEMENT | (to < from) --> MERGE | if-else merge --> CONDITION | if-else head --> STATEMENT | (to < 0) --> STATEMENT | to = len - ~to; --> MERGE | if-else merge --> CONDITION | if-else head --> STATEMENT | (to > len) --> MERGE | if-else merge --> STATEMENT | size_t n = to - from; --> STATEMENT | buffer_t *self = buffer_new_with_size(n); --> STATEMENT | memcpy(self->data, buf->data + from, n); --> RETURN | return self;\"\\n          },\\n          {\\n            \"path_id\": 3,\\n            \"path\": \"START | START --> STATEMENT | size_t len = strlen(buf->data); --> CONDITION | if-else head --> STATEMENT | (to < from) --> MERGE | if-else merge --> CONDITION | if-else head --> STATEMENT | (to < 0) --> MERGE | if-else merge --> CONDITION | if-else head --> STATEMENT | (to > len) --> STATEMENT | to = len; --> MERGE | if-else merge --> STATEMENT | size_t n = to - from; --> STATEMENT | buffer_t *self = buffer_new_with_size(n); --> STATEMENT | memcpy(self->data, buf->data + from, n); --> RETURN | return self;\"\\n          },\\n          {\\n            \"path_id\": 4,\\n            \"path\": \"START | START --> STATEMENT | size_t len = strlen(buf->data); --> CONDITION | if-else head --> STATEMENT | (to < from) --> MERGE | if-else merge --> CONDITION | if-else head --> STATEMENT | (to < 0) --> MERGE | if-else merge --> CONDITION | if-else head --> STATEMENT | (to > len) --> MERGE | if-else merge --> STATEMENT | size_t n = to - from; --> STATEMENT | buffer_t *self = buffer_new_with_size(n); --> STATEMENT | memcpy(self->data, buf->data + from, n); --> RETURN | return self;\"\\n          },\\n          {\\n            \"path_id\": 5,\\n            \"path\": \"START | START --> STATEMENT | size_t len = strlen(buf->data); --> CONDITION | if-else head --> STATEMENT | (to < from) --> RETURN | return NULL;\"\\n          }\\n        ]\\n      },\\n      {\\n        \"name\": \"buffer_trim\",\\n        \"paths\": [\\n          {\\n            \"path_id\": 1,\\n            \"path\": \"START | START --> STATEMENT | buffer_trim_left(self); --> STATEMENT | buffer_trim_right(self); --> RETURN | implicit return\"\\n          }\\n        ]\\n      },\\n      {\\n        \"name\": \"buffer_trim_left\",\\n        \"paths\": [\\n          {\\n            \"path_id\": 1,\\n            \"path\": \"START | START --> STATEMENT | int c; --> STATEMENT | ((c = *self->data) && isspace(c)) --> FOR_EXIT | loop exit --> RETURN | implicit return\"\\n          }\\n        ]\\n      },\\n      {\\n        \"name\": \"buffer_trim_right\",\\n        \"paths\": [\\n          {\\n            \"path_id\": 1,\\n            \"path\": \"START | START --> STATEMENT | int c; --> STATEMENT | size_t i = buffer_length(self) - 1; -->  --> FOR_EXIT | loop exit --> RETURN | implicit return\"\\n          }\\n        ]\\n      }\\n    ],\\n    \"planned_created_functions\": [\\n      {\\n        \"name\": \"helper_assert_buffer_content\",\\n        \"calls\": [\\n          \"assert_string_equal\"\\n        ]\\n      },\\n      {\\n        \"name\": \"helper_assert_buffer_length\",\\n        \"calls\": [\\n          \"assert_int_equal\"\\n        ]\\n      },\\n      {\\n        \"name\": \"helper_assert_buffer_size\",\\n        \"calls\": [\\n          \"assert_int_equal\"\\n        ]\\n      },\\n      {\\n        \"name\": \"helper_assert_buffer_empty\",\\n        \"calls\": [\\n          \"assert_string_empty\"\\n        ]\\n      },\\n      {\\n        \"name\": \"helper_create_buffer_with_content\",\\n        \"calls\": [\\n          \"buffer_new_with_copy\"\\n        ]\\n      },\\n      {\\n        \"name\": \"helper_cleanup_buffer\",\\n        \"calls\": [\\n          \"buffer_free\"\\n        ]\\n      }\\n    ],\\n    \"required_from_pool\": [\\n      \"assert_string_equal\",\\n      \"assert_int_equal\",\\n      \"assert_string_empty\"\\n    ]\\n  },\\n  \"assertion_operations\": {\\n    \"searched_from_pool\": [\\n      {\\n        \"name\": \"assert_string_equal\",\\n        \"return_type\": \"void\",\\n        \"parameters\": [\\n          {\\n            \"name\": \"actual\",\\n            \"type\": \"const char *\"\\n          },\\n          {\\n            \"name\": \"expected\",\\n            \"type\": \"const char *\"\\n          }\\n        ]\\n      },\\n      {\\n        \"name\": \"assert_int_equal\",\\n        \"return_type\": \"void\",\\n        \"parameters\": [\\n          {\\n            \"name\": \"actual\",\\n            \"type\": \"int\"\\n          },\\n          {\\n            \"name\": \"expected\",\\n            \"type\": \"int\"\\n          }\\n        ]\\n      },\\n      {\\n        \"name\": \"assert_string_empty\",\\n        \"return_type\": \"void\",\\n        \"parameters\": [\\n          {\\n            \"name\": \"string\",\\n            \"type\": \"const char *\"\\n          }\\n        ]\\n      },\\n      {\\n        \"name\": \"assert_string_not_equal\",\\n        \"return_type\": \"void\",\\n        \"parameters\": [\\n          {\\n            \"name\": \"actual\",\\n            \"type\": \"const char *\"\\n          },\\n          {\\n            \"name\": \"expected\",\\n            \"type\": \"const char *\"\\n          }\\n        ]\\n      },\\n      {\\n        \"name\": \"assert_string_contains\",\\n        \"return_type\": \"void\",\\n        \"parameters\": [\\n          {\\n            \"name\": \"haystack\",\\n            \"type\": \"const char *\"\\n          },\\n          {\\n            \"name\": \"needle\",\\n            \"type\": \"const char *\"\\n          }\\n        ]\\n      },\\n      {\\n        \"name\": \"assert_string_starts_with\",\\n        \"return_type\": \"void\",\\n        \"parameters\": [\\n          {\\n            \"name\": \"string\",\\n            \"type\": \"const char *\"\\n          },\\n          {\\n            \"name\": \"prefix\",\\n            \"type\": \"const char *\"\\n          }\\n        ]\\n      },\\n      {\\n        \"name\": \"assert_string_ends_with\",\\n        \"return_type\": \"void\",\\n        \"parameters\": [\\n          {\\n            \"name\": \"string\",\\n            \"type\": \"const char *\"\\n          },\\n          {\\n            \"name\": \"suffix\",\\n            \"type\": \"const char *\"\\n          }\\n        ]\\n      },\\n      {\\n        \"name\": \"assert_string_length\",\\n        \"return_type\": \"void\",\\n        \"parameters\": [\\n          {\\n            \"name\": \"string\",\\n            \"type\": \"const char *\"\\n          },\\n          {\\n            \"name\": \"expected_length\",\\n            \"type\": \"size_t\"\\n          }\\n        ]\\n      },\\n      {\\n        \"name\": \"assert_string_not_empty\",\\n        \"return_type\": \"void\",\\n        \"parameters\": [\\n          {\\n            \"name\": \"string\",\\n            \"type\": \"const char *\"\\n          }\\n        ]\\n      }\\n    ],\\n    \"created\": [\\n      {\\n        \"name\": \"helper_assert_buffer_content\",\\n        \"description\": \"Assert that the buffer's content matches the expected string.\",\\n        \"return_type\": \"void\",\\n        \"parameters\": [\\n          {\\n            \"name\": \"buf\",\\n            \"type\": \"buffer_t *\"\\n          },\\n          {\\n            \"name\": \"expected\",\\n            \"type\": \"const char *\"\\n          }\\n        ]\\n      },\\n      {\\n        \"name\": \"helper_assert_buffer_length\",\\n        \"description\": \"Assert that the buffer's string length matches the expected value.\",\\n        \"return_type\": \"void\",\\n        \"parameters\": [\\n          {\\n            \"name\": \"buf\",\\n            \"type\": \"buffer_t *\"\\n          },\\n          {\\n            \"name\": \"expected_length\",\\n            \"type\": \"int\"\\n          }\\n        ]\\n      },\\n      {\\n        \"name\": \"helper_assert_buffer_size\",\\n        \"description\": \"Assert that the buffer's allocated size matches the expected value.\",\\n        \"return_type\": \"void\",\\n        \"parameters\": [\\n          {\\n            \"name\": \"buf\",\\n            \"type\": \"buffer_t *\"\\n          },\\n          {\\n            \"name\": \"expected_size\",\\n            \"type\": \"int\"\\n          }\\n        ]\\n      },\\n      {\\n        \"name\": \"helper_assert_buffer_empty\",\\n        \"description\": \"Assert that the buffer is empty (its data string is empty).\",\\n        \"return_type\": \"void\",\\n        \"parameters\": [\\n          {\\n            \"name\": \"buf\",\\n            \"type\": \"buffer_t *\"\\n          }\\n        ]\\n      }\\n    ]\\n  },\\n  \"utility_operations\": {\\n    \"searched_from_pool\": [\\n      {\\n        \"name\": \"init_test_string\",\\n        \"return_type\": \"char *\",\\n        \"parameters\": [\\n          {\\n            \"name\": \"initial_value\",\\n            \"type\": \"const char *\"\\n          }\\n        ]\\n      },\\n      {\\n        \"name\": \"create_test_string_buffer\",\\n        \"return_type\": \"char *\",\\n        \"parameters\": [\\n          {\\n            \"name\": \"size\",\\n            \"type\": \"size_t\"\\n          }\\n        ]\\n      },\\n      {\\n        \"name\": \"reset_test_string\",\\n        \"return_type\": \"void\",\\n        \"parameters\": [\\n          {\\n            \"name\": \"string\",\\n            \"type\": \"char *\"\\n          },\\n          {\\n            \"name\": \"max_size\",\\n            \"type\": \"size_t\"\\n          }\\n        ]\\n      },\\n      {\\n        \"name\": \"cleanup_test_string\",\\n        \"return_type\": \"void\",\\n        \"parameters\": [\\n          {\\n            \"name\": \"string\",\\n            \"type\": \"char *\"\\n          }\\n        ]\\n      }\\n    ],\\n    \"created\": [\\n      {\\n        \"name\": \"helper_create_buffer_with_content\",\\n        \"description\": \"Create a buffer and initialize it with the given string content.\",\\n        \"return_type\": \"buffer_t *\",\\n        \"parameters\": [\\n          {\\n            \"name\": \"content\",\\n            \"type\": \"char *\"\\n          }\\n        ]\\n      },\\n      {\\n        \"name\": \"helper_cleanup_buffer\",\\n        \"description\": \"Free the memory allocated for a buffer.\",\\n        \"return_type\": \"void\",\\n        \"parameters\": [\\n          {\\n            \"name\": \"buf\",\\n            \"type\": \"buffer_t *\"\\n          }\\n        ]\\n      }\\n    ]\\n  }\\n}\n\nReference these by name for assertions, utilities, generators, cleanup.\n\nOUTPUT FORMAT (return valid JSON):\n{\n  \"metadata\": {\n    \"function_under_test\": \"buffer_appendf\",\n    \"target_path\": \"<path_id>\"\n  },\n  \"test_scenarios\": [{\n    \"test_metadata\": {\n      \"test_id\": \"<UNIQUE_ID>\",\n      \"test_name\": \"test_<function>_<scenario>\",\n      \"test_category\": \"boundary|normal_operation|edge_case|error_condition\",\n      \"description\": \"<one-sentence what this tests>\",\n      \"rationale\": \"<why this matters for this path>\"\n    },\n    \"path_coverage\": {\n      \"target_paths\": [\"<path_id>\"],\n      \"path_conditions\": [\"<condition1>\", ...],\n      \"expected_branches\": [\"<branch1>\", ...]\n    },\n    \"source_functions_required\": {\n      \"primary\": {\n        \"name\": \"buffer_appendf\",\n        \"signature\": \"<signature>\",\n        \"extract_from\": \"<source_file>\",\n        \"reason\": \"Function under test\"\n      },\n      \"dependencies\": [{\n        \"name\": \"<dep_name>\",\n        \"signature\": \"<signature>\",\n        \"extract_from\": \"<source_file>\",\n        \"reason\": \"<why needed>\",\n        \"call_path\": \"<chain>\"\n      }]\n    },\n    \"helper_functions_required\": {\n      \"assertions\": [{\n        \"name\": \"<helper_name>\",\n        \"purpose\": \"<what_to_verify>\",\n        \"from_pool\": true|false,\n        \"usage\": \"<how_used>\"\n      }],\n      \"utilities\": [{\n        \"name\": \"<helper_name>\",\n        \"purpose\": \"<what_it_does>\",\n        \"from_pool\": true|false,\n        \"from_operation_map\": true|false,\n        \"usage\": \"<when_used>\"\n      }]\n    },\n    \"test_design\": {\n      \"setup_requirements\": {\n        \"data_structures\": [\"<structures>\"],\n        \"preconditions\": [\"<conditions>\"],\n        \"initial_state\": \"<state_description>\"\n      },\n      \"test_inputs\": {\n        \"primary_function_args\": [{\n          \"param_name\": \"<name>\",\n          \"param_type\": \"<C_type>\",\n          \"test_value_semantic\": \"<description>\",\n          \"test_value_category\": \"boundary|normal|edge|error\",\n          \"concrete_value\": \"<value>\",\n          \"rationale\": \"<why_this_value>\"\n        }]\n      },\n      \"expected_behavior\": {\n        \"return_value\": {\n          \"type\": \"<type>\",\n          \"description\": \"<expected>\",\n          \"validation\": \"<check>\"\n        },\n        \"side_effects\": [{\n          \"effect\": \"<what_changes>\",\n          \"observable_via\": \"<how_to_check>\"\n        }],\n        \"state_changes\": [\"<before → after>\"],\n        \"invariants_maintained\": [\"<invariants>\"]\n      },\n      \"assertions_required\": [{\n        \"assertion_id\": \"<A1, A2, ...>\",\n        \"assertion_type\": \"<type>\",\n        \"target\": \"<what_to_check>\",\n        \"expected\": \"<value>\",\n        \"description\": \"<what_verified>\",\n        \"failure_meaning\": \"<what_failure_means>\"\n      }],\n      \"cleanup_requirements\": {\n        \"memory_to_free\": [\"<resources>\"],\n        \"resources_to_close\": [],\n        \"final_state\": \"<clean_state>\",\n        \"cleanup_order\": [\"<steps>\"]\n      }\n    },\n    \"implementation_hints\": {\n      \"variable_names\": [{\n        \"semantic_name\": \"<semantic>\",\n        \"c_variable_name\": \"<c_name>\"\n      }],\n      \"operation_sequence\": [\"<step1>\", \"<step2>\", ...],\n      \"edge_cases_to_note\": [\"<edge_cases>\"]\n    }\n  }],\n  \"test_suite_summary\": {\n    \"target_path_id\": \"<path_id>\",\n    \"path_description\": \"<description>\",\n    \"test_category\": \"<category>\",\n    \"required_helpers_aggregate\": {\n      \"from_pool\": {\n        \"assertions\": [\"<helpers>\"],\n        \"utilities\": [\"<helpers>\"]\n      },\n      \"from_operation_map\": {\n        \"assertions\": [],\n        \"utilities\": [\"<helpers>\"]\n      }\n    }\n  }\n}\n\nEXAMPLE - Testing insert() for Path P3 (NULL tree case):\n\nFunction: insert(struct node* node, int key)\nPath P3: node == NULL → return newNode(key)\n\n{\n  \"metadata\": {\n    \"function_under_test\": \"insert\",\n    \"target_path\": \"P3\"\n  },\n  \"test_scenarios\": [{\n    \"test_metadata\": {\n      \"test_id\": \"INSERT_P3_B1\",\n      \"test_name\": \"test_insert_null_tree\",\n      \"test_category\": \"boundary\",\n      \"description\": \"Verify insert creates new node when tree is NULL\",\n      \"rationale\": \"Tests base case where tree doesn't exist; NULL input is common edge case\"\n    },\n    \"path_coverage\": {\n      \"target_paths\": [\"P3\"],\n      \"path_conditions\": [\"node == NULL\"],\n      \"expected_branches\": [\"NULL check → true → return newNode(key)\"]\n    },\n    \"source_functions_required\": {\n      \"primary\": {\n        \"name\": \"insert\",\n        \"signature\": \"struct node* insert(struct node* node, int key)\",\n        \"extract_from\": \"subjects/bst/bst.c\",\n        \"reason\": \"Function under test\"\n      },\n      \"dependencies\": [{\n        \"name\": \"newNode\",\n        \"signature\": \"struct node* newNode(int item)\",\n        \"extract_from\": \"subjects/bst/bst.c\",\n        \"reason\": \"Called when node == NULL to allocate new node\",\n        \"call_path\": \"insert → newNode\"\n      }]\n    },\n    \"helper_functions_required\": {\n      \"assertions\": [{\n        \"name\": \"assert_not_null\",\n        \"purpose\": \"Verify returned node pointer is not NULL\",\n        \"from_pool\": true,\n        \"usage\": \"Check allocation succeeded\"\n      }, {\n        \"name\": \"assert_int_equal\",\n        \"purpose\": \"Verify node->key equals inserted key\",\n        \"from_pool\": true,\n        \"usage\": \"Validate key stored correctly\"\n      }],\n      \"utilities\": [{\n        \"name\": \"free\",\n        \"purpose\": \"Deallocate created node\",\n        \"from_pool\": false,\n        \"from_operation_map\": false,\n        \"usage\": \"Cleanup phase\"\n      }]\n    },\n    \"test_design\": {\n      \"setup_requirements\": {\n        \"data_structures\": [],\n        \"preconditions\": [\"No preconditions - testing NULL case\"],\n        \"initial_state\": \"No tree exists (NULL pointer)\"\n      },\n      \"test_inputs\": {\n        \"primary_function_args\": [{\n          \"param_name\": \"node\",\n          \"param_type\": \"struct node*\",\n          \"test_value_semantic\": \"NULL pointer (empty tree)\",\n          \"test_value_category\": \"boundary\",\n          \"concrete_value\": \"NULL\",\n          \"rationale\": \"Triggers P3 path condition (node == NULL)\"\n        }, {\n          \"param_name\": \"key\",\n          \"param_type\": \"int\",\n          \"test_value_semantic\": \"typical positive integer\",\n          \"test_value_category\": \"normal\",\n          \"concrete_value\": \"42\",\n          \"rationale\": \"Representative value to verify storage\"\n        }]\n      },\n      \"expected_behavior\": {\n        \"return_value\": {\n          \"type\": \"struct node*\",\n          \"description\": \"non-NULL pointer to newly allocated node\",\n          \"validation\": \"result != NULL\"\n        },\n        \"side_effects\": [{\n          \"effect\": \"new node allocated via newNode\",\n          \"observable_via\": \"return value is non-NULL\"\n        }, {\n          \"effect\": \"node->key initialized to 42\",\n          \"observable_via\": \"result->key == 42\"\n        }],\n        \"state_changes\": [\"No tree → Single-node tree\"],\n        \"invariants_maintained\": [\"BST property trivially satisfied\"]\n      },\n      \"assertions_required\": [{\n        \"assertion_id\": \"A1\",\n        \"assertion_type\": \"not_null\",\n        \"target\": \"return_value\",\n        \"expected\": \"non-NULL\",\n        \"description\": \"Verify node was created\",\n        \"failure_meaning\": \"Allocation failed\"\n      }, {\n        \"assertion_id\": \"A2\",\n        \"assertion_type\": \"int_equal\",\n        \"target\": \"return_value->key\",\n        \"expected\": \"42\",\n        \"description\": \"Verify key stored correctly\",\n        \"failure_meaning\": \"Key initialization failed\"\n      }],\n      \"cleanup_requirements\": {\n        \"memory_to_free\": [\"result node\"],\n        \"resources_to_close\": [],\n        \"final_state\": \"All memory freed\",\n        \"cleanup_order\": [\"free(result)\"]\n      }\n    },\n    \"implementation_hints\": {\n      \"variable_names\": [{\n        \"semantic_name\": \"return_value\",\n        \"c_variable_name\": \"result\"\n      }],\n      \"operation_sequence\": [\"call_insert_with_null\", \"assert_result_not_null\", \"assert_key_equals_42\", \"free_result\"],\n      \"edge_cases_to_note\": [\"Allocation failure not testable (no mocking)\"]\n    }\n  }],\n  \"test_suite_summary\": {\n    \"target_path_id\": \"P3\",\n    \"path_description\": \"NULL tree case - creates new node\",\n    \"test_category\": \"boundary\",\n    \"required_helpers_aggregate\": {\n      \"from_pool\": {\n        \"assertions\": [\"assert_not_null\", \"assert_int_equal\"],\n        \"utilities\": []\n      },\n      \"from_operation_map\": {\n        \"assertions\": [],\n        \"utilities\": []\n      }\n    }\n  }\n}\n\nNow design your test in valid JSON format.\n"
+      }
+    ],
+    "model": "gpt-4.1-2025-04-14",
+    "temperature": 0.0,
+    "response_model": "<class 'apis.formats.response_format.EnhancedTestDesigns'>",
+    "max_tokens": 8192,
+    "input_tokens": 9313
+  },
+  "response": {
+    "parsed_content": {
+      "metadata": {
+        "function_under_test": "buffer_appendf",
+        "target_path": "1",
+        "source_file": null,
+        "total_paths": null,
+        "coverage_target": null
+      },
+      "test_scenarios": [
+        {
+          "test_metadata": {
+            "test_id": "BUFFER_APPENDF_P1_E1",
+            "test_name": "test_buffer_appendf_resize_failure",
+            "test_category": "error_condition",
+            "description": "Verify buffer_appendf returns -1 and leaves buffer unchanged if buffer_resize fails.",
+            "rationale": "This test ensures that the function properly handles memory allocation/resize failures, does not corrupt the buffer, and returns the correct error code."
+          },
+          "path_coverage": {
+            "target_paths": [
+              "1"
+            ],
+            "path_conditions": [
+              "buffer_resize(self, length + required) returns -1"
+            ],
+            "expected_branches": [
+              "buffer_resize failure branch taken → va_end(ap) → return -1"
+            ]
+          },
+          "source_functions_required": {
+            "primary": {
+              "name": "buffer_appendf",
+              "signature": "int buffer_appendf(buffer_t *self, const char *format, ...)",
+              "extract_from": "buffer.c",
+              "reason": "Function under test"
+            },
+            "dependencies": [
+              {
+                "name": "buffer_length",
+                "signature": "size_t buffer_length(buffer_t *self)",
+                "extract_from": "buffer.c",
+                "reason": "Used to determine current buffer length",
+                "call_path": "buffer_appendf → buffer_length"
+              },
+              {
+                "name": "buffer_resize",
+                "signature": "int buffer_resize(buffer_t *self, size_t n)",
+                "extract_from": "buffer.c",
+                "reason": "Resizes buffer; must fail for this path",
+                "call_path": "buffer_appendf → buffer_resize"
+              }
+            ]
+          },
+          "helper_functions_required": {
+            "assertions": [
+              {
+                "name": "assert_int_equal",
+                "purpose": "Verify return value is -1 (error)",
+                "from_pool": true,
+                "from_operation_map": null,
+                "usage": "Check function return code"
+              },
+              {
+                "name": "helper_assert_buffer_content",
+                "purpose": "Verify buffer content is unchanged after failure",
+                "from_pool": false,
+                "from_operation_map": true,
+                "usage": "Check buffer data after call"
+              }
+            ],
+            "utilities": [
+              {
+                "name": "helper_create_buffer_with_content",
+                "purpose": "Create a buffer with known initial content",
+                "from_pool": false,
+                "from_operation_map": true,
+                "usage": "Setup: create test buffer"
+              },
+              {
+                "name": "helper_cleanup_buffer",
+                "purpose": "Free buffer memory after test",
+                "from_pool": false,
+                "from_operation_map": true,
+                "usage": "Cleanup: free buffer"
+              }
+            ]
+          },
+          "test_design": {
+            "setup_requirements": {
+              "data_structures": [
+                "buffer_t *test_buffer"
+              ],
+              "preconditions": [
+                "buffer_resize will fail for the requested size (simulate by creating a buffer with maximum allowed size or by using a custom buffer_resize that fails for this test only, but no mocking is allowed, so use a buffer with len set to maximum possible so that resize cannot allocate more)"
+              ],
+              "initial_state": "A buffer with known content and size set to a value that cannot be increased (simulate allocation failure by using a buffer with len set to SIZE_MAX or a very large value so that buffer_resize returns -1 naturally)."
+            },
+            "test_inputs": {
+              "primary_function_args": [
+                {
+                  "param_name": "self",
+                  "param_type": "buffer_t *",
+                  "test_value_semantic": "Buffer with content 'abc', size set to maximum so resize fails",
+                  "test_value_category": "error",
+                  "concrete_value": "test_buffer",
+                  "rationale": "Triggers buffer_resize failure without mocking"
+                },
+                {
+                  "param_name": "format",
+                  "param_type": "const char *",
+                  "test_value_semantic": "Simple format string",
+                  "test_value_category": "normal",
+                  "concrete_value": "\"%s\"",
+                  "rationale": "Ensures vsnprintf works and triggers resize"
+                },
+                {
+                  "param_name": "...",
+                  "param_type": "const char *",
+                  "test_value_semantic": "String to append",
+                  "test_value_category": "normal",
+                  "concrete_value": "\"def\"",
+                  "rationale": "Typical string to append"
+                }
+              ]
+            },
+            "expected_behavior": {
+              "return_value": {
+                "type": "int",
+                "description": "-1 (error)",
+                "validation": "assert_int_equal(return_value, -1)"
+              },
+              "side_effects": [
+                {
+                  "effect": "Buffer content remains unchanged",
+                  "observable_via": "helper_assert_buffer_content(test_buffer, \"abc\")"
+                }
+              ],
+              "state_changes": [
+                "Buffer content: 'abc' → 'abc' (unchanged)"
+              ],
+              "invariants_maintained": [
+                "Buffer is not corrupted",
+                "No memory leaks"
+              ]
+            },
+            "assertions_required": [
+              {
+                "assertion_id": "A1",
+                "assertion_type": "int_equal",
+                "target": "return_value",
+                "expected": "-1",
+                "description": "Verify function returns error code on resize failure",
+                "failure_meaning": "Function does not signal error as required"
+              },
+              {
+                "assertion_id": "A2",
+                "assertion_type": "string_equal",
+                "target": "test_buffer->data",
+                "expected": "abc",
+                "description": "Verify buffer content is unchanged after failed append",
+                "failure_meaning": "Buffer was modified on error"
+              }
+            ],
+            "cleanup_requirements": {
+              "memory_to_free": [
+                "test_buffer"
+              ],
+              "resources_to_close": [],
+              "final_state": "All memory freed, buffer no longer accessible",
+              "cleanup_order": [
+                "helper_cleanup_buffer(test_buffer)"
+              ]
+            }
+          },
+          "implementation_hints": {
+            "variable_names": [
+              {
+                "semantic_name": "test_buffer",
+                "c_variable_name": "buf"
+              },
+              {
+                "semantic_name": "return_value",
+                "c_variable_name": "ret"
+              }
+            ],
+            "operation_sequence": [
+              "Create buffer with content 'abc' and set len to maximum (simulate allocation failure)",
+              "Call buffer_appendf(buf, \"%s\", \"def\")",
+              "Assert return value is -1",
+              "Assert buffer content is still 'abc'",
+              "Free buffer"
+            ],
+            "edge_cases_to_note": [
+              "No mocking: must use real allocation failure (e.g., set buffer->len to SIZE_MAX or a huge value so realloc fails)",
+              "Buffer must be initialized and non-NULL"
+            ]
+          }
+        }
+      ],
+      "test_suite_summary": {
+        "total_tests_designed": 1,
+        "path_coverage_analysis": [
+          {
+            "path_id": "1",
+            "covered_by": [
+              "BUFFER_APPENDF_P1_E1"
+            ],
+            "description": "Error path: buffer_resize fails, function returns -1 and buffer is unchanged",
+            "coverage_count": 1
+          }
+        ],
+        "category_distribution": {
+          "boundary": 0,
+          "normal_operation": 0,
+          "edge_case": 0,
+          "error_conditions": 1
+        },
+        "required_helpers_aggregate": {
+          "from_pool": {
+            "assertions": [
+              "assert_int_equal"
+            ],
+            "utilities": []
+          },
+          "from_operation_map": {
+            "assertions": [
+              "helper_assert_buffer_content"
+            ],
+            "utilities": [
+              "helper_create_buffer_with_content",
+              "helper_cleanup_buffer"
+            ]
+          }
+        },
+        "estimated_total_coverage": {
+          "path_coverage_percent": "100%",
+          "expected_line_coverage_percent": "90-100%",
+          "branch_coverage_percent": "100%"
+        },
+        "integration_test_suggestions": [
+          "Test buffer_appendf with a buffer that can be resized (success path)",
+          "Test buffer_appendf with NULL buffer (should fail gracefully)",
+          "Test buffer_appendf with empty format string"
+        ]
+      }
+    },
+    "raw_content": "{\n  \"metadata\": {\n    \"function_under_test\": \"buffer_appendf\",\n    \"target_path\": \"1\"\n  ,\n  \"source_file\": null,\n  \"total_paths\": null,\n  \"coverage_target\": null\n  },\n  \"test_scenarios\": [\n    {\n      \"test_metadata\": {\n        \"test_id\": \"BUFFER_APPENDF_P1_E1\",\n        \"test_name\": \"test_buffer_appendf_resize_failure\",\n        \"test_category\": \"error_condition\",\n        \"description\": \"Verify buffer_appendf returns -1 and leaves buffer unchanged if buffer_resize fails.\",\n        \"rationale\": \"This test ensures that the function properly handles memory allocation/resize failures, does not corrupt the buffer, and returns the correct error code.\"\n      },\n      \"path_coverage\": {\n        \"target_paths\": [\"1\"],\n        \"path_conditions\": [\n          \"buffer_resize(self, length + required) returns -1\"\n        ],\n        \"expected_branches\": [\n          \"buffer_resize failure branch taken → va_end(ap) → return -1\"\n        ]\n      },\n      \"source_functions_required\": {\n        \"primary\": {\n          \"name\": \"buffer_appendf\",\n          \"signature\": \"int buffer_appendf(buffer_t *self, const char *format, ...)\",\n          \"extract_from\": \"buffer.c\",\n          \"reason\": \"Function under test\"\n        },\n        \"dependencies\": [\n          {\n            \"name\": \"buffer_length\",\n            \"signature\": \"size_t buffer_length(buffer_t *self)\",\n            \"extract_from\": \"buffer.c\",\n            \"reason\": \"Used to determine current buffer length\",\n            \"call_path\": \"buffer_appendf → buffer_length\"\n          },\n          {\n            \"name\": \"buffer_resize\",\n            \"signature\": \"int buffer_resize(buffer_t *self, size_t n)\",\n            \"extract_from\": \"buffer.c\",\n            \"reason\": \"Resizes buffer; must fail for this path\",\n            \"call_path\": \"buffer_appendf → buffer_resize\"\n          }\n        ]\n      },\n      \"helper_functions_required\": {\n        \"assertions\": [\n          {\n            \"name\": \"assert_int_equal\",\n            \"purpose\": \"Verify return value is -1 (error)\",\n            \"from_pool\": true,\n            \"from_operation_map\": null,\n            \"usage\": \"Check function return code\"\n          },\n          {\n            \"name\": \"helper_assert_buffer_content\",\n            \"purpose\": \"Verify buffer content is unchanged after failure\",\n            \"from_pool\": false,\n            \"from_operation_map\": true,\n            \"usage\": \"Check buffer data after call\"\n          }\n        ],\n        \"utilities\": [\n          {\n            \"name\": \"helper_create_buffer_with_content\",\n            \"purpose\": \"Create a buffer with known initial content\",\n            \"from_pool\": false,\n            \"from_operation_map\": true,\n            \"usage\": \"Setup: create test buffer\"\n          },\n          {\n            \"name\": \"helper_cleanup_buffer\",\n            \"purpose\": \"Free buffer memory after test\",\n            \"from_pool\": false,\n            \"from_operation_map\": true,\n            \"usage\": \"Cleanup: free buffer\"\n          }\n        ]\n      },\n      \"test_design\": {\n        \"setup_requirements\": {\n          \"data_structures\": [\n            \"buffer_t *test_buffer\"\n          ],\n          \"preconditions\": [\n            \"buffer_resize will fail for the requested size (simulate by creating a buffer with maximum allowed size or by using a custom buffer_resize that fails for this test only, but no mocking is allowed, so use a buffer with len set to maximum possible so that resize cannot allocate more)\"\n          ],\n          \"initial_state\": \"A buffer with known content and size set to a value that cannot be increased (simulate allocation failure by using a buffer with len set to SIZE_MAX or a very large value so that buffer_resize returns -1 naturally).\"\n        },\n        \"test_inputs\": {\n          \"primary_function_args\": [\n            {\n              \"param_name\": \"self\",\n              \"param_type\": \"buffer_t *\",\n              \"test_value_semantic\": \"Buffer with content 'abc', size set to maximum so resize fails\",\n              \"test_value_category\": \"error\",\n              \"concrete_value\": \"test_buffer\",\n              \"rationale\": \"Triggers buffer_resize failure without mocking\"\n            },\n            {\n              \"param_name\": \"format\",\n              \"param_type\": \"const char *\",\n              \"test_value_semantic\": \"Simple format string\",\n              \"test_value_category\": \"normal\",\n              \"concrete_value\": \"\\\"%s\\\"\",\n              \"rationale\": \"Ensures vsnprintf works and triggers resize\"\n            },\n            {\n              \"param_name\": \"...\",\n              \"param_type\": \"const char *\",\n              \"test_value_semantic\": \"String to append\",\n              \"test_value_category\": \"normal\",\n              \"concrete_value\": \"\\\"def\\\"\",\n              \"rationale\": \"Typical string to append\"\n            }\n          ]\n        },\n        \"expected_behavior\": {\n          \"return_value\": {\n            \"type\": \"int\",\n            \"description\": \"-1 (error)\",\n            \"validation\": \"assert_int_equal(return_value, -1)\"\n          },\n          \"side_effects\": [\n            {\n              \"effect\": \"Buffer content remains unchanged\",\n              \"observable_via\": \"helper_assert_buffer_content(test_buffer, \\\"abc\\\")\"\n            }\n          ],\n          \"state_changes\": [\n            \"Buffer content: 'abc' → 'abc' (unchanged)\"\n          ],\n          \"invariants_maintained\": [\n            \"Buffer is not corrupted\",\n            \"No memory leaks\"\n          ]\n        },\n        \"assertions_required\": [\n          {\n            \"assertion_id\": \"A1\",\n            \"assertion_type\": \"int_equal\",\n            \"target\": \"return_value\",\n            \"expected\": \"-1\",\n            \"description\": \"Verify function returns error code on resize failure\",\n            \"failure_meaning\": \"Function does not signal error as required\"\n          },\n          {\n            \"assertion_id\": \"A2\",\n            \"assertion_type\": \"string_equal\",\n            \"target\": \"test_buffer->data\",\n            \"expected\": \"abc\",\n            \"description\": \"Verify buffer content is unchanged after failed append\",\n            \"failure_meaning\": \"Buffer was modified on error\"\n          }\n        ],\n        \"cleanup_requirements\": {\n          \"memory_to_free\": [\n            \"test_buffer\"\n          ],\n          \"resources_to_close\": [],\n          \"final_state\": \"All memory freed, buffer no longer accessible\",\n          \"cleanup_order\": [\n            \"helper_cleanup_buffer(test_buffer)\"\n          ]\n        }\n      },\n      \"implementation_hints\": {\n        \"variable_names\": [\n          {\n            \"semantic_name\": \"test_buffer\",\n            \"c_variable_name\": \"buf\"\n          },\n          {\n            \"semantic_name\": \"return_value\",\n            \"c_variable_name\": \"ret\"\n          }\n        ],\n        \"operation_sequence\": [\n          \"Create buffer with content 'abc' and set len to maximum (simulate allocation failure)\",\n          \"Call buffer_appendf(buf, \\\"%s\\\", \\\"def\\\")\",\n          \"Assert return value is -1\",\n          \"Assert buffer content is still 'abc'\",\n          \"Free buffer\"\n        ],\n        \"edge_cases_to_note\": [\n          \"No mocking: must use real allocation failure (e.g., set buffer->len to SIZE_MAX or a huge value so realloc fails)\",\n          \"Buffer must be initialized and non-NULL\"\n        ]\n      }\n    }\n  ],\n  \"test_suite_summary\": {\n    \"total_tests_designed\": 1,\n    \"path_coverage_analysis\": [\n      {\n        \"path_id\": \"1\",\n        \"covered_by\": [\"BUFFER_APPENDF_P1_E1\"],\n        \"description\": \"Error path: buffer_resize fails, function returns -1 and buffer is unchanged\",\n        \"coverage_count\": 1\n      }\n    ],\n    \"category_distribution\": {\n      \"boundary\": 0,\n      \"normal_operation\": 0,\n      \"edge_case\": 0,\n      \"error_conditions\": 1\n    },\n    \"required_helpers_aggregate\": {\n      \"from_pool\": {\n        \"assertions\": [\"assert_int_equal\"],\n        \"utilities\": []\n      },\n      \"from_operation_map\": {\n        \"assertions\": [\"helper_assert_buffer_content\"],\n        \"utilities\": [\"helper_create_buffer_with_content\", \"helper_cleanup_buffer\"]\n      }\n    },\n    \"estimated_total_coverage\": {\n      \"path_coverage_percent\": \"100%\",\n      \"expected_line_coverage_percent\": \"90-100%\",\n      \"branch_coverage_percent\": \"100%\"\n    },\n    \"integration_test_suggestions\": [\n      \"Test buffer_appendf with a buffer that can be resized (success path)\",\n      \"Test buffer_appendf with NULL buffer (should fail gracefully)\",\n      \"Test buffer_appendf with empty format string\"\n    ]\n  }\n}",
+    "finish_reason": "stop",
+    "usage": {
+      "completion_tokens": 1839,
+      "prompt_tokens": 14411,
+      "total_tokens": 16250,
+      "completion_tokens_details": {
+        "accepted_prediction_tokens": 0,
+        "audio_tokens": 0,
+        "reasoning_tokens": 0,
+        "rejected_prediction_tokens": 0
+      },
+      "prompt_tokens_details": {
+        "audio_tokens": 0,
+        "cached_tokens": 5376
+      }
+    },
+    "response_id": "chatcmpl-CpIvXkiXgNEyGyNrrhykp9BQBPtPE",
+    "created": 1766343519
+  }
+}

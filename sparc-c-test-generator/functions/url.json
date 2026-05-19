@@ -1,0 +1,640 @@
+{
+  "main_file": "subjects/url_parser/url.c",
+  "functions": [
+    {
+      "name": "url_get_protocol",
+      "return_type": "char *",
+      "parameters": [
+        {
+          "name": "url",
+          "type": "const char *"
+        }
+      ],
+      "location": "subjects/url_parser/url.h:84",
+      "source_file": "url.c",
+      "description": ""
+    },
+    {
+      "name": "url_get_hash",
+      "return_type": "char *",
+      "parameters": [
+        {
+          "name": "url",
+          "type": "const char *"
+        }
+      ],
+      "location": "subjects/url_parser/url.h:117",
+      "source_file": "url.c",
+      "description": ""
+    },
+    {
+      "name": "strdup",
+      "return_type": "char *",
+      "parameters": [
+        {
+          "name": "str",
+          "type": "const char *"
+        }
+      ],
+      "location": "subjects/url_parser/url.c:43",
+      "source_file": "url.c",
+      "description": ""
+    },
+    {
+      "name": "url_parse",
+      "return_type": "url_data_t *",
+      "parameters": [
+        {
+          "name": "url",
+          "type": "const char *"
+        }
+      ],
+      "location": "subjects/url_parser/url.c:184",
+      "source_file": "url.c",
+      "description": ""
+    },
+    {
+      "name": "url_is_protocol",
+      "return_type": "_Bool",
+      "parameters": [
+        {
+          "name": "str",
+          "type": "const char *"
+        }
+      ],
+      "location": "subjects/url_parser/url.c:347",
+      "source_file": "url.c",
+      "description": ""
+    },
+    {
+      "name": "url_is_ssh",
+      "return_type": "_Bool",
+      "parameters": [
+        {
+          "name": "str",
+          "type": "const char *"
+        }
+      ],
+      "location": "subjects/url_parser/url.c:360",
+      "source_file": "url.c",
+      "description": ""
+    },
+    {
+      "name": "url_get_scheme",
+      "return_type": "char *",
+      "parameters": [
+        {
+          "name": "url",
+          "type": "const char *"
+        }
+      ],
+      "location": "subjects/url_parser/url.c:368",
+      "source_file": "url.c",
+      "description": ""
+    },
+    {
+      "name": "url_get_userinfo",
+      "return_type": "char *",
+      "parameters": [
+        {
+          "name": "url",
+          "type": "const char *"
+        }
+      ],
+      "location": "subjects/url_parser/url.c:389",
+      "source_file": "url.c",
+      "description": ""
+    },
+    {
+      "name": "url_get_hostname",
+      "return_type": "char *",
+      "parameters": [
+        {
+          "name": "url",
+          "type": "const char *"
+        }
+      ],
+      "location": "subjects/url_parser/url.c:394",
+      "source_file": "url.c",
+      "description": ""
+    },
+    {
+      "name": "url_get_host",
+      "return_type": "char *",
+      "parameters": [
+        {
+          "name": "url",
+          "type": "const char *"
+        }
+      ],
+      "location": "subjects/url_parser/url.c:399",
+      "source_file": "url.c",
+      "description": ""
+    },
+    {
+      "name": "url_get_pathname",
+      "return_type": "char *",
+      "parameters": [
+        {
+          "name": "url",
+          "type": "const char *"
+        }
+      ],
+      "location": "subjects/url_parser/url.c:404",
+      "source_file": "url.c",
+      "description": ""
+    },
+    {
+      "name": "url_get_path",
+      "return_type": "char *",
+      "parameters": [
+        {
+          "name": "url",
+          "type": "const char *"
+        }
+      ],
+      "location": "subjects/url_parser/url.c:409",
+      "source_file": "url.c",
+      "description": ""
+    },
+    {
+      "name": "url_get_query_value",
+      "return_type": "const char *",
+      "parameters": [
+        {
+          "name": "url",
+          "type": "const url_data_t *"
+        },
+        {
+          "name": "key",
+          "type": "const char *"
+        }
+      ],
+      "location": "subjects/url_parser/url.c:415",
+      "source_file": "url.c",
+      "description": ""
+    },
+    {
+      "name": "url_get_fragment",
+      "return_type": "char *",
+      "parameters": [
+        {
+          "name": "url",
+          "type": "const char *"
+        }
+      ],
+      "location": "subjects/url_parser/url.c:430",
+      "source_file": "url.c",
+      "description": ""
+    },
+    {
+      "name": "url_get_port",
+      "return_type": "char *",
+      "parameters": [
+        {
+          "name": "url",
+          "type": "const char *"
+        }
+      ],
+      "location": "subjects/url_parser/url.c:435",
+      "source_file": "url.c",
+      "description": ""
+    },
+    {
+      "name": "url_inspect",
+      "return_type": "void",
+      "parameters": [
+        {
+          "name": "url",
+          "type": "const char *"
+        }
+      ],
+      "location": "subjects/url_parser/url.c:440",
+      "source_file": "url.c",
+      "description": ""
+    },
+    {
+      "name": "url_data_inspect",
+      "return_type": "void",
+      "parameters": [
+        {
+          "name": "data",
+          "type": "const url_data_t *"
+        }
+      ],
+      "location": "subjects/url_parser/url.c:453",
+      "source_file": "url.c",
+      "description": ""
+    },
+    {
+      "name": "url_free",
+      "return_type": "void",
+      "parameters": [
+        {
+          "name": "data",
+          "type": "url_data_t *"
+        }
+      ],
+      "location": "subjects/url_parser/url.c:476",
+      "source_file": "url.c",
+      "description": ""
+    },
+    {
+      "name": "fill",
+      "return_type": "void",
+      "parameters": [
+        {
+          "name": "value",
+          "type": "unsigned int"
+        },
+        {
+          "name": "alnum",
+          "type": "const char *"
+        },
+        {
+          "name": "special",
+          "type": "const char *"
+        }
+      ],
+      "location": "subjects/url_parser/gen_char_category_table.c:17",
+      "source_file": "gen_char_category_table.c",
+      "description": ""
+    },
+    {
+      "name": "print_table",
+      "return_type": "void",
+      "parameters": [],
+      "location": "subjects/url_parser/gen_char_category_table.c:31",
+      "source_file": "gen_char_category_table.c",
+      "description": ""
+    },
+    {
+      "name": "main",
+      "return_type": "int",
+      "parameters": [],
+      "location": "subjects/url_parser/gen_char_category_table.c:53",
+      "source_file": "gen_char_category_table.c",
+      "description": ""
+    },
+    {
+      "name": "url_get_protocol",
+      "return_type": "char *",
+      "parameters": [
+        {
+          "name": "url",
+          "type": "const char *"
+        }
+      ],
+      "location": "subjects/url_parser/url.h:84",
+      "source_file": "test.c",
+      "description": ""
+    },
+    {
+      "name": "url_get_hash",
+      "return_type": "char *",
+      "parameters": [
+        {
+          "name": "url",
+          "type": "const char *"
+        }
+      ],
+      "location": "subjects/url_parser/url.h:117",
+      "source_file": "test.c",
+      "description": ""
+    },
+    {
+      "name": "main",
+      "return_type": "int",
+      "parameters": [],
+      "location": "subjects/url_parser/test.c:16",
+      "source_file": "test.c",
+      "description": ""
+    }
+  ],
+  "source_files": {
+    "subjects/url_parser/url.c": [
+      {
+        "name": "url_get_protocol",
+        "return_type": "char *",
+        "parameters": [
+          {
+            "name": "url",
+            "type": "const char *"
+          }
+        ],
+        "location": "subjects/url_parser/url.h:84",
+        "source_file": "url.c",
+        "description": ""
+      },
+      {
+        "name": "url_get_hash",
+        "return_type": "char *",
+        "parameters": [
+          {
+            "name": "url",
+            "type": "const char *"
+          }
+        ],
+        "location": "subjects/url_parser/url.h:117",
+        "source_file": "url.c",
+        "description": ""
+      },
+      {
+        "name": "strdup",
+        "return_type": "char *",
+        "parameters": [
+          {
+            "name": "str",
+            "type": "const char *"
+          }
+        ],
+        "location": "subjects/url_parser/url.c:43",
+        "source_file": "url.c",
+        "description": ""
+      },
+      {
+        "name": "url_parse",
+        "return_type": "url_data_t *",
+        "parameters": [
+          {
+            "name": "url",
+            "type": "const char *"
+          }
+        ],
+        "location": "subjects/url_parser/url.c:184",
+        "source_file": "url.c",
+        "description": ""
+      },
+      {
+        "name": "url_is_protocol",
+        "return_type": "_Bool",
+        "parameters": [
+          {
+            "name": "str",
+            "type": "const char *"
+          }
+        ],
+        "location": "subjects/url_parser/url.c:347",
+        "source_file": "url.c",
+        "description": ""
+      },
+      {
+        "name": "url_is_ssh",
+        "return_type": "_Bool",
+        "parameters": [
+          {
+            "name": "str",
+            "type": "const char *"
+          }
+        ],
+        "location": "subjects/url_parser/url.c:360",
+        "source_file": "url.c",
+        "description": ""
+      },
+      {
+        "name": "url_get_scheme",
+        "return_type": "char *",
+        "parameters": [
+          {
+            "name": "url",
+            "type": "const char *"
+          }
+        ],
+        "location": "subjects/url_parser/url.c:368",
+        "source_file": "url.c",
+        "description": ""
+      },
+      {
+        "name": "url_get_userinfo",
+        "return_type": "char *",
+        "parameters": [
+          {
+            "name": "url",
+            "type": "const char *"
+          }
+        ],
+        "location": "subjects/url_parser/url.c:389",
+        "source_file": "url.c",
+        "description": ""
+      },
+      {
+        "name": "url_get_hostname",
+        "return_type": "char *",
+        "parameters": [
+          {
+            "name": "url",
+            "type": "const char *"
+          }
+        ],
+        "location": "subjects/url_parser/url.c:394",
+        "source_file": "url.c",
+        "description": ""
+      },
+      {
+        "name": "url_get_host",
+        "return_type": "char *",
+        "parameters": [
+          {
+            "name": "url",
+            "type": "const char *"
+          }
+        ],
+        "location": "subjects/url_parser/url.c:399",
+        "source_file": "url.c",
+        "description": ""
+      },
+      {
+        "name": "url_get_pathname",
+        "return_type": "char *",
+        "parameters": [
+          {
+            "name": "url",
+            "type": "const char *"
+          }
+        ],
+        "location": "subjects/url_parser/url.c:404",
+        "source_file": "url.c",
+        "description": ""
+      },
+      {
+        "name": "url_get_path",
+        "return_type": "char *",
+        "parameters": [
+          {
+            "name": "url",
+            "type": "const char *"
+          }
+        ],
+        "location": "subjects/url_parser/url.c:409",
+        "source_file": "url.c",
+        "description": ""
+      },
+      {
+        "name": "url_get_query_value",
+        "return_type": "const char *",
+        "parameters": [
+          {
+            "name": "url",
+            "type": "const url_data_t *"
+          },
+          {
+            "name": "key",
+            "type": "const char *"
+          }
+        ],
+        "location": "subjects/url_parser/url.c:415",
+        "source_file": "url.c",
+        "description": ""
+      },
+      {
+        "name": "url_get_fragment",
+        "return_type": "char *",
+        "parameters": [
+          {
+            "name": "url",
+            "type": "const char *"
+          }
+        ],
+        "location": "subjects/url_parser/url.c:430",
+        "source_file": "url.c",
+        "description": ""
+      },
+      {
+        "name": "url_get_port",
+        "return_type": "char *",
+        "parameters": [
+          {
+            "name": "url",
+            "type": "const char *"
+          }
+        ],
+        "location": "subjects/url_parser/url.c:435",
+        "source_file": "url.c",
+        "description": ""
+      },
+      {
+        "name": "url_inspect",
+        "return_type": "void",
+        "parameters": [
+          {
+            "name": "url",
+            "type": "const char *"
+          }
+        ],
+        "location": "subjects/url_parser/url.c:440",
+        "source_file": "url.c",
+        "description": ""
+      },
+      {
+        "name": "url_data_inspect",
+        "return_type": "void",
+        "parameters": [
+          {
+            "name": "data",
+            "type": "const url_data_t *"
+          }
+        ],
+        "location": "subjects/url_parser/url.c:453",
+        "source_file": "url.c",
+        "description": ""
+      },
+      {
+        "name": "url_free",
+        "return_type": "void",
+        "parameters": [
+          {
+            "name": "data",
+            "type": "url_data_t *"
+          }
+        ],
+        "location": "subjects/url_parser/url.c:476",
+        "source_file": "url.c",
+        "description": ""
+      }
+    ],
+    "subjects/url_parser/gen_char_category_table.c": [
+      {
+        "name": "fill",
+        "return_type": "void",
+        "parameters": [
+          {
+            "name": "value",
+            "type": "unsigned int"
+          },
+          {
+            "name": "alnum",
+            "type": "const char *"
+          },
+          {
+            "name": "special",
+            "type": "const char *"
+          }
+        ],
+        "location": "subjects/url_parser/gen_char_category_table.c:17",
+        "source_file": "gen_char_category_table.c",
+        "description": ""
+      },
+      {
+        "name": "print_table",
+        "return_type": "void",
+        "parameters": [],
+        "location": "subjects/url_parser/gen_char_category_table.c:31",
+        "source_file": "gen_char_category_table.c",
+        "description": ""
+      },
+      {
+        "name": "main",
+        "return_type": "int",
+        "parameters": [],
+        "location": "subjects/url_parser/gen_char_category_table.c:53",
+        "source_file": "gen_char_category_table.c",
+        "description": ""
+      }
+    ],
+    "subjects/url_parser/test.c": [
+      {
+        "name": "url_get_protocol",
+        "return_type": "char *",
+        "parameters": [
+          {
+            "name": "url",
+            "type": "const char *"
+          }
+        ],
+        "location": "subjects/url_parser/url.h:84",
+        "source_file": "test.c",
+        "description": ""
+      },
+      {
+        "name": "url_get_hash",
+        "return_type": "char *",
+        "parameters": [
+          {
+            "name": "url",
+            "type": "const char *"
+          }
+        ],
+        "location": "subjects/url_parser/url.h:117",
+        "source_file": "test.c",
+        "description": ""
+      },
+      {
+        "name": "main",
+        "return_type": "int",
+        "parameters": [],
+        "location": "subjects/url_parser/test.c:16",
+        "source_file": "test.c",
+        "description": ""
+      }
+    ]
+  },
+  "headers_processed": [
+    "subjects/url_parser/url.h",
+    "subjects/url_parser/url_char_category.h",
+    "subjects/url_parser/url_char_category_table.h"
+  ],
+  "implementation_files": [
+    "subjects/url_parser/gen_char_category_table.c",
+    "subjects/url_parser/test.c"
+  ]
+}

@@ -1,0 +1,42 @@
+{
+  "timestamp": "2026-01-13T11:14:28.704301",
+  "context": "function_documentation_kohonen_som",
+  "model_type": "chat_deepseek",
+  "model": "deepseek-chat",
+  "request": {
+    "messages": [
+      {
+        "role": "system",
+        "content": "\nYou are a technical writer creating professional C function documentation. Write clear, concise documentation like high-quality open source projects (glibc, libcurl, Python stdlib).\n\n## FORMAT\n\n```c\n/**\n * @brief One-line description of what the function does.\n *\n * Detailed description (2-3 sentences max) explaining the function's purpose\n * and key behavior. Mention important edge cases or special handling.\n *\n * @param param_name Description of parameter, its valid values, and constraints.\n *                   Note if NULL is valid or if the parameter is modified.\n *\n * @return What the function returns. Specify success/failure values.\n *         Example: \"Pointer to new node on success, NULL on allocation failure.\"\n *\n * @note Memory: Caller must free returned pointer / Function allocates internally\n * @note Error: How errors are signaled (return value, errno, etc.)\n *\n * @see related_function, another_function\n */\n```\n\n## GUIDELINES\n\n**Be concise**: One line for @brief. 2-3 sentences max for detailed description.\n\n**Parameters**: Type is in code, so describe purpose and constraints:\n- Valid ranges: \"Must be positive\", \"Valid pointer or NULL\"\n- Modifications: \"Modified to contain result\", \"Contents are sorted in-place\"\n- Ownership: \"Caller retains ownership\", \"Function takes ownership\"\n\n**Return values**: Be specific about success/failure:\n- \"Returns 0 on success, -1 on error\"\n- \"Returns pointer to node, or NULL if not found\"\n\n**@note for important details** (only include if relevant):\n- Memory allocation/deallocation responsibility\n- Side effects that modify input or global state\n- Error handling mechanism\n\n**Omit @note/@see if not applicable.**\n\n## STYLE\n\n- Write naturally, not in bullet points or key-value format\n- Use present tense: \"Inserts a node\" not \"Will insert a node\"\n- Be precise: \"non-negative integer\" not \"valid number\"\n- Avoid redundancy: Don't repeat the function name in @brief\n\n## EXAMPLES\n\n```c\n/**\n * @brief Insert a key into a binary search tree.\n *\n * Creates a new node with the given key and inserts it at the correct\n * position to maintain BST ordering. If the tree is empty (node is NULL),\n * returns a new root node.\n *\n * @param node Root of the tree, or NULL for empty tree.\n * @param key Value to insert.\n *\n * @return Root of the modified tree. Returns newly allocated node if\n *         tree was empty, or existing root with new node inserted.\n *\n * @note Caller must free the returned tree.\n */\n```\n\n```c\n/**\n * @brief Partition array around a pivot for quicksort.\n *\n * Rearranges elements so values less than pivot come before it,\n * and values greater come after. Modifies array in-place.\n *\n * @param arr Array to partition. Must not be NULL.\n * @param low Starting index (inclusive).\n * @param high Ending index (inclusive). Must be >= low.\n *\n * @return Index of the pivot after partitioning.\n */\n```\n\nGenerate ONLY the documentation block. Start with /** and end with */.\n"
+      },
+      {
+        "role": "user",
+        "content": "\nGenerate documentation for this C function:\n\n**Function**: kohonen_som\n\n```c\n// C program for the function called kohonen_som\n// Contains target function implementation and dependency signatures\n\n#include <math.h>\n#include <stdio.h>\n#include <stdlib.h>\n#include <time.h>\n#include <omp.h>\n\nstruct kohonen_array_3d\n{\n    int dim1;     /**< lengths of first dimension */\n    int dim2;     /**< lengths of second dimension */\n    int dim3;     /**< lengths of thirddimension */\n    double *data; /**< pointer to data */\n};\n\n// Forward declarations for dependency functions\ndouble kohonen_update_weights(const double *X, struct kohonen_array_3d *W,\n                              double **D, int num_out, int num_features,\n                              double alpha, int R);\nvoid get_min_2d(double **X, int N, double *val, int *x_idx, int *y_idx);\ndouble *kohonen_data_3d(const struct kohonen_array_3d *arr, int x, int y, int z);\n\n// Target function implementation\nvoid kohonen_som(double **X, struct kohonen_array_3d *W, int num_samples,\n                 int num_features, int num_out, double alpha_min)\n{\n    int R = num_out >> 2, iter = 0;\n    double **D = (double **)malloc(num_out * sizeof(double *));\n    for (int i = 0; i < num_out; i++)\n        D[i] = (double *)malloc(num_out * sizeof(double));\n\n    double dmin = 1.f;  // average minimum distance of all samples\n\n    // Loop alpha from 1 to slpha_min\n    for (double alpha = 1.f; alpha > alpha_min && dmin > 1e-3;\n         alpha -= 0.001, iter++)\n    {\n        dmin = 0.f;\n        // Loop for each sample pattern in the data set\n        for (int sample = 0; sample < num_samples; sample++)\n        {\n            // update weights for the current input pattern sample\n            dmin += kohonen_update_weights(X[sample], W, D, num_out,\n                                           num_features, alpha, R);\n        }\n\n        // every 20th iteration, reduce the neighborhood range\n        if (iter % 100 == 0 && R > 1)\n            R--;\n\n        dmin /= num_samples;\n        printf(\"iter: %5d\\t alpha: %.4g\\t R: %d\\td_min: %.4g\\r\", iter, alpha, R,\n               dmin);\n    }\n    putchar('\\n');\n\n    for (int i = 0; i < num_out; i++) free(D[i]);\n    free(D);\n}\n\n```\n\n**Dependencies**: kohonen_update_weights\n\nWrite clear, concise documentation following the system prompt format.\nOutput only the /** ... */ block.\n"
+      }
+    ],
+    "model": "deepseek-chat",
+    "provider": "deepseek",
+    "temperature": 0.0,
+    "response_model": null,
+    "max_tokens": 8192,
+    "input_tokens": 1287
+  },
+  "response": {
+    "content": "/**\n * @brief Train a Kohonen Self-Organizing Map (SOM) on a dataset.\n *\n * Iteratively adjusts the weight vectors of a 3D SOM grid to learn the\n * topological structure of the input data. The learning rate and neighborhood\n * radius decrease over time to allow the map to converge.\n *\n * @param X Input data matrix. Must be a `num_samples` x `num_features` array.\n * @param W 3D weight matrix of the SOM to be trained. Modified in-place.\n * @param num_samples Number of data samples (rows) in X.\n * @param num_features Number of features (columns) in each data sample.\n * @param num_out Output grid size (one side length of the square SOM map).\n * @param alpha_min Minimum learning rate; training stops when alpha reaches this value.\n *\n * @return No return value (void). The trained weights are stored in `W`.\n *\n * @note Memory: Allocates and frees a temporary `num_out` x `num_out` distance matrix internally.\n * @note Side Effect: Prints progress information (iteration, alpha, radius, average distance) to stdout.\n * @note Convergence: Training also stops if the average minimum distance (`dmin`) falls below 1e-3.\n */",
+    "finish_reason": "stop",
+    "usage": {
+      "completion_tokens": 269,
+      "prompt_tokens": 1303,
+      "total_tokens": 1572,
+      "completion_tokens_details": null,
+      "prompt_tokens_details": {
+        "audio_tokens": null,
+        "cached_tokens": 1280
+      },
+      "prompt_cache_hit_tokens": 1280,
+      "prompt_cache_miss_tokens": 23
+    },
+    "response_id": "f6322ef9-669c-45d6-a4e9-c5e886a48f1e",
+    "created": 1768302859
+  }
+}

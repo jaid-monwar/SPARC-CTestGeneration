@@ -1,0 +1,555 @@
+{
+  "main_file": "subjects/quadtree-0.1.0/src/quadtree.c",
+  "functions": [
+    {
+      "name": "quadtree_new",
+      "return_type": "quadtree_t *",
+      "parameters": [
+        {
+          "name": "minx",
+          "type": "double"
+        },
+        {
+          "name": "miny",
+          "type": "double"
+        },
+        {
+          "name": "maxx",
+          "type": "double"
+        },
+        {
+          "name": "maxy",
+          "type": "double"
+        }
+      ],
+      "location": "subjects/quadtree-0.1.0/src/quadtree.c:123",
+      "source_file": "quadtree.c"
+    },
+    {
+      "name": "quadtree_insert",
+      "return_type": "int",
+      "parameters": [
+        {
+          "name": "tree",
+          "type": "quadtree_t *"
+        },
+        {
+          "name": "x",
+          "type": "double"
+        },
+        {
+          "name": "y",
+          "type": "double"
+        },
+        {
+          "name": "key",
+          "type": "void *"
+        }
+      ],
+      "location": "subjects/quadtree-0.1.0/src/quadtree.c:136",
+      "source_file": "quadtree.c"
+    },
+    {
+      "name": "quadtree_search",
+      "return_type": "quadtree_point_t *",
+      "parameters": [
+        {
+          "name": "tree",
+          "type": "quadtree_t *"
+        },
+        {
+          "name": "x",
+          "type": "double"
+        },
+        {
+          "name": "y",
+          "type": "double"
+        }
+      ],
+      "location": "subjects/quadtree-0.1.0/src/quadtree.c:146",
+      "source_file": "quadtree.c"
+    },
+    {
+      "name": "quadtree_free",
+      "return_type": "void",
+      "parameters": [
+        {
+          "name": "tree",
+          "type": "quadtree_t *"
+        }
+      ],
+      "location": "subjects/quadtree-0.1.0/src/quadtree.c:151",
+      "source_file": "quadtree.c"
+    },
+    {
+      "name": "quadtree_walk",
+      "return_type": "void",
+      "parameters": [
+        {
+          "name": "root",
+          "type": "quadtree_node_t *"
+        },
+        {
+          "name": "descent",
+          "type": "void (*)(quadtree_node_t *)"
+        },
+        {
+          "name": "ascent",
+          "type": "void (*)(quadtree_node_t *)"
+        }
+      ],
+      "location": "subjects/quadtree-0.1.0/src/quadtree.c:161",
+      "source_file": "quadtree.c"
+    },
+    {
+      "name": "quadtree_bounds_extend",
+      "return_type": "void",
+      "parameters": [
+        {
+          "name": "bounds",
+          "type": "quadtree_bounds_t *"
+        },
+        {
+          "name": "x",
+          "type": "double"
+        },
+        {
+          "name": "y",
+          "type": "double"
+        }
+      ],
+      "location": "subjects/quadtree-0.1.0/src/bounds.c:4",
+      "source_file": "bounds.c"
+    },
+    {
+      "name": "quadtree_bounds_free",
+      "return_type": "void",
+      "parameters": [
+        {
+          "name": "bounds",
+          "type": "quadtree_bounds_t *"
+        }
+      ],
+      "location": "subjects/quadtree-0.1.0/src/bounds.c:14",
+      "source_file": "bounds.c"
+    },
+    {
+      "name": "quadtree_bounds_new",
+      "return_type": "quadtree_bounds_t *",
+      "parameters": [],
+      "location": "subjects/quadtree-0.1.0/src/bounds.c:22",
+      "source_file": "bounds.c"
+    },
+    {
+      "name": "quadtree_point_new",
+      "return_type": "quadtree_point_t *",
+      "parameters": [
+        {
+          "name": "x",
+          "type": "double"
+        },
+        {
+          "name": "y",
+          "type": "double"
+        }
+      ],
+      "location": "subjects/quadtree-0.1.0/src/point.c:4",
+      "source_file": "point.c"
+    },
+    {
+      "name": "quadtree_point_free",
+      "return_type": "void",
+      "parameters": [
+        {
+          "name": "point",
+          "type": "quadtree_point_t *"
+        }
+      ],
+      "location": "subjects/quadtree-0.1.0/src/point.c:14",
+      "source_file": "point.c"
+    },
+    {
+      "name": "quadtree_node_ispointer",
+      "return_type": "int",
+      "parameters": [
+        {
+          "name": "node",
+          "type": "quadtree_node_t *"
+        }
+      ],
+      "location": "subjects/quadtree-0.1.0/src/node.c:6",
+      "source_file": "node.c"
+    },
+    {
+      "name": "quadtree_node_isempty",
+      "return_type": "int",
+      "parameters": [
+        {
+          "name": "node",
+          "type": "quadtree_node_t *"
+        }
+      ],
+      "location": "subjects/quadtree-0.1.0/src/node.c:15",
+      "source_file": "node.c"
+    },
+    {
+      "name": "quadtree_node_isleaf",
+      "return_type": "int",
+      "parameters": [
+        {
+          "name": "node",
+          "type": "quadtree_node_t *"
+        }
+      ],
+      "location": "subjects/quadtree-0.1.0/src/node.c:24",
+      "source_file": "node.c"
+    },
+    {
+      "name": "quadtree_node_reset",
+      "return_type": "void",
+      "parameters": [
+        {
+          "name": "node",
+          "type": "quadtree_node_t *"
+        },
+        {
+          "name": "key_free",
+          "type": "void (*)(void *)"
+        }
+      ],
+      "location": "subjects/quadtree-0.1.0/src/node.c:29",
+      "source_file": "node.c"
+    },
+    {
+      "name": "quadtree_node_new",
+      "return_type": "quadtree_node_t *",
+      "parameters": [],
+      "location": "subjects/quadtree-0.1.0/src/node.c:36",
+      "source_file": "node.c"
+    },
+    {
+      "name": "quadtree_node_with_bounds",
+      "return_type": "quadtree_node_t *",
+      "parameters": [
+        {
+          "name": "minx",
+          "type": "double"
+        },
+        {
+          "name": "miny",
+          "type": "double"
+        },
+        {
+          "name": "maxx",
+          "type": "double"
+        },
+        {
+          "name": "maxy",
+          "type": "double"
+        }
+      ],
+      "location": "subjects/quadtree-0.1.0/src/node.c:51",
+      "source_file": "node.c"
+    },
+    {
+      "name": "quadtree_node_free",
+      "return_type": "void",
+      "parameters": [
+        {
+          "name": "node",
+          "type": "quadtree_node_t *"
+        },
+        {
+          "name": "key_free",
+          "type": "void (*)(void *)"
+        }
+      ],
+      "location": "subjects/quadtree-0.1.0/src/node.c:63",
+      "source_file": "node.c"
+    }
+  ],
+  "source_files": {
+    "subjects/quadtree-0.1.0/src/quadtree.c": [
+      {
+        "name": "quadtree_new",
+        "return_type": "quadtree_t *",
+        "parameters": [
+          {
+            "name": "minx",
+            "type": "double"
+          },
+          {
+            "name": "miny",
+            "type": "double"
+          },
+          {
+            "name": "maxx",
+            "type": "double"
+          },
+          {
+            "name": "maxy",
+            "type": "double"
+          }
+        ],
+        "location": "subjects/quadtree-0.1.0/src/quadtree.c:123",
+        "source_file": "quadtree.c"
+      },
+      {
+        "name": "quadtree_insert",
+        "return_type": "int",
+        "parameters": [
+          {
+            "name": "tree",
+            "type": "quadtree_t *"
+          },
+          {
+            "name": "x",
+            "type": "double"
+          },
+          {
+            "name": "y",
+            "type": "double"
+          },
+          {
+            "name": "key",
+            "type": "void *"
+          }
+        ],
+        "location": "subjects/quadtree-0.1.0/src/quadtree.c:136",
+        "source_file": "quadtree.c"
+      },
+      {
+        "name": "quadtree_search",
+        "return_type": "quadtree_point_t *",
+        "parameters": [
+          {
+            "name": "tree",
+            "type": "quadtree_t *"
+          },
+          {
+            "name": "x",
+            "type": "double"
+          },
+          {
+            "name": "y",
+            "type": "double"
+          }
+        ],
+        "location": "subjects/quadtree-0.1.0/src/quadtree.c:146",
+        "source_file": "quadtree.c"
+      },
+      {
+        "name": "quadtree_free",
+        "return_type": "void",
+        "parameters": [
+          {
+            "name": "tree",
+            "type": "quadtree_t *"
+          }
+        ],
+        "location": "subjects/quadtree-0.1.0/src/quadtree.c:151",
+        "source_file": "quadtree.c"
+      },
+      {
+        "name": "quadtree_walk",
+        "return_type": "void",
+        "parameters": [
+          {
+            "name": "root",
+            "type": "quadtree_node_t *"
+          },
+          {
+            "name": "descent",
+            "type": "void (*)(quadtree_node_t *)"
+          },
+          {
+            "name": "ascent",
+            "type": "void (*)(quadtree_node_t *)"
+          }
+        ],
+        "location": "subjects/quadtree-0.1.0/src/quadtree.c:161",
+        "source_file": "quadtree.c"
+      }
+    ],
+    "subjects/quadtree-0.1.0/src/bounds.c": [
+      {
+        "name": "quadtree_bounds_extend",
+        "return_type": "void",
+        "parameters": [
+          {
+            "name": "bounds",
+            "type": "quadtree_bounds_t *"
+          },
+          {
+            "name": "x",
+            "type": "double"
+          },
+          {
+            "name": "y",
+            "type": "double"
+          }
+        ],
+        "location": "subjects/quadtree-0.1.0/src/bounds.c:4",
+        "source_file": "bounds.c"
+      },
+      {
+        "name": "quadtree_bounds_free",
+        "return_type": "void",
+        "parameters": [
+          {
+            "name": "bounds",
+            "type": "quadtree_bounds_t *"
+          }
+        ],
+        "location": "subjects/quadtree-0.1.0/src/bounds.c:14",
+        "source_file": "bounds.c"
+      },
+      {
+        "name": "quadtree_bounds_new",
+        "return_type": "quadtree_bounds_t *",
+        "parameters": [],
+        "location": "subjects/quadtree-0.1.0/src/bounds.c:22",
+        "source_file": "bounds.c"
+      }
+    ],
+    "subjects/quadtree-0.1.0/src/point.c": [
+      {
+        "name": "quadtree_point_new",
+        "return_type": "quadtree_point_t *",
+        "parameters": [
+          {
+            "name": "x",
+            "type": "double"
+          },
+          {
+            "name": "y",
+            "type": "double"
+          }
+        ],
+        "location": "subjects/quadtree-0.1.0/src/point.c:4",
+        "source_file": "point.c"
+      },
+      {
+        "name": "quadtree_point_free",
+        "return_type": "void",
+        "parameters": [
+          {
+            "name": "point",
+            "type": "quadtree_point_t *"
+          }
+        ],
+        "location": "subjects/quadtree-0.1.0/src/point.c:14",
+        "source_file": "point.c"
+      }
+    ],
+    "subjects/quadtree-0.1.0/src/node.c": [
+      {
+        "name": "quadtree_node_ispointer",
+        "return_type": "int",
+        "parameters": [
+          {
+            "name": "node",
+            "type": "quadtree_node_t *"
+          }
+        ],
+        "location": "subjects/quadtree-0.1.0/src/node.c:6",
+        "source_file": "node.c"
+      },
+      {
+        "name": "quadtree_node_isempty",
+        "return_type": "int",
+        "parameters": [
+          {
+            "name": "node",
+            "type": "quadtree_node_t *"
+          }
+        ],
+        "location": "subjects/quadtree-0.1.0/src/node.c:15",
+        "source_file": "node.c"
+      },
+      {
+        "name": "quadtree_node_isleaf",
+        "return_type": "int",
+        "parameters": [
+          {
+            "name": "node",
+            "type": "quadtree_node_t *"
+          }
+        ],
+        "location": "subjects/quadtree-0.1.0/src/node.c:24",
+        "source_file": "node.c"
+      },
+      {
+        "name": "quadtree_node_reset",
+        "return_type": "void",
+        "parameters": [
+          {
+            "name": "node",
+            "type": "quadtree_node_t *"
+          },
+          {
+            "name": "key_free",
+            "type": "void (*)(void *)"
+          }
+        ],
+        "location": "subjects/quadtree-0.1.0/src/node.c:29",
+        "source_file": "node.c"
+      },
+      {
+        "name": "quadtree_node_new",
+        "return_type": "quadtree_node_t *",
+        "parameters": [],
+        "location": "subjects/quadtree-0.1.0/src/node.c:36",
+        "source_file": "node.c"
+      },
+      {
+        "name": "quadtree_node_with_bounds",
+        "return_type": "quadtree_node_t *",
+        "parameters": [
+          {
+            "name": "minx",
+            "type": "double"
+          },
+          {
+            "name": "miny",
+            "type": "double"
+          },
+          {
+            "name": "maxx",
+            "type": "double"
+          },
+          {
+            "name": "maxy",
+            "type": "double"
+          }
+        ],
+        "location": "subjects/quadtree-0.1.0/src/node.c:51",
+        "source_file": "node.c"
+      },
+      {
+        "name": "quadtree_node_free",
+        "return_type": "void",
+        "parameters": [
+          {
+            "name": "node",
+            "type": "quadtree_node_t *"
+          },
+          {
+            "name": "key_free",
+            "type": "void (*)(void *)"
+          }
+        ],
+        "location": "subjects/quadtree-0.1.0/src/node.c:63",
+        "source_file": "node.c"
+      }
+    ]
+  },
+  "headers_processed": [
+    "subjects/quadtree-0.1.0/src/quadtree.h"
+  ],
+  "implementation_files": [
+    "subjects/quadtree-0.1.0/src/bounds.c",
+    "subjects/quadtree-0.1.0/src/point.c",
+    "subjects/quadtree-0.1.0/src/node.c"
+  ]
+}

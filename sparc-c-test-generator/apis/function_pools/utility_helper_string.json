@@ -1,0 +1,183 @@
+{
+  "main_file": "test/helper/functions/utility_helper_string.c",
+  "functions": [
+    {
+      "name": "init_test_string",
+      "return_type": "char *",
+      "parameters": [
+        {
+          "name": "initial_value",
+          "type": "const char *"
+        }
+      ],
+      "location": "test/helper/functions/utility_helper_string.c:5",
+      "source_file": "utility_helper_string.c",
+      "description": "Initialize a string with the provided value."
+    },
+    {
+      "name": "create_test_string_buffer",
+      "return_type": "char *",
+      "parameters": [
+        {
+          "name": "size",
+          "type": "size_t"
+        }
+      ],
+      "location": "test/helper/functions/utility_helper_string.c:24",
+      "source_file": "utility_helper_string.c",
+      "description": "Create a string buffer of specified size initialized to empty string."
+    },
+    {
+      "name": "reset_test_string",
+      "return_type": "void",
+      "parameters": [
+        {
+          "name": "string",
+          "type": "char *"
+        },
+        {
+          "name": "max_size",
+          "type": "size_t"
+        }
+      ],
+      "location": "test/helper/functions/utility_helper_string.c:38",
+      "source_file": "utility_helper_string.c",
+      "description": "Reset a string to empty (clear its contents)."
+    },
+    {
+      "name": "cleanup_test_string",
+      "return_type": "void",
+      "parameters": [
+        {
+          "name": "string",
+          "type": "char *"
+        }
+      ],
+      "location": "test/helper/functions/utility_helper_string.c:48",
+      "source_file": "utility_helper_string.c",
+      "description": "Free the memory allocated for a string."
+    },
+    {
+      "name": "init_test_char",
+      "return_type": "char",
+      "parameters": [
+        {
+          "name": "initial_value",
+          "type": "char"
+        }
+      ],
+      "location": "test/helper/functions/utility_helper_string.c:58",
+      "source_file": "utility_helper_string.c",
+      "description": "Initialize a char with the provided value."
+    },
+    {
+      "name": "create_char_array",
+      "return_type": "char *",
+      "parameters": [
+        {
+          "name": "size",
+          "type": "size_t"
+        },
+        {
+          "name": "fill_char",
+          "type": "char"
+        }
+      ],
+      "location": "test/helper/functions/utility_helper_string.c:66",
+      "source_file": "utility_helper_string.c",
+      "description": "Create a character array of specified size filled with a character."
+    }
+  ],
+  "source_files": {
+    "test/helper/functions/utility_helper_string.c": [
+      {
+        "name": "init_test_string",
+        "return_type": "char *",
+        "parameters": [
+          {
+            "name": "initial_value",
+            "type": "const char *"
+          }
+        ],
+        "location": "test/helper/functions/utility_helper_string.c:5",
+        "source_file": "utility_helper_string.c",
+        "description": "Initialize a string with the provided value."
+      },
+      {
+        "name": "create_test_string_buffer",
+        "return_type": "char *",
+        "parameters": [
+          {
+            "name": "size",
+            "type": "size_t"
+          }
+        ],
+        "location": "test/helper/functions/utility_helper_string.c:24",
+        "source_file": "utility_helper_string.c",
+        "description": "Create a string buffer of specified size initialized to empty string."
+      },
+      {
+        "name": "reset_test_string",
+        "return_type": "void",
+        "parameters": [
+          {
+            "name": "string",
+            "type": "char *"
+          },
+          {
+            "name": "max_size",
+            "type": "size_t"
+          }
+        ],
+        "location": "test/helper/functions/utility_helper_string.c:38",
+        "source_file": "utility_helper_string.c",
+        "description": "Reset a string to empty (clear its contents)."
+      },
+      {
+        "name": "cleanup_test_string",
+        "return_type": "void",
+        "parameters": [
+          {
+            "name": "string",
+            "type": "char *"
+          }
+        ],
+        "location": "test/helper/functions/utility_helper_string.c:48",
+        "source_file": "utility_helper_string.c",
+        "description": "Free the memory allocated for a string."
+      },
+      {
+        "name": "init_test_char",
+        "return_type": "char",
+        "parameters": [
+          {
+            "name": "initial_value",
+            "type": "char"
+          }
+        ],
+        "location": "test/helper/functions/utility_helper_string.c:58",
+        "source_file": "utility_helper_string.c",
+        "description": "Initialize a char with the provided value."
+      },
+      {
+        "name": "create_char_array",
+        "return_type": "char *",
+        "parameters": [
+          {
+            "name": "size",
+            "type": "size_t"
+          },
+          {
+            "name": "fill_char",
+            "type": "char"
+          }
+        ],
+        "location": "test/helper/functions/utility_helper_string.c:66",
+        "source_file": "utility_helper_string.c",
+        "description": "Create a character array of specified size filled with a character."
+      }
+    ]
+  },
+  "headers_processed": [],
+  "implementation_files": []
+}

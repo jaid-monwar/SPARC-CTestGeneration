@@ -1,0 +1,123 @@
+{
+  "main_file": "subjects/qsort/qsort.c",
+  "functions": [
+    {
+      "name": "swap",
+      "return_type": "void",
+      "parameters": [
+        {
+          "name": "a",
+          "type": "int *"
+        },
+        {
+          "name": "b",
+          "type": "int *"
+        }
+      ],
+      "location": "subjects/qsort/qsort.c:1",
+      "source_file": "qsort.c"
+    },
+    {
+      "name": "partition",
+      "return_type": "int",
+      "parameters": [
+        {
+          "name": "arr",
+          "type": "int[]"
+        },
+        {
+          "name": "low",
+          "type": "int"
+        },
+        {
+          "name": "high",
+          "type": "int"
+        }
+      ],
+      "location": "subjects/qsort/qsort.c:8",
+      "source_file": "qsort.c"
+    },
+    {
+      "name": "quickSort",
+      "return_type": "void",
+      "parameters": [
+        {
+          "name": "arr",
+          "type": "int[]"
+        },
+        {
+          "name": "low",
+          "type": "int"
+        },
+        {
+          "name": "high",
+          "type": "int"
+        }
+      ],
+      "location": "subjects/qsort/qsort.c:23",
+      "source_file": "qsort.c"
+    }
+  ],
+  "source_files": {
+    "subjects/qsort/qsort.c": [
+      {
+        "name": "swap",
+        "return_type": "void",
+        "parameters": [
+          {
+            "name": "a",
+            "type": "int *"
+          },
+          {
+            "name": "b",
+            "type": "int *"
+          }
+        ],
+        "location": "subjects/qsort/qsort.c:1",
+        "source_file": "qsort.c"
+      },
+      {
+        "name": "partition",
+        "return_type": "int",
+        "parameters": [
+          {
+            "name": "arr",
+            "type": "int[]"
+          },
+          {
+            "name": "low",
+            "type": "int"
+          },
+          {
+            "name": "high",
+            "type": "int"
+          }
+        ],
+        "location": "subjects/qsort/qsort.c:8",
+        "source_file": "qsort.c"
+      },
+      {
+        "name": "quickSort",
+        "return_type": "void",
+        "parameters": [
+          {
+            "name": "arr",
+            "type": "int[]"
+          },
+          {
+            "name": "low",
+            "type": "int"
+          },
+          {
+            "name": "high",
+            "type": "int"
+          }
+        ],
+        "location": "subjects/qsort/qsort.c:23",
+        "source_file": "qsort.c"
+      }
+    ]
+  },
+  "headers_processed": [],
+  "implementation_files": []
+}

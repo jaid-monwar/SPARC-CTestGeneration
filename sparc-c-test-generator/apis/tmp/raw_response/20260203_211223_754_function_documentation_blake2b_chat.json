@@ -1,0 +1,45 @@
+{
+  "timestamp": "2026-02-03T21:12:23.754269",
+  "context": "function_documentation_blake2b",
+  "model_type": "chat",
+  "model": "gpt-4.1-2025-04-14",
+  "request": {
+    "messages": [
+      {
+        "role": "system",
+        "content": "\nYou are a technical writer creating professional C function documentation. Write clear, concise documentation like high-quality open source projects (glibc, libcurl, Python stdlib).\n\n## FORMAT\n\n```c\n/**\n * @brief One-line description of what the function does.\n *\n * Detailed description (2-3 sentences max) explaining the function's purpose\n * and key behavior. Mention important edge cases or special handling.\n *\n * @param param_name Description of parameter, its valid values, and constraints.\n *                   Note if NULL is valid or if the parameter is modified.\n *\n * @return What the function returns. Specify success/failure values.\n *         Example: \"Pointer to new node on success, NULL on allocation failure.\"\n *\n * @note Memory: Caller must free returned pointer / Function allocates internally\n * @note Error: How errors are signaled (return value, errno, etc.)\n *\n * @see related_function, another_function\n */\n```\n\n## GUIDELINES\n\n**Be concise**: One line for @brief. 2-3 sentences max for detailed description.\n\n**Parameters**: Type is in code, so describe purpose and constraints:\n- Valid ranges: \"Must be positive\", \"Valid pointer or NULL\"\n- Modifications: \"Modified to contain result\", \"Contents are sorted in-place\"\n- Ownership: \"Caller retains ownership\", \"Function takes ownership\"\n\n**Return values**: Be specific about success/failure:\n- \"Returns 0 on success, -1 on error\"\n- \"Returns pointer to node, or NULL if not found\"\n\n**@note for important details** (only include if relevant):\n- Memory allocation/deallocation responsibility\n- Side effects that modify input or global state\n- Error handling mechanism\n\n**Omit @note/@see if not applicable.**\n\n## STYLE\n\n- Write naturally, not in bullet points or key-value format\n- Use present tense: \"Inserts a node\" not \"Will insert a node\"\n- Be precise: \"non-negative integer\" not \"valid number\"\n- Avoid redundancy: Don't repeat the function name in @brief\n\n## EXAMPLES\n\n```c\n/**\n * @brief Insert a key into a binary search tree.\n *\n * Creates a new node with the given key and inserts it at the correct\n * position to maintain BST ordering. If the tree is empty (node is NULL),\n * returns a new root node.\n *\n * @param node Root of the tree, or NULL for empty tree.\n * @param key Value to insert.\n *\n * @return Root of the modified tree. Returns newly allocated node if\n *         tree was empty, or existing root with new node inserted.\n *\n * @note Caller must free the returned tree.\n */\n```\n\n```c\n/**\n * @brief Partition array around a pivot for quicksort.\n *\n * Rearranges elements so values less than pivot come before it,\n * and values greater come after. Modifies array in-place.\n *\n * @param arr Array to partition. Must not be NULL.\n * @param low Starting index (inclusive).\n * @param high Ending index (inclusive). Must be >= low.\n *\n * @return Index of the pivot after partitioning.\n */\n```\n\nGenerate ONLY the documentation block. Start with /** and end with */.\n"
+      },
+      {
+        "role": "user",
+        "content": "\nGenerate documentation for this C function:\n\n**Function**: blake2b\n\n```c\n// C program for the function called blake2b\n// Contains target function implementation and dependency signatures\n\n#include <assert.h>    /// for asserts\n#include <inttypes.h>  /// for fixed-width integer types e.g. uint64_t and uint8_t\n#include <stdio.h>     /// for IO\n#include <stdlib.h>    /// for malloc, calloc, and free. As well as size_t\n\n// Forward declarations for dependency functions\nstatic void G(block_t v, uint8_t a, uint8_t b, uint8_t c, uint8_t d, uint64_t x,\n              uint64_t y);\nstatic int BLAKE2B(uint8_t *dest, block_t *d, size_t dd, u128 ll, uint8_t kk,\n                   uint8_t nn);\nstatic void F(uint64_t h[8], block_t m, u128 t, int f);\nstatic inline void u128_fill(u128 dest, size_t n);\nstatic inline void u128_increment(u128 dest, uint64_t n);\n\n// Target function implementation\nuint8_t *blake2b(const uint8_t *message, size_t len, const uint8_t *key,\n                 uint8_t kk, uint8_t nn)\n{\n    uint8_t *dest = NULL;\n    uint64_t long_hold;\n    size_t dd, has_key, i;\n    size_t block_index, word_in_block;\n    u128 ll;\n    block_t *blocks;\n\n    if (message == NULL)\n    {\n        len = 0;\n    }\n    if (key == NULL)\n    {\n        kk = 0;\n    }\n\n    kk = MIN(kk, KK_MAX);\n    nn = MIN(nn, NN_MAX);\n\n    dd = MAX(CEIL(kk, bb) + CEIL(len, bb), 1);\n\n    blocks = calloc(dd, sizeof(block_t));\n    if (blocks == NULL)\n    {\n        return NULL;\n    }\n\n    dest = malloc(nn * sizeof(uint8_t));\n    if (dest == NULL)\n    {\n        free(blocks);\n        return NULL;\n    }\n\n    /* If there is a secret key it occupies the first block */\n    for (i = 0; i < kk; i++)\n    {\n        long_hold = key[i];\n        long_hold <<= 8 * (i % 8);\n\n        word_in_block = (i % bb) / 8;\n        /* block_index will always be 0 because kk <= 64 and bb = 128*/\n        blocks[0][word_in_block] |= long_hold;\n    }\n\n    has_key = kk > 0 ? 1 : 0;\n\n    for (i = 0; i < len; i++)\n    {\n        /* long_hold exists because the bit-shifting will overflow if we don't\n         * store the value */\n        long_hold = message[i];\n        long_hold <<= 8 * (i % 8);\n\n        block_index = has_key + (i / bb);\n        word_in_block = (i % bb) / 8;\n\n        blocks[block_index][word_in_block] |= long_hold;\n    }\n\n    u128_fill(ll, len);\n\n    BLAKE2B(dest, blocks, dd, ll, kk, nn);\n\n    free(blocks);\n\n    return dest;\n}\n\n```\n\n**Dependencies**: BLAKE2B, u128_fill\n\nWrite clear, concise documentation following the system prompt format.\nOutput only the /** ... */ block.\n"
+      }
+    ],
+    "model": "gpt-4.1-2025-04-14",
+    "provider": "gpt",
+    "temperature": 0.0,
+    "response_model": null,
+    "max_tokens": 8192,
+    "input_tokens": 1418
+  },
+  "response": {
+    "content": "/**\n * @brief Computes the BLAKE2b cryptographic hash of a message.\n *\n * Calculates the BLAKE2b hash of the input message, optionally using a secret key\n * for keyed hashing. The output length and key length are clamped to implementation\n * limits. Returns a newly allocated buffer containing the hash digest.\n *\n * @param message Pointer to the input message. May be NULL if len is 0.\n * @param len Length of the input message in bytes. Must be non-negative.\n * @param key Pointer to the secret key, or NULL for unkeyed hashing.\n * @param kk Length of the key in bytes. Ignored if key is NULL; otherwise clamped to maximum allowed.\n * @param nn Desired output length in bytes. Clamped to maximum allowed.\n *\n * @return Pointer to a newly allocated buffer containing the hash digest of length nn,\n *         or NULL on allocation failure.\n *\n * @note Memory: Caller must free the returned buffer.\n * @note Error: Returns NULL if memory allocation fails.\n */",
+    "finish_reason": "stop",
+    "usage": {
+      "completion_tokens": 218,
+      "prompt_tokens": 1418,
+      "total_tokens": 1636,
+      "completion_tokens_details": {
+        "accepted_prediction_tokens": 0,
+        "audio_tokens": 0,
+        "reasoning_tokens": 0,
+        "rejected_prediction_tokens": 0
+      },
+      "prompt_tokens_details": {
+        "audio_tokens": 0,
+        "cached_tokens": 0
+      }
+    },
+    "response_id": "chatcmpl-D5CMeRlgcSU9RWXEp0GghOvd6jqRO",
+    "created": 1770131540
+  }
+}

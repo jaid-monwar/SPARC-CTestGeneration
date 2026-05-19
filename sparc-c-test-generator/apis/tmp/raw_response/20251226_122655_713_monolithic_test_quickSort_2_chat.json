@@ -1,0 +1,44 @@
+{
+  "timestamp": "2025-12-26T12:26:55.713623",
+  "context": "monolithic_test_quickSort_2",
+  "model_type": "chat",
+  "model": "gpt-4.1-2025-04-14",
+  "request": {
+    "messages": [
+      {
+        "role": "system",
+        "content": "Generate a complete, compilable Unity C test for ONE execution path.\n\nRULES:\n- Use ONLY functions from the operation map or standard C library\n- Use Unity TEST_ASSERT_* macros for all assertions (not assert())\n- Do NOT create custom assertion functions\n- Manage memory properly (allocate/free)\n- Call malloc_reset() in tearDown() when using malloc failure testing\n\nUNITY MACROS:\nTEST_ASSERT_NULL, TEST_ASSERT_NOT_NULL, TEST_ASSERT_EQUAL, TEST_ASSERT_EQUAL_INT,\nTEST_ASSERT_EQUAL_STRING, TEST_ASSERT_EQUAL_MEMORY, TEST_ASSERT_TRUE, TEST_ASSERT_FALSE,\nTEST_ASSERT_GREATER_THAN, TEST_ASSERT_LESS_THAN, TEST_ASSERT_FLOAT_WITHIN\n\nMALLOC FAILURE TESTING (for paths requiring allocation failures):\n#include \"malloc_wrap.h\"\n- malloc_fail_next(1)    - Next malloc/calloc/realloc returns NULL\n- malloc_fail_after(n)   - First n allocations succeed, then fail\n- malloc_reset()         - Reset to normal (call in tearDown)\n\nExample - testing malloc failure path:\n```c\nvoid tearDown(void) { malloc_reset(); }\nvoid test_buffer_malloc_failure(void) {\n    malloc_fail_next(1);\n    buffer_t* buf = buffer_new(100);\n    TEST_ASSERT_NULL(buf);\n}\n```\n\nOUTPUT FORMAT:\n```c\n#include \"unity.h\"\n#include \"malloc_wrap.h\"  // Only if testing allocation failures\n\nvoid setUp(void) { }\nvoid tearDown(void) { malloc_reset(); }  // Always reset malloc state\n\nvoid test_<function>_<scenario>(void) {\n    // Setup, call function, assert with TEST_ASSERT_*, cleanup\n}\n\nint main(void) {\n    UNITY_BEGIN();\n    RUN_TEST(test_<function>_<scenario>);\n    return UNITY_END();\n}\n```\n\nOutput ONLY compilable C code. No explanations.\n"
+      },
+      {
+        "role": "user",
+        "content": "Generate Unity test for this path.\n\nFUNCTION: quickSort\nSignature: void quickSort(int arr[], int low, int high)\nDescription: /**\n * @brief Sorts an array of integers in ascending order using quicksort.\n *\n * Recursively sorts the subarrays before and after a partition index,\n * rearranging elements in-place. The function modifies the input array\n * directly and does not allocate additional memory.\n *\n * @param arr Array of integers to sort. Must not be NULL.\n * @param low Starting index of the subarray to sort (inclusive).\n * @param high Ending index of the subarray to sort (inclusive). Must be >= low.\n *\n * @return None.\n *\n * @note The contents of arr are sorted in-place. Caller retains ownership.\n *\n * @see partition\n */\nDependencies: partition, quickSort\n\nIMPLEMENTATION:\n```c\n// C program for the function called quickSort\n// Contains target function implementation and dependency signatures\n\n// Forward declarations for dependency functions\nvoid swap(int* a, int* b);\nint partition (int arr[], int low, int high);\n\n// Target function implementation\nvoid quickSort(int arr[], int low, int high)\n{\n    if (low < high) {\n        int i = partition(arr, low, high);\n        quickSort(arr, low, i - 1);\n        quickSort(arr, i + 1, high);\n    }\n}\n\n```\n\nTARGET PATH:\nPath 2: START | START --> CONDITION | if-else head --> STATEMENT | (low < high) --> MERGE | if-else merge --> RETURN | implicit return\n\nAVAILABLE OPERATIONS:\n```json\n{\\n  \"dependency_analysis\": {\\n    \"source_functions\": [\\n      {\\n        \"name\": \"partition\",\\n        \"paths\": [\\n          {\\n            \"path_id\": 1,\\n            \"path\": \"START | START -->  --> STATEMENT | int i = low - 1; --> EMPTY | loop head --> STATEMENT | int j = low; --> STATEMENT | j <= high - 1 --> FOR_EXIT | loop exit -->  --> RETURN | return i + 1;\"\\n          }\\n        ]\\n      },\\n      {\\n        \"name\": \"quickSort\",\\n        \"paths\": [\\n          {\\n            \"path_id\": 1,\\n            \"path\": \"START | START --> CONDITION | if-else head --> STATEMENT | (low < high) --> STATEMENT | int i = partition(arr, low, high); --> STATEMENT | quickSort(arr, low, i - 1); --> STATEMENT | quickSort(arr, i + 1, high); --> MERGE | if-else merge --> RETURN | implicit return\"\\n          },\\n          {\\n            \"path_id\": 2,\\n            \"path\": \"START | START --> CONDITION | if-else head --> STATEMENT | (low < high) --> MERGE | if-else merge --> RETURN | implicit return\"\\n          }\\n        ]\\n      },\\n      {\\n        \"name\": \"swap\",\\n        \"paths\": [\\n          {\\n            \"path_id\": 1,\\n            \"path\": \"START | START --> STATEMENT | int t = *a; --> STATEMENT | *a = *b; --> STATEMENT | *b = t; --> RETURN | implicit return\"\\n          }\\n        ]\\n      }\\n    ],\\n    \"planned_created_functions\": [\\n      {\\n        \"name\": \"helper_assert_array_equal\",\\n        \"calls\": [\\n          \"printf\"\\n        ]\\n      },\\n      {\\n        \"name\": \"helper_is_sorted\",\\n        \"calls\": []\\n      }\\n    ],\\n    \"required_from_pool\": []\\n  },\\n  \"assertion_operations\": {\\n    \"searched_from_pool\": [],\\n    \"created\": [\\n      {\\n        \"name\": \"helper_assert_array_equal\",\\n        \"description\": \"Asserts that two integer arrays are equal element-wise for a given length. Prints a message if they are not equal.\",\\n        \"return_type\": \"void\",\\n        \"parameters\": [\\n          {\\n            \"name\": \"arr1\",\\n            \"type\": \"int *\"\\n          },\\n          {\\n            \"name\": \"arr2\",\\n            \"type\": \"int *\"\\n          },\\n          {\\n            \"name\": \"length\",\\n            \"type\": \"int\"\\n          }\\n        ]\\n      },\\n      {\\n        \"name\": \"helper_is_sorted\",\\n        \"description\": \"Checks if an integer array is sorted in non-decreasing order. Returns 1 if sorted, 0 otherwise.\",\\n        \"return_type\": \"int\",\\n        \"parameters\": [\\n          {\\n            \"name\": \"arr\",\\n            \"type\": \"int *\"\\n          },\\n          {\\n            \"name\": \"length\",\\n            \"type\": \"int\"\\n          }\\n        ]\\n      }\\n    ]\\n  },\\n  \"utility_operations\": {\\n    \"searched_from_pool\": [],\\n    \"created\": []\\n  }\\n}\n```\n\nOutput ONLY the complete C test file.\n"
+      }
+    ],
+    "model": "gpt-4.1-2025-04-14",
+    "temperature": 0.0,
+    "response_model": null,
+    "max_tokens": 4096,
+    "input_tokens": 1526
+  },
+  "response": {
+    "content": "```c\n#include \"unity.h\"\n\n// Forward declarations for dependencies\nvoid quickSort(int arr[], int low, int high);\n\n// Helper: Checks if an array is sorted in non-decreasing order\nint helper_is_sorted(int* arr, int length) {\n    for (int i = 1; i < length; ++i) {\n        if (arr[i-1] > arr[i]) return 0;\n    }\n    return 1;\n}\n\nvoid setUp(void) { }\nvoid tearDown(void) { }\n\nvoid test_quickSort_low_not_less_than_high_noop(void) {\n    int arr[] = {5, 3, 8, 1, 2};\n    int original[] = {5, 3, 8, 1, 2};\n    int n = sizeof(arr)/sizeof(arr[0]);\n\n    // Case 1: low == high (single element, should do nothing)\n    quickSort(arr, 2, 2);\n    for (int i = 0; i < n; ++i) {\n        TEST_ASSERT_EQUAL_INT(original[i], arr[i]);\n    }\n\n    // Case 2: low > high (invalid range, should do nothing)\n    quickSort(arr, 4, 2);\n    for (int i = 0; i < n; ++i) {\n        TEST_ASSERT_EQUAL_INT(original[i], arr[i]);\n    }\n}\n\nint main(void) {\n    UNITY_BEGIN();\n    RUN_TEST(test_quickSort_low_not_less_than_high_noop);\n    return UNITY_END();\n}\n```",
+    "finish_reason": "stop",
+    "usage": {
+      "completion_tokens": 321,
+      "prompt_tokens": 1526,
+      "total_tokens": 1847,
+      "completion_tokens_details": {
+        "accepted_prediction_tokens": 0,
+        "audio_tokens": 0,
+        "reasoning_tokens": 0,
+        "rejected_prediction_tokens": 0
+      },
+      "prompt_tokens_details": {
+        "audio_tokens": 0,
+        "cached_tokens": 0
+      }
+    },
+    "response_id": "chatcmpl-CqvZlHKJK21QBhJEdxn4lRatM9c56",
+    "created": 1766730413
+  }
+}

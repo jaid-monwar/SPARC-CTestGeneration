@@ -1,0 +1,45 @@
+{
+  "timestamp": "2026-02-03T21:13:53.564769",
+  "context": "function_documentation_test1",
+  "model_type": "chat",
+  "model": "gpt-4.1-2025-04-14",
+  "request": {
+    "messages": [
+      {
+        "role": "system",
+        "content": "\nYou are a technical writer creating professional C function documentation. Write clear, concise documentation like high-quality open source projects (glibc, libcurl, Python stdlib).\n\n## FORMAT\n\n```c\n/**\n * @brief One-line description of what the function does.\n *\n * Detailed description (2-3 sentences max) explaining the function's purpose\n * and key behavior. Mention important edge cases or special handling.\n *\n * @param param_name Description of parameter, its valid values, and constraints.\n *                   Note if NULL is valid or if the parameter is modified.\n *\n * @return What the function returns. Specify success/failure values.\n *         Example: \"Pointer to new node on success, NULL on allocation failure.\"\n *\n * @note Memory: Caller must free returned pointer / Function allocates internally\n * @note Error: How errors are signaled (return value, errno, etc.)\n *\n * @see related_function, another_function\n */\n```\n\n## GUIDELINES\n\n**Be concise**: One line for @brief. 2-3 sentences max for detailed description.\n\n**Parameters**: Type is in code, so describe purpose and constraints:\n- Valid ranges: \"Must be positive\", \"Valid pointer or NULL\"\n- Modifications: \"Modified to contain result\", \"Contents are sorted in-place\"\n- Ownership: \"Caller retains ownership\", \"Function takes ownership\"\n\n**Return values**: Be specific about success/failure:\n- \"Returns 0 on success, -1 on error\"\n- \"Returns pointer to node, or NULL if not found\"\n\n**@note for important details** (only include if relevant):\n- Memory allocation/deallocation responsibility\n- Side effects that modify input or global state\n- Error handling mechanism\n\n**Omit @note/@see if not applicable.**\n\n## STYLE\n\n- Write naturally, not in bullet points or key-value format\n- Use present tense: \"Inserts a node\" not \"Will insert a node\"\n- Be precise: \"non-negative integer\" not \"valid number\"\n- Avoid redundancy: Don't repeat the function name in @brief\n\n## EXAMPLES\n\n```c\n/**\n * @brief Insert a key into a binary search tree.\n *\n * Creates a new node with the given key and inserts it at the correct\n * position to maintain BST ordering. If the tree is empty (node is NULL),\n * returns a new root node.\n *\n * @param node Root of the tree, or NULL for empty tree.\n * @param key Value to insert.\n *\n * @return Root of the modified tree. Returns newly allocated node if\n *         tree was empty, or existing root with new node inserted.\n *\n * @note Caller must free the returned tree.\n */\n```\n\n```c\n/**\n * @brief Partition array around a pivot for quicksort.\n *\n * Rearranges elements so values less than pivot come before it,\n * and values greater come after. Modifies array in-place.\n *\n * @param arr Array to partition. Must not be NULL.\n * @param low Starting index (inclusive).\n * @param high Ending index (inclusive). Must be >= low.\n *\n * @return Index of the pivot after partitioning.\n */\n```\n\nGenerate ONLY the documentation block. Start with /** and end with */.\n"
+      },
+      {
+        "role": "user",
+        "content": "\nGenerate documentation for this C function:\n\n**Function**: test1\n\n```c\n// C program for the function called test1\n// Contains target function implementation and dependency signatures\n\n#include <math.h>\n#include <stdio.h>\n#include <stdlib.h>\n#include <time.h>\n#include <omp.h>\n\n// Forward declarations for dependency functions\nvoid test_circle(double *const *data, int N);\nvoid kohonen_update_weights(double const *x, double *const *W, double *D,\n                            int num_out, int num_features, double alpha, int R);\nvoid kohonen_get_min_1d(double const *X, int N, double *val, int *idx);\ndouble _random(double a, double b);\nvoid kohonen_som_tracer(double **X, double *const *W, int num_samples,\n                        int num_features, int num_out, double alpha_min);\nint save_nd_data(const char *fname, double **X, int num_points,\n                 int num_features);\n\n// Target function implementation\nvoid test1()\n{\n    int j, N = 500;\n    int features = 2;\n    int num_out = 50;\n\n    // 2D space, hence size = number of rows * 2\n    double **X = (double **)malloc(N * sizeof(double *));\n\n    // number of clusters nodes * 2\n    double **W = (double **)malloc(num_out * sizeof(double *));\n\n    for (int i = 0; i < max(num_out, N); i++)  // loop till max(N, num_out)\n    {\n        if (i < N)  // only add new arrays if i < N\n            X[i] = (double *)malloc(features * sizeof(double));\n        if (i < num_out)  // only add new arrays if i < num_out\n        {\n            W[i] = (double *)malloc(features * sizeof(double));\n#ifdef _OPENMP\n#pragma omp for\n#endif\n            // preallocate with random initial weights\n            for (j = 0; j < features; j++) W[i][j] = _random(-1, 1);\n        }\n    }\n\n    test_circle(X, N);  // create test data around circumference of a circle\n    save_nd_data(\"test1.csv\", X, N, features);  // save test data points\n    save_nd_data(\"w11.csv\", W, num_out,\n                 features);  // save initial random weights\n    kohonen_som_tracer(X, W, N, features, num_out, 0.1);  // train the SOM\n    save_nd_data(\"w12.csv\", W, num_out,\n                 features);  // save the resultant weights\n\n    for (int i = 0; i < max(num_out, N); i++)\n    {\n        if (i < N)\n            free(X[i]);\n        if (i < num_out)\n            free(W[i]);\n    }\n}\n\n```\n\n**Dependencies**: _random, kohonen_som_tracer, save_nd_data, test_circle\n\nWrite clear, concise documentation following the system prompt format.\nOutput only the /** ... */ block.\n"
+      }
+    ],
+    "model": "gpt-4.1-2025-04-14",
+    "provider": "gpt",
+    "temperature": 0.0,
+    "response_model": null,
+    "max_tokens": 8192,
+    "input_tokens": 1329
+  },
+  "response": {
+    "content": "/**\n * @brief Demonstrates training a 1D Kohonen self-organizing map on circular data.\n *\n * Allocates and initializes a dataset of 2D points arranged on a circle, then creates and randomly initializes weights for a 1D Kohonen SOM. Saves the initial data and weights to CSV files, trains the SOM, and saves the final weights. All memory is freed before returning.\n *\n * @return This function does not return a value.\n *\n * @note Memory: All allocated memory is freed before the function returns.\n * @note Files: Writes \"test1.csv\", \"w11.csv\", and \"w12.csv\" to the current directory.\n */",
+    "finish_reason": "stop",
+    "usage": {
+      "completion_tokens": 138,
+      "prompt_tokens": 1329,
+      "total_tokens": 1467,
+      "completion_tokens_details": {
+        "accepted_prediction_tokens": 0,
+        "audio_tokens": 0,
+        "reasoning_tokens": 0,
+        "rejected_prediction_tokens": 0
+      },
+      "prompt_tokens_details": {
+        "audio_tokens": 0,
+        "cached_tokens": 0
+      }
+    },
+    "response_id": "chatcmpl-D5CO66sd8r9nJKy3qFjohOQIFrYd2",
+    "created": 1770131630
+  }
+}

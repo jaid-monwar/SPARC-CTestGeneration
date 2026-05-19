@@ -1,0 +1,45 @@
+{
+  "timestamp": "2026-02-03T21:13:29.885791",
+  "context": "function_documentation_adaline_fit",
+  "model_type": "chat",
+  "model": "gpt-4.1-2025-04-14",
+  "request": {
+    "messages": [
+      {
+        "role": "system",
+        "content": "\nYou are a technical writer creating professional C function documentation. Write clear, concise documentation like high-quality open source projects (glibc, libcurl, Python stdlib).\n\n## FORMAT\n\n```c\n/**\n * @brief One-line description of what the function does.\n *\n * Detailed description (2-3 sentences max) explaining the function's purpose\n * and key behavior. Mention important edge cases or special handling.\n *\n * @param param_name Description of parameter, its valid values, and constraints.\n *                   Note if NULL is valid or if the parameter is modified.\n *\n * @return What the function returns. Specify success/failure values.\n *         Example: \"Pointer to new node on success, NULL on allocation failure.\"\n *\n * @note Memory: Caller must free returned pointer / Function allocates internally\n * @note Error: How errors are signaled (return value, errno, etc.)\n *\n * @see related_function, another_function\n */\n```\n\n## GUIDELINES\n\n**Be concise**: One line for @brief. 2-3 sentences max for detailed description.\n\n**Parameters**: Type is in code, so describe purpose and constraints:\n- Valid ranges: \"Must be positive\", \"Valid pointer or NULL\"\n- Modifications: \"Modified to contain result\", \"Contents are sorted in-place\"\n- Ownership: \"Caller retains ownership\", \"Function takes ownership\"\n\n**Return values**: Be specific about success/failure:\n- \"Returns 0 on success, -1 on error\"\n- \"Returns pointer to node, or NULL if not found\"\n\n**@note for important details** (only include if relevant):\n- Memory allocation/deallocation responsibility\n- Side effects that modify input or global state\n- Error handling mechanism\n\n**Omit @note/@see if not applicable.**\n\n## STYLE\n\n- Write naturally, not in bullet points or key-value format\n- Use present tense: \"Inserts a node\" not \"Will insert a node\"\n- Be precise: \"non-negative integer\" not \"valid number\"\n- Avoid redundancy: Don't repeat the function name in @brief\n\n## EXAMPLES\n\n```c\n/**\n * @brief Insert a key into a binary search tree.\n *\n * Creates a new node with the given key and inserts it at the correct\n * position to maintain BST ordering. If the tree is empty (node is NULL),\n * returns a new root node.\n *\n * @param node Root of the tree, or NULL for empty tree.\n * @param key Value to insert.\n *\n * @return Root of the modified tree. Returns newly allocated node if\n *         tree was empty, or existing root with new node inserted.\n *\n * @note Caller must free the returned tree.\n */\n```\n\n```c\n/**\n * @brief Partition array around a pivot for quicksort.\n *\n * Rearranges elements so values less than pivot come before it,\n * and values greater come after. Modifies array in-place.\n *\n * @param arr Array to partition. Must not be NULL.\n * @param low Starting index (inclusive).\n * @param high Ending index (inclusive). Must be >= low.\n *\n * @return Index of the pivot after partitioning.\n */\n```\n\nGenerate ONLY the documentation block. Start with /** and end with */.\n"
+      },
+      {
+        "role": "user",
+        "content": "\nGenerate documentation for this C function:\n\n**Function**: adaline_fit\n\n```c\n// C program for the function called adaline_fit\n// Contains target function implementation and dependency signatures\n\n#include <assert.h>\n#include <limits.h>\n#include <math.h>\n#include <stdbool.h>\n#include <stdio.h>\n#include <stdlib.h>\n#include <time.h>\n\nstruct adaline\n{\n    double eta;      /**< learning rate of the algorithm */\n    double *weights; /**< weights of the neural network */\n    int num_weights; /**< number of weights of the neural network */\n};\n\n// Forward declarations for dependency functions\ndouble adaline_fit_sample(struct adaline *ada, const double *x, const int y);\nint adaline_activation(double x);\nchar *adaline_get_weights_str(const struct adaline *ada);\nint adaline_predict(struct adaline *ada, const double *x, double *out);\n\n// Target function implementation\nvoid adaline_fit(struct adaline *ada, double **X, const int *y, const int N)\n{\n    double avg_pred_error = 1.f;\n\n    int iter;\n    for (iter = 0;\n         (iter < MAX_ADALINE_ITER) && (avg_pred_error > ADALINE_ACCURACY);\n         iter++)\n    {\n        avg_pred_error = 0.f;\n\n        // perform fit for each sample\n        for (int i = 0; i < N; i++)\n        {\n            double err = adaline_fit_sample(ada, X[i], y[i]);\n            avg_pred_error += fabs(err);\n        }\n        avg_pred_error /= N;\n\n        // Print updates every 200th iteration\n        // if (iter % 100 == 0)\n        printf(\"\\tIter %3d: Training weights: %s\\tAvg error: %.4f\\n\", iter,\n               adaline_get_weights_str(ada), avg_pred_error);\n    }\n\n    if (iter < MAX_ADALINE_ITER)\n        printf(\"Converged after %d iterations.\\n\", iter);\n    else\n        printf(\"Did not converged after %d iterations.\\n\", iter);\n}\n\n```\n\n**Dependencies**: adaline_fit_sample, adaline_get_weights_str\n\nWrite clear, concise documentation following the system prompt format.\nOutput only the /** ... */ block.\n"
+      }
+    ],
+    "model": "gpt-4.1-2025-04-14",
+    "provider": "gpt",
+    "temperature": 0.0,
+    "response_model": null,
+    "max_tokens": 8192,
+    "input_tokens": 1149
+  },
+  "response": {
+    "content": "/**\n * @brief Train an ADALINE model using batch gradient descent.\n *\n * Iteratively updates the weights of the given ADALINE structure to fit the\n * provided training data, stopping when average prediction error falls below\n * a set threshold or a maximum number of iterations is reached. Prints training\n * progress and convergence status to standard output.\n *\n * @param ada Pointer to an initialized adaline struct. Must not be NULL; weights and num_weights must be set.\n * @param X Array of N input vectors, each of length ada->num_weights. Must not be NULL.\n * @param y Array of N target labels. Must not be NULL.\n * @param N Number of training samples. Must be positive.\n *\n * @return None.\n *\n * @note The function modifies ada->weights in-place. Progress and results are printed to stdout.\n */",
+    "finish_reason": "stop",
+    "usage": {
+      "completion_tokens": 177,
+      "prompt_tokens": 1149,
+      "total_tokens": 1326,
+      "completion_tokens_details": {
+        "accepted_prediction_tokens": 0,
+        "audio_tokens": 0,
+        "reasoning_tokens": 0,
+        "rejected_prediction_tokens": 0
+      },
+      "prompt_tokens_details": {
+        "audio_tokens": 0,
+        "cached_tokens": 0
+      }
+    },
+    "response_id": "chatcmpl-D5CNhXGccD8QAkBCbh7DsppPu8rXV",
+    "created": 1770131605
+  }
+}

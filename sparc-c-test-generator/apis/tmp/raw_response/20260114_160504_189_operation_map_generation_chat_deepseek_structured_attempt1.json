@@ -1,0 +1,475 @@
+{
+  "timestamp": "2026-01-14T16:05:04.189901",
+  "context": "operation_map_generation",
+  "model_type": "chat_deepseek_structured_attempt1",
+  "model": "deepseek-chat",
+  "request": {
+    "messages": [
+      {
+        "role": "system",
+        "content": "\n🚨 CRITICAL RULES - VIOLATION = IMMEDIATE REJECTION 🚨\n1. **NO DUPLICATE NAMES**: Never create functions with same names as source code\n2. **NO HARDCODED VALUES**: All data must come from parameters, never {50, 30, 20}\n3. **PARAMETERIZED ONLY**: Every function must accept explicit parameters\n4. **NO PLACEHOLDER CODE**: Every function must contain COMPLETE, WORKING C code - NO TODO comments, NO placeholder comments like \"// Perform operation\", NO functions that only malloc/free without doing actual work\n5. **NO PRIVATE FUNCTIONS**: Never call functions that are NOT declared in the header file. Functions with trailing underscores (like `node_contains_`, `get_quadrant_`) are typically private/static and FORBIDDEN\n\n\n##⚠️ MANDATORY WORKFLOW ⚠️:\n\n1. **Analyze the C source code and header file**: \n   - **Note**: Source function names and their paths are pre-defined and will be loaded from source_functions.json - you do NOT need to generate them\n   - **Extract all public function declarations** from the header file - these are the ONLY functions you can call from the source code\n   - **FORBIDDEN**: Never call functions not declared in the header file (private/static functions like `node_contains_`, `get_quadrant_`)\n2. **Focus on BASIC helpers only**: Create only fundamental assertion and utility helpers that provide NEW functionality. Do NOT create:\n   - Wrapper functions that just call existing helpers\n   - Complete test functions that combine multiple operations\n   - Functions that duplicate existing functionality\n3. Carefully separate operations into two categories:\n   - **assertion_operations**: Include BASIC assertion functions for validating specific conditions.\n   - **utility_operations**: Include BASIC utility functions for fundamental setup/init functions, cleanup functions, or reset functions.\n    Important:\n    - Do not place assertion-type functions under utility_operations.\n    - Do not place utility-type functions under assertion_operations.\n4. For each category:\n   - If there are existing helper functions that are relevant for unit testing (either as dependencies OR as useful operations for test scenarios), list all the **names** in `\"searched_from_pool\"` **ONLY if they do NOT conflict with source code function names**.\n   - **CRITICAL: Before adding ANY function name to \"searched_from_pool\", verify it does NOT match ANY function name in the source C code being tested.**\n   - **Include in searched_from_pool**:\n     a. Functions that your created functions will call (dependencies)\n     b. Functions that would be useful for test scenarios even if not called by created functions\n     c. Any assertion or utility functions relevant to testing the source code\n   - If no perfect match exists for needed functionality, define a **new helper** in `\"created\"` with:\n     - `\"name\"`: The function name you're creating. **🚨 CRITICAL RULE 🚨** Please use prefix \"helper_\" for all helper functions to avoid conflicts with source code function names.\n     - `\"description\"`: Clear explanation of the helper's purpose\n     - `\"return_type\"`: C return type (e.g., `void`, `int`, `struct node *`)\n     - `\"parameters\"`: List of objects with `\"name\"` and `\"type\"`\n     - `\"code_block\"`: The complete, compilable C implementation of the helper function. **🚨 MANDATORY: MUST CONTAIN ACTUAL WORKING CODE 🚨** - NO PLACEHOLDER COMMENTS! Include all necessary declarations and statements so that the function can be compiled and run as-is. \n       **FORBIDDEN PATTERNS**:\n       ❌ `// TODO: implement this` \n       ❌ `// Perform some operation`\n       ❌ `// Call some_function(...)`\n       ❌ Functions with only malloc/free and no actual logic\n       **REQUIRED**: Every function must contain complete, functional C code that actually performs the described operation.\n   - **🚨 CRITICAL DEPENDENCY RULE 🚨**: If your created function calls ANY other function (like `assert_array_equal`, `malloc`, custom helpers, etc.), you MUST ensure those functions are available by:\n     1. **For standard library functions** (malloc, printf, etc.): Include appropriate headers in your code_block\n     2. **For helper pool functions** (assert_array_equal, etc.): Add them to `\"searched_from_pool\"` \n     3. **For source code functions**: ONLY call functions that are declared in the header file - never call private/static functions\n     4. **Example**: If you create a function that calls `assert_array_equal`, you MUST include `assert_array_equal` in the `\"searched_from_pool\"` section, otherwise compilation will fail with \"undefined reference\" errors.\n   - **🚨 HEADER FILE VALIDATION 🚨**: Before calling ANY function from the source code, verify it exists in the header file:\n     - ✅ **ALLOWED**: `insert(root, key)` (if declared in header)\n     - ❌ **FORBIDDEN**: `node_contains_(root, point)` (private function with underscore)\n     - ❌ **FORBIDDEN**: `get_quadrant_(root, point)` (private function with underscore)\n     - ❌ **FORBIDDEN**: Any function not declared in the header file\n   - Only generate new helper functions in `\"created\"` if no existing function in available helper functions performs the same or a highly similar task. **PREFER REUSING existing helpers over creating new ones**. If an equivalent function already exists, reuse it instead of creating a new one.\n   - **AVOID WRAPPER FUNCTIONS**: Do not create functions that simply call existing helpers without adding significant new functionality.\n   - **FOCUS ON GAPS**: Only create helpers that fill genuine functionality gaps not covered by existing helper pool functions.\n   - **CRITICAL CONFLICT RESOLUTION**: If a helper function from the pool has the same name as a source code function, do NOT include it in \"searched_from_pool\". Instead, create a new function in \"created\" with a different name that performs the same functionality.\n   - **STRICT NAMING REQUIREMENT**: Before finalizing any function name in `\"created\"` or `\"searched_from_pool\"`, verify it does NOT match any function name from the source code or helper functions. This is mandatory to prevent compilation conflicts.\n4. **MANDATORY DEPENDENCY MANAGEMENT**:\n   - **Create dependency_analysis section** with these 2 required fields:\n     - **\"planned_created_functions\"**: For each function you plan to create, list:\n       - `\"name\"`: The function name you're creating\n       - `\"calls\"`: Array of ALL functions it will call (including `malloc`, `printf`, `assert_array_equal`, etc.)\n     - **\"required_from_pool\"**: List ALL helper pool functions needed by your created functions\n   - **Note**: \"source_functions\" will be automatically loaded from source_functions.json and merged - you do NOT need to generate it\n   \n   - **Dependency validation rules**:\n     - **Scan every `\"created\"` function** for external function calls\n     - **For each function call**, determine if it's:\n       - Standard library (`malloc`, `printf`) → Include proper #includes in code_block\n       - Helper pool function (`assert_array_equal`) → Add to \"required_from_pool\"\n       - Source code function (`insert`, `newNode`) → ONLY allowed if declared in header file, list in \"calls\"\n       - Private/static function (`node_contains_`, `get_quadrant_`) → ❌ FORBIDDEN - causes compilation errors\n     - **CRITICAL**: Every function in \"required_from_pool\" MUST appear in \"searched_from_pool\" sections\n     - **HEADER VALIDATION**: Every source code function call must be verified against the header file declarations\n     - **NOTE**: \"searched_from_pool\" can include MORE functions than \"required_from_pool\" - include any helper pool functions that are relevant for unit testing, even if not directly called by created functions\n     - **Compilation will fail** with \"undefined reference\" errors if dependencies are missing\n\n5. Include all possible operations that are necessary for generating **complete** test scenarios later.\n6. Make sure the operations are comprehensive enough to write complete test scenarios for all functions in the source code.\n7. Before producing the final JSON output, double-check the classification:\n   - If a function performs any kind of checking, validation, or result verification, it must be under assertion_operations.\n   - If a function only supports test setup, teardown, or data preparation, it must be under utility_operations.\n8. **FINAL DEPENDENCY VERIFICATION**: Before outputting JSON, verify that ALL functions called by your created functions are either:\n   - Standard library functions (with proper #includes)\n   - Listed in your `\"searched_from_pool\"` sections\n   - Source code functions that are declared in the header file (never private/static functions)\n   - Defined within the same `\"created\"` function\n\n## FORBIDDEN PATTERNS (REAL EXAMPLES THAT CAUSED ERRORS):\n```c\n// ❌ WRONG - Same name as source (causes \"error: redefinition of 'newNode'\")\nstruct node* newNode(int item) { ... }\n\n// ❌ WRONG - Hardcoded values (generates same key = 50 for all inserts)\nvoid setup() {\n    int values[] = {50, 30, 20};  // Results in: int key = 50; insert(root, key); insert(root, key);\n}\n\n// ❌ WRONG - Missing dependencies (causes \"undefined reference to 'assert_array_equal'\")\nvoid check_array(int *arr) {\n    assert_array_equal(arr, expected);  // Function not in searched_from_pool\n}\n\n// ❌ WRONG - Creates utility operations with same name as source code functions\nvoid insert() { ... }  // Conflicts with source insert() function\n\n// ❌ WRONG - Wrapper functions that just call existing helpers (useless)\nvoid verify_tree_structure(struct node *test_root, struct node *expected_root) {\n    assert_tree_equal(test_root, expected_root);  // Just calls existing function\n}\n\n// ❌ WRONG - Complete test functions (not basic helpers)\nvoid test_delete_node(struct node *root, int key) {\n    root = deleteNode(root, key);\n    assert_root_key(root, expected_key);\n    // This is a complete test, not a basic helper\n}\n\n// ❌ WRONG - Functions with only comments, no actual code (USELESS!)\nvoid assert_tree_structure(struct node *tree, int *expected, int size) {\n    int *actual = malloc(size * sizeof(int));\n    // Perform inorder traversal to fill actual_array\n    // Call assert_array_equal(actual_array, expected_array, size);\n    free(actual);  // Allocates and frees memory but does NOTHING useful!\n}\n\n// ❌ WRONG - Functions with TODO comments instead of real implementation\nvoid helper_function(int *data) {\n    // TODO: implement this function\n    return;  // Does nothing!\n}\n\n// ❌ WRONG - Calling private/static functions not in header file\nvoid helper_check_node(struct node* root, Point point) {\n    if (node_contains_(root, point)) {  // FORBIDDEN - private function!\n        // ...\n    }\n}\n\n// ❌ WRONG - Calling functions with underscores (typically private)\nint helper_find_quadrant(struct node* root, Point point) {\n    return get_quadrant_(root, point);  // FORBIDDEN - private function!\n}\n```\n\n## CORRECT PATTERNS:\n```c\n// ✅ RIGHT - Unique name, parameterized, provides NEW functionality with COMPLETE CODE\nstruct node* helper_build_tree(int *values, int size) {\n    struct node* root = NULL;\n    for (int i = 0; i < size; i++) {\n        root = insert(root, values[i]);\n    }\n    return root;\n}\n\n// ✅ RIGHT - Basic assertion helper that doesn't exist in pool with ACTUAL IMPLEMENTATION\nvoid assert_node_count(struct node* root, int expected_count) {\n    int actual_count = 0;\n    // Count nodes using recursive traversal\n    if (root != NULL) {\n        actual_count = 1 + count_subtree(root->left) + count_subtree(root->right);\n    }\n    assert(actual_count == expected_count);\n}\n\n// ✅ RIGHT - Basic utility helper for specific data preparation with WORKING CODE\nint* create_test_array(int size, int start_value) {\n    int* arr = malloc(size * sizeof(int));\n    for (int i = 0; i < size; i++) {\n        arr[i] = start_value + i;\n    }\n    return arr;\n}\n\n// ✅ RIGHT - Tree structure verification with COMPLETE FUNCTIONAL IMPLEMENTATION\nvoid assert_tree_structure(struct node *actual_tree, int *expected_array, int size) {\n    int *actual_array = malloc(size * sizeof(int));\n    int index = 0;\n    \n    // Perform inorder traversal to fill actual_array\n    inorder_to_array(actual_tree, actual_array, &index);\n    \n    // Compare arrays\n    for (int i = 0; i < size; i++) {\n        assert(actual_array[i] == expected_array[i]);\n    }\n    \n    free(actual_array);\n}\n\n// Helper function for inorder traversal\nvoid inorder_to_array(struct node* root, int* arr, int* index) {\n    if (root != NULL) {\n        inorder_to_array(root->left, arr, index);\n        arr[(*index)++] = root->data;\n        inorder_to_array(root->right, arr, index);\n    }\n}\n\n// ✅ RIGHT - Only calling public functions from header file\nvoid helper_validate_tree(struct node* root, Point point) {\n    // Only call functions declared in the header file\n    struct node* result = insert(root, point);  // OK if insert() is in header\n    // Never call node_contains_() or get_quadrant_() - they're private!\n}\n\n"
+      },
+      {
+        "role": "user",
+        "content": "\nYou are creating an **operation map** for C unit tests.\n\nBelow is the C source file to be tested:\n/**\n * @file\n * \\brief This file is a simple implementation of a Threaded Binary Tree\n *\n * Threaded Binary Tree is a binary tree variant in which all left child\n * pointers that are NULL (in Linked list representation) point to its\n * in-order predecessor, and all right child pointers that are NULL\n * (in Linked list representation) point to its in-order successor.\n * It has the following functionalities:\n * - Insertion\n * - Search\n * - Deletion\n * - Listing of node keys inorder,preorder,postorder\n *\n * -see binary_search_tree.c\n *\n * \\author [Amitha Nayak](https://github.com/amitnayakblr)\n */\n\n#include <stdio.h>\n#include <stdlib.h>\n\n/**\n * Node, the basic data structure of the tree\n */\ntypedef struct Node\n{\n    int data;           /**< stores the number */\n    struct Node *llink; /**< link to left child */\n    struct Node *rlink; /**< link to right child */\n} node;\n\n/**\n * creates a new node\n * param[in] data value to be inserted\n * \\returns a pointer to the new node\n */\nnode *create_node(int data)\n{\n    node *ptr = (node *)malloc(sizeof(node));\n    ptr->rlink = ptr->llink = NULL;\n    ptr->data = data;\n    return ptr;\n}\n\n/**\n * inserts a node into the tree\n * param[in,out] root pointer to node pointer to the topmost node of the tree\n * param[in] data value to be inserted into the tree\n */\nvoid insert_bt(node **root, int data)\n{\n    node *new_node = create_node(data);\n    node *temp;  // to be deleted\n    node *prev;  // keeps track of the parent of the element deleted\n    if (*root == NULL)\n    {\n        *root = new_node;\n    }\n    else\n    {\n        temp = *root;\n        prev = NULL;\n        while (temp != NULL)\n        {\n            if (new_node->data > temp->data)\n            {\n                prev = temp;\n                temp = temp->rlink;\n            }\n            else if (new_node->data < temp->data)\n            {\n                prev = temp;\n                temp = temp->llink;\n            }\n            else\n            {\n                return;\n            }\n        }\n\n        if (new_node->data > prev->data)\n        {\n            prev->rlink = new_node;\n        }\n        else\n        {\n            prev->llink = new_node;\n        }\n    }\n}\n\n/**\n * searches for the element\n * \\param[in] root node pointer to the topmost node of the tree\n * \\param[in] ele value searched for\n * \\returns 1 if element found, 0 otherwise\n */\nint search(node *root, int ele)\n{\n    node *temp = root;\n    while (temp != NULL)\n    {\n        if (temp->data == ele)\n        {\n            return 1;\n        }\n        else if (ele > temp->data)\n        {\n            temp = temp->rlink;\n        }\n        else\n        {\n            temp = temp->llink;\n        }\n    }\n    return 0;\n}\n\n/**\n * performs inorder traversal\n * param[in] curr node pointer to the topmost node of the tree\n */\nvoid inorder_display(node *curr)\n{\n    if (curr != NULL)\n    {\n        inorder_display(curr->llink);\n        printf(\"%d\\t\", curr->data);\n        inorder_display(curr->rlink);\n    }\n}\n\n/**\n * performs postorder traversal\n * param[in] curr node pointer to the topmost node of the tree\n */\nvoid postorder_display(node *curr)\n{\n    if (curr != NULL)\n    {\n        postorder_display(curr->llink);\n        postorder_display(curr->rlink);\n        printf(\"%d\\t\", curr->data);\n    }\n}\n\n/**\n * performs preorder traversal\n * param[in] curr node pointer to the topmost node of the tree\n */\nvoid preorder_display(node *curr)\n{\n    if (curr != NULL)\n    {\n        printf(\"%d\\t\", curr->data);\n        preorder_display(curr->llink);\n        preorder_display(curr->rlink);\n    }\n}\n\n/**\n * deletion of a node from the tree\n * if the node isn't present in the tree, it takes no action.\n * param[in,out] root pointer to node pointer to the topmost node of the tree\n * param[in] ele value to be deleted from the tree\n */\nvoid delete_bt(node **root, int ele)\n{\n    node *temp;\n    node *prev;\n    if (*root == NULL)\n        return;\n    else\n    {\n        temp = *root;\n        prev = NULL;\n        // search\n        while (temp != NULL)\n        {\n            if (temp->data == ele)\n            {\n                break;\n            }\n            else if (ele > temp->data)\n            {\n                prev = temp;\n                temp = temp->rlink;\n            }\n            else\n            {\n                prev = temp;\n                temp = temp->llink;\n            }\n        }\n    }\n\n    if (temp == NULL)\n        return;\n    else\n    {\n        node *replacement;  // deleted node's replacement\n        node *t;\n        if (temp->llink == NULL && temp->rlink == NULL)\n        {\n            replacement = NULL;\n        }\n        else if (temp->llink == NULL && temp->rlink != NULL)\n        {\n            replacement = temp->rlink;\n        }\n        else if (temp->llink != NULL && temp->rlink == NULL)\n        {\n            replacement = temp->llink;\n        }\n        else\n        {\n            replacement = temp->rlink;  // replaced with inorder successor\n            t = replacement;\n            while (t->llink != NULL)\n            {\n                t = t->llink;\n            }\n            t->llink =\n                temp->llink;  // leftmost node of the replacement is linked to\n                              // the left child of the deleted node\n        }\n\n        if (temp == *root)\n        {\n            free(*root);\n            *root = replacement;\n        }\n        else if (prev->llink == temp)\n        {\n            free(prev->llink);\n            prev->llink = replacement;\n        }\n        else if (prev->rlink == temp)\n        {\n            free(prev->rlink);\n            prev->rlink = replacement;\n        }\n    }\n}\n\n/**\n * frees all nodes in the tree\n * param[in] root node pointer to the topmost node of the tree\n */\nvoid free_tree(node *root)\n{\n    if (root != NULL)\n    {\n        free_tree(root->llink);\n        free_tree(root->rlink);\n        free(root);\n    }\n}\n\n\nBelow is the header file with public function declarations:\n#ifndef DS_THREADED_BINARY_TREES_H\n#define DS_THREADED_BINARY_TREES_H\n\n#include <stdlib.h>\n\n/**\n * Node, the basic data structure of the tree\n */\ntypedef struct Node\n{\n    int data;           /**< stores the number */\n    struct Node *llink; /**< link to left child */\n    struct Node *rlink; /**< link to right child */\n} node;\n\n/**\n * creates a new node\n * param[in] data value to be inserted\n * returns a pointer to the new node\n */\nnode *create_node(int data);\n\n/**\n * inserts a node into the tree\n * param[in,out] root pointer to node pointer to the topmost node of the tree\n * param[in] data value to be inserted into the tree\n */\nvoid insert_bt(node **root, int data);\n\n/**\n * searches for the element\n * param[in] root node pointer to the topmost node of the tree\n * param[in] ele value searched for\n * returns 1 if element found, 0 otherwise\n */\nint search(node *root, int ele);\n\n/**\n * performs inorder traversal\n * param[in] curr node pointer to the topmost node of the tree\n */\nvoid inorder_display(node *curr);\n\n/**\n * performs postorder traversal\n * param[in] curr node pointer to the topmost node of the tree\n */\nvoid postorder_display(node *curr);\n\n/**\n * performs preorder traversal\n * param[in] curr node pointer to the topmost node of the tree\n */\nvoid preorder_display(node *curr);\n\n/**\n * deletion of a node from the tree\n * if the node isn't present in the tree, it takes no action.\n * param[in,out] root pointer to node pointer to the topmost node of the tree\n * param[in] ele value to be deleted from the tree\n */\nvoid delete_bt(node **root, int ele);\n\n/**\n * frees all nodes in the tree\n * param[in] root node pointer to the topmost node of the tree\n */\nvoid free_tree(node *root);\n\n#endif /* DS_THREADED_BINARY_TREES_H */\n\n\nBelow is a list of available helper functions retrieved from the helper pool:\nHere are all 5 available helper functions you can use:\\n\\n1. capture_stdout_start\\n   Description: Create a pipe\\n   Returns: stdout_capture_t *\\n\\n2. capture_stdout_stop\\n   Description: Flush stdout to ensure all output is written to pipe\\n   Returns: char *\\n   Parameters: stdout_capture_t * cap\\n\\n3. assert_stdout_equals\\n   Returns: void\\n   Parameters: stdout_capture_t * cap, const char * expected\\n\\n4. assert_stdout_contains\\n   Returns: void\\n   Parameters: stdout_capture_t * cap, const char * expected_substring\\n\\n5. assert_stdout_not_empty\\n   Returns: void\\n   Parameters: stdout_capture_t * cap\\n\\n\n\nYou task:\n1. Identify public header functions (Note: source function names will be loaded from source_functions.json).\n2. Classify helpers into 'assertion_operations' and 'utility_operations'.\n3. Create new helpers in 'created' only if no existing helper covers the functionality.\n4. Fill 'searched_from_pool' with relevant helpers (verify no conflicts with source code names).\n5. Track dependencies in 'dependency_analysis' (planned_created_functions and required_from_pool only).\n6. Ensure output JSON strictly follows the format with all created and searched helpers.    \n\n## OUTPUT FORMAT:\n**REQUIRED JSON structure with dependency_analysis:**\n```json\n{\n  \"dependency_analysis\": {\n    \"planned_created_functions\": [\n      {\"name\": \"helper_build_tree\", \"calls\": [\"insert\", \"malloc\", \"free\"]},\n      {\"name\": \"verify_tree_structure\", \"calls\": [\"assert_array_equal\", \"printf\"]}\n    ],\n    \"required_from_pool\": [\"assert_array_equal\"]\n  },\n  \"assertion_operations\": {\n    \"searched_from_pool\": [\"assert_array_equal\"],\n    \"created\": [\n      {\n        \"name\": \"verify_tree_structure\",\n        \"description\": \"Verifies tree structure matches expected\",\n        \"return_type\": \"void\",\n        \"parameters\": [{\"name\": \"root\", \"type\": \"struct node *\"}],\n        \"code_block\": \"#include <stdio.h>\nvoid verify_tree_structure(struct node *root) {\n  // calls assert_array_equal\n}\"\n      }\n    ]\n  },\n  \"utility_operations\": {\n    \"searched_from_pool\": [\"init_test_root\", \"cleanup_test_tree\", \"reset_test_root\"],\n    \"created\": [\n      {\n        \"name\": \"helper_build_tree\", \n        \"description\": \"Builds tree from array of values\",\n        \"return_type\": \"struct node *\",\n        \"parameters\": [{\"name\": \"values\", \"type\": \"int *\"}, {\"name\": \"size\", \"type\": \"int\"}],\n        \"code_block\": \"#include <stdlib.h>\nstruct node* helper_build_tree(int *values, int size) {\n  // calls insert, malloc, free\n}\"\n      }\n    ]\n  }\n}\n```\n\n**VALIDATION**: Ensure \"required_from_pool\" functions appear in \"searched_from_pool\" sections! \n**HEADER VALIDATION**: Ensure all source code function calls are declared in the header file!\n**NOTE**: \"searched_from_pool\" may include additional relevant functions beyond just \"required_from_pool\"!\n"
+      }
+    ],
+    "model": "deepseek-chat",
+    "provider": "deepseek",
+    "temperature": 0,
+    "response_model": "<class 'apis.formats.response_format.OperationMap'>",
+    "max_tokens": 8192,
+    "input_tokens": 5491
+  },
+  "response": {
+    "parsed_content": {
+      "dependency_analysis": {
+        "planned_created_functions": [
+          {
+            "name": "helper_build_tree",
+            "calls": [
+              "insert_bt",
+              "malloc",
+              "free"
+            ]
+          },
+          {
+            "name": "helper_assert_tree_inorder",
+            "calls": [
+              "inorder_display",
+              "capture_stdout_start",
+              "capture_stdout_stop",
+              "assert_stdout_equals",
+              "free"
+            ]
+          },
+          {
+            "name": "helper_assert_tree_preorder",
+            "calls": [
+              "preorder_display",
+              "capture_stdout_start",
+              "capture_stdout_stop",
+              "assert_stdout_equals",
+              "free"
+            ]
+          },
+          {
+            "name": "helper_assert_tree_postorder",
+            "calls": [
+              "postorder_display",
+              "capture_stdout_start",
+              "capture_stdout_stop",
+              "assert_stdout_equals",
+              "free"
+            ]
+          },
+          {
+            "name": "helper_assert_search_result",
+            "calls": [
+              "search",
+              "assert"
+            ]
+          },
+          {
+            "name": "helper_assert_tree_empty",
+            "calls": [
+              "assert"
+            ]
+          },
+          {
+            "name": "helper_create_test_array",
+            "calls": [
+              "malloc"
+            ]
+          },
+          {
+            "name": "helper_free_tree",
+            "calls": [
+              "free_tree"
+            ]
+          }
+        ],
+        "required_from_pool": [
+          "capture_stdout_start",
+          "capture_stdout_stop",
+          "assert_stdout_equals"
+        ]
+      },
+      "assertion_operations": {
+        "searched_from_pool": [
+          "assert_stdout_equals",
+          "assert_stdout_contains",
+          "assert_stdout_not_empty"
+        ],
+        "created": [
+          {
+            "name": "helper_assert_tree_inorder",
+            "description": "Asserts that inorder traversal of a tree matches expected output string",
+            "return_type": "void",
+            "parameters": [
+              {
+                "name": "root",
+                "type": "node *"
+              },
+              {
+                "name": "expected_output",
+                "type": "const char *"
+              }
+            ],
+            "code_block": "#include <stdio.h>\n#include <stdlib.h>\n#include <assert.h>\nvoid helper_assert_tree_inorder(node *root, const char *expected_output) {\n    stdout_capture_t *cap = capture_stdout_start();\n    inorder_display(root);\n    char *actual_output = capture_stdout_stop(cap);\n    assert_stdout_equals(cap, expected_output);\n    free(actual_output);\n}"
+          },
+          {
+            "name": "helper_assert_tree_preorder",
+            "description": "Asserts that preorder traversal of a tree matches expected output string",
+            "return_type": "void",
+            "parameters": [
+              {
+                "name": "root",
+                "type": "node *"
+              },
+              {
+                "name": "expected_output",
+                "type": "const char *"
+              }
+            ],
+            "code_block": "#include <stdio.h>\n#include <stdlib.h>\n#include <assert.h>\nvoid helper_assert_tree_preorder(node *root, const char *expected_output) {\n    stdout_capture_t *cap = capture_stdout_start();\n    preorder_display(root);\n    char *actual_output = capture_stdout_stop(cap);\n    assert_stdout_equals(cap, expected_output);\n    free(actual_output);\n}"
+          },
+          {
+            "name": "helper_assert_tree_postorder",
+            "description": "Asserts that postorder traversal of a tree matches expected output string",
+            "return_type": "void",
+            "parameters": [
+              {
+                "name": "root",
+                "type": "node *"
+              },
+              {
+                "name": "expected_output",
+                "type": "const char *"
+              }
+            ],
+            "code_block": "#include <stdio.h>\n#include <stdlib.h>\n#include <assert.h>\nvoid helper_assert_tree_postorder(node *root, const char *expected_output) {\n    stdout_capture_t *cap = capture_stdout_start();\n    postorder_display(root);\n    char *actual_output = capture_stdout_stop(cap);\n    assert_stdout_equals(cap, expected_output);\n    free(actual_output);\n}"
+          },
+          {
+            "name": "helper_assert_search_result",
+            "description": "Asserts that search function returns expected result for a given element",
+            "return_type": "void",
+            "parameters": [
+              {
+                "name": "root",
+                "type": "node *"
+              },
+              {
+                "name": "element",
+                "type": "int"
+              },
+              {
+                "name": "expected_result",
+                "type": "int"
+              }
+            ],
+            "code_block": "#include <assert.h>\nvoid helper_assert_search_result(node *root, int element, int expected_result) {\n    int result = search(root, element);\n    assert(result == expected_result);\n}"
+          },
+          {
+            "name": "helper_assert_tree_empty",
+            "description": "Asserts that a tree is empty (root is NULL)",
+            "return_type": "void",
+            "parameters": [
+              {
+                "name": "root",
+                "type": "node *"
+              }
+            ],
+            "code_block": "#include <assert.h>\nvoid helper_assert_tree_empty(node *root) {\n    assert(root == NULL);\n}"
+          }
+        ]
+      },
+      "utility_operations": {
+        "searched_from_pool": [
+          "capture_stdout_start",
+          "capture_stdout_stop"
+        ],
+        "created": [
+          {
+            "name": "helper_build_tree",
+            "description": "Builds a binary tree by inserting an array of values",
+            "return_type": "node *",
+            "parameters": [
+              {
+                "name": "values",
+                "type": "int *"
+              },
+              {
+                "name": "size",
+                "type": "int"
+              }
+            ],
+            "code_block": "#include <stdlib.h>\nnode* helper_build_tree(int *values, int size) {\n    node *root = NULL;\n    for (int i = 0; i < size; i++) {\n        insert_bt(&root, values[i]);\n    }\n    return root;\n}"
+          },
+          {
+            "name": "helper_create_test_array",
+            "description": "Creates a dynamically allocated array of integers for testing",
+            "return_type": "int *",
+            "parameters": [
+              {
+                "name": "size",
+                "type": "int"
+              },
+              {
+                "name": "start_value",
+                "type": "int"
+              }
+            ],
+            "code_block": "#include <stdlib.h>\nint* helper_create_test_array(int size, int start_value) {\n    int *arr = malloc(size * sizeof(int));\n    for (int i = 0; i < size; i++) {\n        arr[i] = start_value + i;\n    }\n    return arr;\n}"
+          },
+          {
+            "name": "helper_free_tree",
+            "description": "Frees all nodes in a tree using the source free_tree function",
+            "return_type": "void",
+            "parameters": [
+              {
+                "name": "root",
+                "type": "node *"
+              }
+            ],
+            "code_block": "void helper_free_tree(node *root) {\n    free_tree(root);\n}"
+          }
+        ]
+      }
+    },
+    "validated_content": {
+      "dependency_analysis": {
+        "source_functions": null,
+        "planned_created_functions": [
+          {
+            "name": "helper_build_tree",
+            "calls": [
+              "insert_bt",
+              "malloc",
+              "free"
+            ]
+          },
+          {
+            "name": "helper_assert_tree_inorder",
+            "calls": [
+              "inorder_display",
+              "capture_stdout_start",
+              "capture_stdout_stop",
+              "assert_stdout_equals",
+              "free"
+            ]
+          },
+          {
+            "name": "helper_assert_tree_preorder",
+            "calls": [
+              "preorder_display",
+              "capture_stdout_start",
+              "capture_stdout_stop",
+              "assert_stdout_equals",
+              "free"
+            ]
+          },
+          {
+            "name": "helper_assert_tree_postorder",
+            "calls": [
+              "postorder_display",
+              "capture_stdout_start",
+              "capture_stdout_stop",
+              "assert_stdout_equals",
+              "free"
+            ]
+          },
+          {
+            "name": "helper_assert_search_result",
+            "calls": [
+              "search",
+              "assert"
+            ]
+          },
+          {
+            "name": "helper_assert_tree_empty",
+            "calls": [
+              "assert"
+            ]
+          },
+          {
+            "name": "helper_create_test_array",
+            "calls": [
+              "malloc"
+            ]
+          },
+          {
+            "name": "helper_free_tree",
+            "calls": [
+              "free_tree"
+            ]
+          }
+        ],
+        "required_from_pool": [
+          "capture_stdout_start",
+          "capture_stdout_stop",
+          "assert_stdout_equals"
+        ]
+      },
+      "assertion_operations": {
+        "searched_from_pool": [
+          "assert_stdout_equals",
+          "assert_stdout_contains",
+          "assert_stdout_not_empty"
+        ],
+        "created": [
+          {
+            "name": "helper_assert_tree_inorder",
+            "description": "Asserts that inorder traversal of a tree matches expected output string",
+            "return_type": "void",
+            "parameters": [
+              {
+                "name": "root",
+                "type": "node *"
+              },
+              {
+                "name": "expected_output",
+                "type": "const char *"
+              }
+            ],
+            "code_block": "#include <stdio.h>\n#include <stdlib.h>\n#include <assert.h>\nvoid helper_assert_tree_inorder(node *root, const char *expected_output) {\n    stdout_capture_t *cap = capture_stdout_start();\n    inorder_display(root);\n    char *actual_output = capture_stdout_stop(cap);\n    assert_stdout_equals(cap, expected_output);\n    free(actual_output);\n}"
+          },
+          {
+            "name": "helper_assert_tree_preorder",
+            "description": "Asserts that preorder traversal of a tree matches expected output string",
+            "return_type": "void",
+            "parameters": [
+              {
+                "name": "root",
+                "type": "node *"
+              },
+              {
+                "name": "expected_output",
+                "type": "const char *"
+              }
+            ],
+            "code_block": "#include <stdio.h>\n#include <stdlib.h>\n#include <assert.h>\nvoid helper_assert_tree_preorder(node *root, const char *expected_output) {\n    stdout_capture_t *cap = capture_stdout_start();\n    preorder_display(root);\n    char *actual_output = capture_stdout_stop(cap);\n    assert_stdout_equals(cap, expected_output);\n    free(actual_output);\n}"
+          },
+          {
+            "name": "helper_assert_tree_postorder",
+            "description": "Asserts that postorder traversal of a tree matches expected output string",
+            "return_type": "void",
+            "parameters": [
+              {
+                "name": "root",
+                "type": "node *"
+              },
+              {
+                "name": "expected_output",
+                "type": "const char *"
+              }
+            ],
+            "code_block": "#include <stdio.h>\n#include <stdlib.h>\n#include <assert.h>\nvoid helper_assert_tree_postorder(node *root, const char *expected_output) {\n    stdout_capture_t *cap = capture_stdout_start();\n    postorder_display(root);\n    char *actual_output = capture_stdout_stop(cap);\n    assert_stdout_equals(cap, expected_output);\n    free(actual_output);\n}"
+          },
+          {
+            "name": "helper_assert_search_result",
+            "description": "Asserts that search function returns expected result for a given element",
+            "return_type": "void",
+            "parameters": [
+              {
+                "name": "root",
+                "type": "node *"
+              },
+              {
+                "name": "element",
+                "type": "int"
+              },
+              {
+                "name": "expected_result",
+                "type": "int"
+              }
+            ],
+            "code_block": "#include <assert.h>\nvoid helper_assert_search_result(node *root, int element, int expected_result) {\n    int result = search(root, element);\n    assert(result == expected_result);\n}"
+          },
+          {
+            "name": "helper_assert_tree_empty",
+            "description": "Asserts that a tree is empty (root is NULL)",
+            "return_type": "void",
+            "parameters": [
+              {
+                "name": "root",
+                "type": "node *"
+              }
+            ],
+            "code_block": "#include <assert.h>\nvoid helper_assert_tree_empty(node *root) {\n    assert(root == NULL);\n}"
+          }
+        ]
+      },
+      "utility_operations": {
+        "searched_from_pool": [
+          "capture_stdout_start",
+          "capture_stdout_stop"
+        ],
+        "created": [
+          {
+            "name": "helper_build_tree",
+            "description": "Builds a binary tree by inserting an array of values",
+            "return_type": "node *",
+            "parameters": [
+              {
+                "name": "values",
+                "type": "int *"
+              },
+              {
+                "name": "size",
+                "type": "int"
+              }
+            ],
+            "code_block": "#include <stdlib.h>\nnode* helper_build_tree(int *values, int size) {\n    node *root = NULL;\n    for (int i = 0; i < size; i++) {\n        insert_bt(&root, values[i]);\n    }\n    return root;\n}"
+          },
+          {
+            "name": "helper_create_test_array",
+            "description": "Creates a dynamically allocated array of integers for testing",
+            "return_type": "int *",
+            "parameters": [
+              {
+                "name": "size",
+                "type": "int"
+              },
+              {
+                "name": "start_value",
+                "type": "int"
+              }
+            ],
+            "code_block": "#include <stdlib.h>\nint* helper_create_test_array(int size, int start_value) {\n    int *arr = malloc(size * sizeof(int));\n    for (int i = 0; i < size; i++) {\n        arr[i] = start_value + i;\n    }\n    return arr;\n}"
+          },
+          {
+            "name": "helper_free_tree",
+            "description": "Frees all nodes in a tree using the source free_tree function",
+            "return_type": "void",
+            "parameters": [
+              {
+                "name": "root",
+                "type": "node *"
+              }
+            ],
+            "code_block": "void helper_free_tree(node *root) {\n    free_tree(root);\n}"
+          }
+        ]
+      }
+    },
+    "raw_content": "{\n    \"dependency_analysis\": {\n        \"planned_created_functions\": [\n            {\n                \"name\": \"helper_build_tree\",\n                \"calls\": [\"insert_bt\", \"malloc\", \"free\"]\n            },\n            {\n                \"name\": \"helper_assert_tree_inorder\",\n                \"calls\": [\"inorder_display\", \"capture_stdout_start\", \"capture_stdout_stop\", \"assert_stdout_equals\", \"free\"]\n            },\n            {\n                \"name\": \"helper_assert_tree_preorder\",\n                \"calls\": [\"preorder_display\", \"capture_stdout_start\", \"capture_stdout_stop\", \"assert_stdout_equals\", \"free\"]\n            },\n            {\n                \"name\": \"helper_assert_tree_postorder\",\n                \"calls\": [\"postorder_display\", \"capture_stdout_start\", \"capture_stdout_stop\", \"assert_stdout_equals\", \"free\"]\n            },\n            {\n                \"name\": \"helper_assert_search_result\",\n                \"calls\": [\"search\", \"assert\"]\n            },\n            {\n                \"name\": \"helper_assert_tree_empty\",\n                \"calls\": [\"assert\"]\n            },\n            {\n                \"name\": \"helper_create_test_array\",\n                \"calls\": [\"malloc\"]\n            },\n            {\n                \"name\": \"helper_free_tree\",\n                \"calls\": [\"free_tree\"]\n            }\n        ],\n        \"required_from_pool\": [\"capture_stdout_start\", \"capture_stdout_stop\", \"assert_stdout_equals\"]\n    },\n    \"assertion_operations\": {\n        \"searched_from_pool\": [\"assert_stdout_equals\", \"assert_stdout_contains\", \"assert_stdout_not_empty\"],\n        \"created\": [\n            {\n                \"name\": \"helper_assert_tree_inorder\",\n                \"description\": \"Asserts that inorder traversal of a tree matches expected output string\",\n                \"return_type\": \"void\",\n                \"parameters\": [\n                    {\"name\": \"root\", \"type\": \"node *\"},\n                    {\"name\": \"expected_output\", \"type\": \"const char *\"}\n                ],\n                \"code_block\": \"#include <stdio.h>\\n#include <stdlib.h>\\n#include <assert.h>\\nvoid helper_assert_tree_inorder(node *root, const char *expected_output) {\\n    stdout_capture_t *cap = capture_stdout_start();\\n    inorder_display(root);\\n    char *actual_output = capture_stdout_stop(cap);\\n    assert_stdout_equals(cap, expected_output);\\n    free(actual_output);\\n}\"\n            },\n            {\n                \"name\": \"helper_assert_tree_preorder\",\n                \"description\": \"Asserts that preorder traversal of a tree matches expected output string\",\n                \"return_type\": \"void\",\n                \"parameters\": [\n                    {\"name\": \"root\", \"type\": \"node *\"},\n                    {\"name\": \"expected_output\", \"type\": \"const char *\"}\n                ],\n                \"code_block\": \"#include <stdio.h>\\n#include <stdlib.h>\\n#include <assert.h>\\nvoid helper_assert_tree_preorder(node *root, const char *expected_output) {\\n    stdout_capture_t *cap = capture_stdout_start();\\n    preorder_display(root);\\n    char *actual_output = capture_stdout_stop(cap);\\n    assert_stdout_equals(cap, expected_output);\\n    free(actual_output);\\n}\"\n            },\n            {\n                \"name\": \"helper_assert_tree_postorder\",\n                \"description\": \"Asserts that postorder traversal of a tree matches expected output string\",\n                \"return_type\": \"void\",\n                \"parameters\": [\n                    {\"name\": \"root\", \"type\": \"node *\"},\n                    {\"name\": \"expected_output\", \"type\": \"const char *\"}\n                ],\n                \"code_block\": \"#include <stdio.h>\\n#include <stdlib.h>\\n#include <assert.h>\\nvoid helper_assert_tree_postorder(node *root, const char *expected_output) {\\n    stdout_capture_t *cap = capture_stdout_start();\\n    postorder_display(root);\\n    char *actual_output = capture_stdout_stop(cap);\\n    assert_stdout_equals(cap, expected_output);\\n    free(actual_output);\\n}\"\n            },\n            {\n                \"name\": \"helper_assert_search_result\",\n                \"description\": \"Asserts that search function returns expected result for a given element\",\n                \"return_type\": \"void\",\n                \"parameters\": [\n                    {\"name\": \"root\", \"type\": \"node *\"},\n                    {\"name\": \"element\", \"type\": \"int\"},\n                    {\"name\": \"expected_result\", \"type\": \"int\"}\n                ],\n                \"code_block\": \"#include <assert.h>\\nvoid helper_assert_search_result(node *root, int element, int expected_result) {\\n    int result = search(root, element);\\n    assert(result == expected_result);\\n}\"\n            },\n            {\n                \"name\": \"helper_assert_tree_empty\",\n                \"description\": \"Asserts that a tree is empty (root is NULL)\",\n                \"return_type\": \"void\",\n                \"parameters\": [\n                    {\"name\": \"root\", \"type\": \"node *\"}\n                ],\n                \"code_block\": \"#include <assert.h>\\nvoid helper_assert_tree_empty(node *root) {\\n    assert(root == NULL);\\n}\"\n            }\n        ]\n    },\n    \"utility_operations\": {\n        \"searched_from_pool\": [\"capture_stdout_start\", \"capture_stdout_stop\"],\n        \"created\": [\n            {\n                \"name\": \"helper_build_tree\",\n                \"description\": \"Builds a binary tree by inserting an array of values\",\n                \"return_type\": \"node *\",\n                \"parameters\": [\n                    {\"name\": \"values\", \"type\": \"int *\"},\n                    {\"name\": \"size\", \"type\": \"int\"}\n                ],\n                \"code_block\": \"#include <stdlib.h>\\nnode* helper_build_tree(int *values, int size) {\\n    node *root = NULL;\\n    for (int i = 0; i < size; i++) {\\n        insert_bt(&root, values[i]);\\n    }\\n    return root;\\n}\"\n            },\n            {\n                \"name\": \"helper_create_test_array\",\n                \"description\": \"Creates a dynamically allocated array of integers for testing\",\n                \"return_type\": \"int *\",\n                \"parameters\": [\n                    {\"name\": \"size\", \"type\": \"int\"},\n                    {\"name\": \"start_value\", \"type\": \"int\"}\n                ],\n                \"code_block\": \"#include <stdlib.h>\\nint* helper_create_test_array(int size, int start_value) {\\n    int *arr = malloc(size * sizeof(int));\\n    for (int i = 0; i < size; i++) {\\n        arr[i] = start_value + i;\\n    }\\n    return arr;\\n}\"\n            },\n            {\n                \"name\": \"helper_free_tree\",\n                \"description\": \"Frees all nodes in a tree using the source free_tree function\",\n                \"return_type\": \"void\",\n                \"parameters\": [\n                    {\"name\": \"root\", \"type\": \"node *\"}\n                ],\n                \"code_block\": \"void helper_free_tree(node *root) {\\n    free_tree(root);\\n}\"\n            }\n        ]\n    }\n}",
+    "finish_reason": "stop",
+    "usage": {
+      "completion_tokens": 1618,
+      "prompt_tokens": 6048,
+      "total_tokens": 7666,
+      "completion_tokens_details": null,
+      "prompt_tokens_details": {
+        "audio_tokens": null,
+        "cached_tokens": 0
+      },
+      "prompt_cache_hit_tokens": 0,
+      "prompt_cache_miss_tokens": 6048
+    },
+    "response_id": "af495202-e5a0-47fb-ac72-ad6a0e43c5e3",
+    "created": 1768406659,
+    "attempt": 1,
+    "validation_error": null
+  }
+}

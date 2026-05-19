@@ -1,0 +1,42 @@
+{
+  "timestamp": "2026-01-15T11:31:06.238582",
+  "context": "function_documentation_main",
+  "model_type": "chat_deepseek",
+  "model": "deepseek-chat",
+  "request": {
+    "messages": [
+      {
+        "role": "system",
+        "content": "\nYou are a technical writer creating professional C function documentation. Write clear, concise documentation like high-quality open source projects (glibc, libcurl, Python stdlib).\n\n## FORMAT\n\n```c\n/**\n * @brief One-line description of what the function does.\n *\n * Detailed description (2-3 sentences max) explaining the function's purpose\n * and key behavior. Mention important edge cases or special handling.\n *\n * @param param_name Description of parameter, its valid values, and constraints.\n *                   Note if NULL is valid or if the parameter is modified.\n *\n * @return What the function returns. Specify success/failure values.\n *         Example: \"Pointer to new node on success, NULL on allocation failure.\"\n *\n * @note Memory: Caller must free returned pointer / Function allocates internally\n * @note Error: How errors are signaled (return value, errno, etc.)\n *\n * @see related_function, another_function\n */\n```\n\n## GUIDELINES\n\n**Be concise**: One line for @brief. 2-3 sentences max for detailed description.\n\n**Parameters**: Type is in code, so describe purpose and constraints:\n- Valid ranges: \"Must be positive\", \"Valid pointer or NULL\"\n- Modifications: \"Modified to contain result\", \"Contents are sorted in-place\"\n- Ownership: \"Caller retains ownership\", \"Function takes ownership\"\n\n**Return values**: Be specific about success/failure:\n- \"Returns 0 on success, -1 on error\"\n- \"Returns pointer to node, or NULL if not found\"\n\n**@note for important details** (only include if relevant):\n- Memory allocation/deallocation responsibility\n- Side effects that modify input or global state\n- Error handling mechanism\n\n**Omit @note/@see if not applicable.**\n\n## STYLE\n\n- Write naturally, not in bullet points or key-value format\n- Use present tense: \"Inserts a node\" not \"Will insert a node\"\n- Be precise: \"non-negative integer\" not \"valid number\"\n- Avoid redundancy: Don't repeat the function name in @brief\n\n## EXAMPLES\n\n```c\n/**\n * @brief Insert a key into a binary search tree.\n *\n * Creates a new node with the given key and inserts it at the correct\n * position to maintain BST ordering. If the tree is empty (node is NULL),\n * returns a new root node.\n *\n * @param node Root of the tree, or NULL for empty tree.\n * @param key Value to insert.\n *\n * @return Root of the modified tree. Returns newly allocated node if\n *         tree was empty, or existing root with new node inserted.\n *\n * @note Caller must free the returned tree.\n */\n```\n\n```c\n/**\n * @brief Partition array around a pivot for quicksort.\n *\n * Rearranges elements so values less than pivot come before it,\n * and values greater come after. Modifies array in-place.\n *\n * @param arr Array to partition. Must not be NULL.\n * @param low Starting index (inclusive).\n * @param high Ending index (inclusive). Must be >= low.\n *\n * @return Index of the pivot after partitioning.\n */\n```\n\nGenerate ONLY the documentation block. Start with /** and end with */.\n"
+      },
+      {
+        "role": "user",
+        "content": "\nGenerate documentation for this C function:\n\n**Function**: main\n\n```c\n// C program for the function called main\n// Contains target function implementation and dependency signatures\n\n#include <stdint.h>\n#include <stdio.h>\n#include <stdlib.h>\n#include <string.h>\n\n// Forward declarations for dependency functions\nint add_numbers(uint8_t *a, uint8_t *b, uint8_t N);\nint print_number(uint8_t *number, uint8_t N, int8_t num_digits_to_print);\nint get_number(FILE *fp, char *buffer, uint8_t *out_int);\n\n// Target function implementation\nint main(void)\n{\n    /* number of digits of the large number */\n    const int N = 10;\n    /* number of digits in output number */\n    const int N2 = N + 10;\n\n    // const char N = 50, N2 = N+10;          /* length of numbers */\n    char *txt_buffer =\n        (char *)calloc(N + 5, sizeof(char)); /* temporary buffer */\n    uint8_t *number = (uint8_t *)calloc(\n        N, sizeof(uint8_t)); /* array to store digits of a large number */\n    uint8_t *sum = (uint8_t *)calloc(\n        N2, sizeof(uint8_t)); /* array to store the sum of the large\nnumbers. For safety, we make it twice the length of a number. */\n\n    FILE *fp = fopen(\"num.txt\", \"rt\"); /* open text file to read */\n    if (!fp)\n    {\n        perror(\"Unable to open file 'num.txt'.\");\n        free(txt_buffer);\n        free(sum);\n        free(number);\n        return -1;\n    }\n\n    int count = 0;\n    get_number(fp, txt_buffer, sum); /* 0 + = first_number = first_number */\n    do\n    {\n        count++;\n        if (get_number(fp, txt_buffer, number) != 0)\n        {\n            break;\n        }\n        add_numbers(number, sum, N);\n    } while (!feof(fp));\n\n    printf(\"\\nSum   : \");\n    print_number(sum, N2, -1);\n\n    printf(\"first 10 digits: \\t\");\n    print_number(sum, N2, 10);\n\n    fclose(fp); /* close file */\n    free(txt_buffer);\n    free(sum);\n    free(number);\n    return 0;\n}\n\n```\n\n**Dependencies**: add_numbers, get_number, print_number\n\nWrite clear, concise documentation following the system prompt format.\nOutput only the /** ... */ block.\n"
+      }
+    ],
+    "model": "deepseek-chat",
+    "provider": "deepseek",
+    "temperature": 0.0,
+    "response_model": null,
+    "max_tokens": 8192,
+    "input_tokens": 1206
+  },
+  "response": {
+    "content": "/**\n * @brief Sum large integers from a file and print the result.\n *\n * Reads space-separated large integers from \"num.txt\", sums them, and prints\n * the full sum along with its first 10 digits. Each integer is stored as an\n * array of decimal digits. The program handles numbers up to a fixed digit length.\n *\n * @return 0 on successful execution, -1 if the input file cannot be opened.\n *\n * @note Memory: Allocates and frees buffers for digit storage and file reading.\n * @note File: Expects \"num.txt\" in the working directory with valid integer data.\n *\n * @see add_numbers, get_number, print_number\n */",
+    "finish_reason": "stop",
+    "usage": {
+      "completion_tokens": 145,
+      "prompt_tokens": 1213,
+      "total_tokens": 1358,
+      "completion_tokens_details": null,
+      "prompt_tokens_details": {
+        "audio_tokens": null,
+        "cached_tokens": 704
+      },
+      "prompt_cache_hit_tokens": 704,
+      "prompt_cache_miss_tokens": 509
+    },
+    "response_id": "eb0dcf2c-e119-4f6d-be94-beffcd4989de",
+    "created": 1768476660
+  }
+}

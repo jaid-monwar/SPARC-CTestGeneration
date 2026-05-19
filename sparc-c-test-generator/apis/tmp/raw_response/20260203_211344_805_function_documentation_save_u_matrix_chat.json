@@ -1,0 +1,45 @@
+{
+  "timestamp": "2026-02-03T21:13:44.805461",
+  "context": "function_documentation_save_u_matrix",
+  "model_type": "chat",
+  "model": "gpt-4.1-2025-04-14",
+  "request": {
+    "messages": [
+      {
+        "role": "system",
+        "content": "\nYou are a technical writer creating professional C function documentation. Write clear, concise documentation like high-quality open source projects (glibc, libcurl, Python stdlib).\n\n## FORMAT\n\n```c\n/**\n * @brief One-line description of what the function does.\n *\n * Detailed description (2-3 sentences max) explaining the function's purpose\n * and key behavior. Mention important edge cases or special handling.\n *\n * @param param_name Description of parameter, its valid values, and constraints.\n *                   Note if NULL is valid or if the parameter is modified.\n *\n * @return What the function returns. Specify success/failure values.\n *         Example: \"Pointer to new node on success, NULL on allocation failure.\"\n *\n * @note Memory: Caller must free returned pointer / Function allocates internally\n * @note Error: How errors are signaled (return value, errno, etc.)\n *\n * @see related_function, another_function\n */\n```\n\n## GUIDELINES\n\n**Be concise**: One line for @brief. 2-3 sentences max for detailed description.\n\n**Parameters**: Type is in code, so describe purpose and constraints:\n- Valid ranges: \"Must be positive\", \"Valid pointer or NULL\"\n- Modifications: \"Modified to contain result\", \"Contents are sorted in-place\"\n- Ownership: \"Caller retains ownership\", \"Function takes ownership\"\n\n**Return values**: Be specific about success/failure:\n- \"Returns 0 on success, -1 on error\"\n- \"Returns pointer to node, or NULL if not found\"\n\n**@note for important details** (only include if relevant):\n- Memory allocation/deallocation responsibility\n- Side effects that modify input or global state\n- Error handling mechanism\n\n**Omit @note/@see if not applicable.**\n\n## STYLE\n\n- Write naturally, not in bullet points or key-value format\n- Use present tense: \"Inserts a node\" not \"Will insert a node\"\n- Be precise: \"non-negative integer\" not \"valid number\"\n- Avoid redundancy: Don't repeat the function name in @brief\n\n## EXAMPLES\n\n```c\n/**\n * @brief Insert a key into a binary search tree.\n *\n * Creates a new node with the given key and inserts it at the correct\n * position to maintain BST ordering. If the tree is empty (node is NULL),\n * returns a new root node.\n *\n * @param node Root of the tree, or NULL for empty tree.\n * @param key Value to insert.\n *\n * @return Root of the modified tree. Returns newly allocated node if\n *         tree was empty, or existing root with new node inserted.\n *\n * @note Caller must free the returned tree.\n */\n```\n\n```c\n/**\n * @brief Partition array around a pivot for quicksort.\n *\n * Rearranges elements so values less than pivot come before it,\n * and values greater come after. Modifies array in-place.\n *\n * @param arr Array to partition. Must not be NULL.\n * @param low Starting index (inclusive).\n * @param high Ending index (inclusive). Must be >= low.\n *\n * @return Index of the pivot after partitioning.\n */\n```\n\nGenerate ONLY the documentation block. Start with /** and end with */.\n"
+      },
+      {
+        "role": "user",
+        "content": "\nGenerate documentation for this C function:\n\n**Function**: save_u_matrix\n\n```c\n// C program for the function called save_u_matrix\n// Contains target function implementation and dependency signatures\n\n#include <math.h>\n#include <stdio.h>\n#include <stdlib.h>\n#include <time.h>\n#include <omp.h>\n\nstruct kohonen_array_3d\n{\n    int dim1;     /**< lengths of first dimension */\n    int dim2;     /**< lengths of second dimension */\n    int dim3;     /**< lengths of thirddimension */\n    double *data; /**< pointer to data */\n};\n\n// Forward declarations for dependency functions\ndouble *kohonen_data_3d(const struct kohonen_array_3d *arr, int x, int y, int z);\n\n// Target function implementation\nint save_u_matrix(const char *fname, struct kohonen_array_3d *W)\n{\n    FILE *fp = fopen(fname, \"wt\");\n    if (!fp)  // error with fopen\n    {\n        char msg[120];\n        sprintf(msg, \"File error (%s): \", fname);\n        perror(msg);\n        return -1;\n    }\n\n    int R = max(W->dim1 >> 3, 2); /* neighborhood range */\n\n    for (int i = 0; i < W->dim1; i++)  // for each x\n    {\n        for (int j = 0; j < W->dim2; j++)  // for each y\n        {\n            double distance = 0.f;\n            int k;\n\n            int from_x = max(0, i - R);\n            int to_x = min(W->dim1, i + R + 1);\n            int from_y = max(0, j - R);\n            int to_y = min(W->dim2, j + R + 1);\n            int l;\n#ifdef _OPENMP\n#pragma omp parallel for reduction(+ : distance)\n#endif\n            for (l = from_x; l < to_x; l++)  // scan neighborhoor in x\n            {\n                for (int m = from_y; m < to_y; m++)  // scan neighborhood in y\n                {\n                    double d = 0.f;\n                    for (k = 0; k < W->dim3; k++)  // for each feature\n                    {\n                        double *w1 = kohonen_data_3d(W, i, j, k);\n                        double *w2 = kohonen_data_3d(W, l, m, k);\n                        d += (w1[0] - w2[0]) * (w1[0] - w2[0]);\n                        // distance += w1[0] * w1[0];\n                    }\n                    distance += sqrt(d);\n                    // distance += d;\n                }\n            }\n\n            distance /= R * R;              // mean distance from neighbors\n            fprintf(fp, \"%.4g\", distance);  // print the mean separation\n            if (j < W->dim2 - 1)            // if not the last column\n                fputc(',', fp);             // suffix comma\n        }\n        if (i < W->dim1 - 1)  // if not the last row\n            fputc('\\n', fp);  // start a new line\n    }\n    fclose(fp);\n    return 0;\n}\n\n```\n\n**Dependencies**: kohonen_data_3d\n\nWrite clear, concise documentation following the system prompt format.\nOutput only the /** ... */ block.\n"
+      }
+    ],
+    "model": "gpt-4.1-2025-04-14",
+    "provider": "gpt",
+    "temperature": 0.0,
+    "response_model": null,
+    "max_tokens": 8192,
+    "input_tokens": 1407
+  },
+  "response": {
+    "content": "/**\n * @brief Save the U-matrix of a 3D Kohonen map to a text file.\n *\n * Computes the mean Euclidean distance between each node and its neighbors\n * in a 3D Kohonen array, writing the resulting U-matrix as a CSV-formatted\n * text file. Each row in the file corresponds to a row in the map, with\n * distances separated by commas.\n *\n * @param fname Path to the output file. Must not be NULL.\n * @param W Pointer to a valid kohonen_array_3d structure containing the map data.\n *          The structure and its data must remain valid for the duration of the call.\n *\n * @return Returns 0 on success, or -1 if the file cannot be opened for writing.\n *\n * @note Error: On file open failure, prints an error message to stderr and returns -1.\n */",
+    "finish_reason": "stop",
+    "usage": {
+      "completion_tokens": 183,
+      "prompt_tokens": 1407,
+      "total_tokens": 1590,
+      "completion_tokens_details": {
+        "accepted_prediction_tokens": 0,
+        "audio_tokens": 0,
+        "reasoning_tokens": 0,
+        "rejected_prediction_tokens": 0
+      },
+      "prompt_tokens_details": {
+        "audio_tokens": 0,
+        "cached_tokens": 0
+      }
+    },
+    "response_id": "chatcmpl-D5CNxOytTe2J8hQmSeNuuYMP53FOs",
+    "created": 1770131621
+  }
+}

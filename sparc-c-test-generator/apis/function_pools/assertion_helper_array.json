@@ -1,0 +1,87 @@
+{
+  "main_file": "test/helper/functions/assertion_helper_array.c",
+  "functions": [
+    {
+      "name": "assert_array_sorted",
+      "return_type": "void",
+      "parameters": [
+        {
+          "name": "actual_array",
+          "type": "const int *"
+        },
+        {
+          "name": "size",
+          "type": "int"
+        }
+      ],
+      "location": "test/helper/functions/assertion_helper_array.c:4",
+      "source_file": "assertion_helper_array.c",
+      "description": "Assert that the array is sorted in non-decreasing order."
+    },
+    {
+      "name": "assert_array_equal",
+      "return_type": "void",
+      "parameters": [
+        {
+          "name": "actual",
+          "type": "const int *"
+        },
+        {
+          "name": "expected",
+          "type": "const int *"
+        },
+        {
+          "name": "size",
+          "type": "int"
+        }
+      ],
+      "location": "test/helper/functions/assertion_helper_array.c:15",
+      "source_file": "assertion_helper_array.c",
+      "description": "Assert that two arrays are equal."
+    }
+  ],
+  "source_files": {
+    "test/helper/functions/assertion_helper_array.c": [
+      {
+        "name": "assert_array_sorted",
+        "return_type": "void",
+        "parameters": [
+          {
+            "name": "actual_array",
+            "type": "const int *"
+          },
+          {
+            "name": "size",
+            "type": "int"
+          }
+        ],
+        "location": "test/helper/functions/assertion_helper_array.c:4",
+        "source_file": "assertion_helper_array.c",
+        "description": "Assert that the array is sorted in non-decreasing order."
+      },
+      {
+        "name": "assert_array_equal",
+        "return_type": "void",
+        "parameters": [
+          {
+            "name": "actual",
+            "type": "const int *"
+          },
+          {
+            "name": "expected",
+            "type": "const int *"
+          },
+          {
+            "name": "size",
+            "type": "int"
+          }
+        ],
+        "location": "test/helper/functions/assertion_helper_array.c:15",
+        "source_file": "assertion_helper_array.c",
+        "description": "Assert that two arrays are equal."
+      }
+    ]
+  },
+  "headers_processed": [],
+  "implementation_files": []
+}

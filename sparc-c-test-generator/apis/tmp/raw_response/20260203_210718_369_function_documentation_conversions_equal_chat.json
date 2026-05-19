@@ -1,0 +1,45 @@
+{
+  "timestamp": "2026-02-03T21:07:18.369053",
+  "context": "function_documentation_conversions_equal",
+  "model_type": "chat",
+  "model": "gpt-4.1-2025-04-14",
+  "request": {
+    "messages": [
+      {
+        "role": "system",
+        "content": "\nYou are a technical writer creating professional C function documentation. Write clear, concise documentation like high-quality open source projects (glibc, libcurl, Python stdlib).\n\n## FORMAT\n\n```c\n/**\n * @brief One-line description of what the function does.\n *\n * Detailed description (2-3 sentences max) explaining the function's purpose\n * and key behavior. Mention important edge cases or special handling.\n *\n * @param param_name Description of parameter, its valid values, and constraints.\n *                   Note if NULL is valid or if the parameter is modified.\n *\n * @return What the function returns. Specify success/failure values.\n *         Example: \"Pointer to new node on success, NULL on allocation failure.\"\n *\n * @note Memory: Caller must free returned pointer / Function allocates internally\n * @note Error: How errors are signaled (return value, errno, etc.)\n *\n * @see related_function, another_function\n */\n```\n\n## GUIDELINES\n\n**Be concise**: One line for @brief. 2-3 sentences max for detailed description.\n\n**Parameters**: Type is in code, so describe purpose and constraints:\n- Valid ranges: \"Must be positive\", \"Valid pointer or NULL\"\n- Modifications: \"Modified to contain result\", \"Contents are sorted in-place\"\n- Ownership: \"Caller retains ownership\", \"Function takes ownership\"\n\n**Return values**: Be specific about success/failure:\n- \"Returns 0 on success, -1 on error\"\n- \"Returns pointer to node, or NULL if not found\"\n\n**@note for important details** (only include if relevant):\n- Memory allocation/deallocation responsibility\n- Side effects that modify input or global state\n- Error handling mechanism\n\n**Omit @note/@see if not applicable.**\n\n## STYLE\n\n- Write naturally, not in bullet points or key-value format\n- Use present tense: \"Inserts a node\" not \"Will insert a node\"\n- Be precise: \"non-negative integer\" not \"valid number\"\n- Avoid redundancy: Don't repeat the function name in @brief\n\n## EXAMPLES\n\n```c\n/**\n * @brief Insert a key into a binary search tree.\n *\n * Creates a new node with the given key and inserts it at the correct\n * position to maintain BST ordering. If the tree is empty (node is NULL),\n * returns a new root node.\n *\n * @param node Root of the tree, or NULL for empty tree.\n * @param key Value to insert.\n *\n * @return Root of the modified tree. Returns newly allocated node if\n *         tree was empty, or existing root with new node inserted.\n *\n * @note Caller must free the returned tree.\n */\n```\n\n```c\n/**\n * @brief Partition array around a pivot for quicksort.\n *\n * Rearranges elements so values less than pivot come before it,\n * and values greater come after. Modifies array in-place.\n *\n * @param arr Array to partition. Must not be NULL.\n * @param low Starting index (inclusive).\n * @param high Ending index (inclusive). Must be >= low.\n *\n * @return Index of the pivot after partitioning.\n */\n```\n\nGenerate ONLY the documentation block. Start with /** and end with */.\n"
+      },
+      {
+        "role": "user",
+        "content": "\nGenerate documentation for this C function:\n\n**Function**: conversions_equal\n\n```c\n// C program for the function called conversions_equal\n// Contains target function implementation and dependency signatures\n\n#include <string.h>  /// for strchr and strlen\n#include <stdint.h>  /// for CPU arch's optimized int types\n#include <stdbool.h> /// for boolean types\n#include <stdlib.h>  /// for malloc and free\n\n// Forward declarations for dependency functions\nbool isbad_alphabet(const char* alphabet);\nvoid convertion(uint64_t nb, const char* alphabet, uint64_t base, char* converted);\nchar* decimal_to_anybase(uint64_t nb, const char* alphabet);\nuint64_t converted_len(uint64_t nb, uint64_t base);\n\n// Target function implementation\nbool conversions_equal(uint64_t nb1, uint64_t nb2, const char* alphabet) {\n\tchar* conv1 = decimal_to_anybase(nb1, alphabet);\n\tchar* conv2 = decimal_to_anybase(nb2, alphabet);\n\n\tif (conv1 == NULL || conv2 == NULL) {\n\t\tif (conv1) free(conv1);\n\t\tif (conv2) free(conv2);\n\t\treturn (conv1 == NULL && conv2 == NULL);\n\t}\n\n\tbool result = (strcmp(conv1, conv2) == 0);\n\tfree(conv1);\n\tfree(conv2);\n\treturn result;\n}\n\n```\n\n**Dependencies**: decimal_to_anybase\n\nWrite clear, concise documentation following the system prompt format.\nOutput only the /** ... */ block.\n"
+      }
+    ],
+    "model": "gpt-4.1-2025-04-14",
+    "provider": "gpt",
+    "temperature": 0.0,
+    "response_model": null,
+    "max_tokens": 8192,
+    "input_tokens": 989
+  },
+  "response": {
+    "content": "/**\n * @brief Compare two numbers for equality in a custom base representation.\n *\n * Converts both numbers to strings using the specified alphabet as the base\n * digits, then checks if their representations are identical. Handles allocation\n * failures by returning true only if both conversions fail.\n *\n * @param nb1 First non-negative integer to compare.\n * @param nb2 Second non-negative integer to compare.\n * @param alphabet Null-terminated string of unique characters representing base digits.\n *                 Must not be NULL and must define a valid base.\n *\n * @return true if both numbers have identical representations in the given base,\n *         or if both conversions fail; false otherwise.\n *\n * @note Memory: Allocates temporary strings internally and frees them before returning.\n * @note Error: Returns true if both conversions fail (i.e., both return NULL).\n *\n * @see decimal_to_anybase\n */",
+    "finish_reason": "stop",
+    "usage": {
+      "completion_tokens": 182,
+      "prompt_tokens": 989,
+      "total_tokens": 1171,
+      "completion_tokens_details": {
+        "accepted_prediction_tokens": 0,
+        "audio_tokens": 0,
+        "reasoning_tokens": 0,
+        "rejected_prediction_tokens": 0
+      },
+      "prompt_tokens_details": {
+        "audio_tokens": 0,
+        "cached_tokens": 0
+      }
+    },
+    "response_id": "chatcmpl-D5CHj6keGNymEZQNoSB9WCcoYmHdg",
+    "created": 1770131235
+  }
+}

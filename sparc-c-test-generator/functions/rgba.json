@@ -1,0 +1,133 @@
+{
+  "main_file": "subjects/rgba/src/rgba.c",
+  "functions": [
+    {
+      "name": "rgba_new",
+      "return_type": "rgba_t",
+      "parameters": [
+        {
+          "name": "rgba",
+          "type": "uint32_t"
+        }
+      ],
+      "location": "subjects/rgba/src/rgba.c:238",
+      "source_file": "rgba.c"
+    },
+    {
+      "name": "rgba_to_string",
+      "return_type": "void",
+      "parameters": [
+        {
+          "name": "rgba",
+          "type": "rgba_t"
+        },
+        {
+          "name": "buf",
+          "type": "char *"
+        },
+        {
+          "name": "len",
+          "type": "size_t"
+        }
+      ],
+      "location": "subjects/rgba/src/rgba.c:252",
+      "source_file": "rgba.c"
+    },
+    {
+      "name": "rgba_from_string",
+      "return_type": "uint32_t",
+      "parameters": [
+        {
+          "name": "str",
+          "type": "const char *"
+        },
+        {
+          "name": "ok",
+          "type": "short *"
+        }
+      ],
+      "location": "subjects/rgba/src/rgba.c:412",
+      "source_file": "rgba.c"
+    },
+    {
+      "name": "rgba_inspect",
+      "return_type": "void",
+      "parameters": [
+        {
+          "name": "rgba",
+          "type": "uint32_t"
+        }
+      ],
+      "location": "subjects/rgba/src/rgba.c:424",
+      "source_file": "rgba.c"
+    }
+  ],
+  "source_files": {
+    "subjects/rgba/src/rgba.c": [
+      {
+        "name": "rgba_new",
+        "return_type": "rgba_t",
+        "parameters": [
+          {
+            "name": "rgba",
+            "type": "uint32_t"
+          }
+        ],
+        "location": "subjects/rgba/src/rgba.c:238",
+        "source_file": "rgba.c"
+      },
+      {
+        "name": "rgba_to_string",
+        "return_type": "void",
+        "parameters": [
+          {
+            "name": "rgba",
+            "type": "rgba_t"
+          },
+          {
+            "name": "buf",
+            "type": "char *"
+          },
+          {
+            "name": "len",
+            "type": "size_t"
+          }
+        ],
+        "location": "subjects/rgba/src/rgba.c:252",
+        "source_file": "rgba.c"
+      },
+      {
+        "name": "rgba_from_string",
+        "return_type": "uint32_t",
+        "parameters": [
+          {
+            "name": "str",
+            "type": "const char *"
+          },
+          {
+            "name": "ok",
+            "type": "short *"
+          }
+        ],
+        "location": "subjects/rgba/src/rgba.c:412",
+        "source_file": "rgba.c"
+      },
+      {
+        "name": "rgba_inspect",
+        "return_type": "void",
+        "parameters": [
+          {
+            "name": "rgba",
+            "type": "uint32_t"
+          }
+        ],
+        "location": "subjects/rgba/src/rgba.c:424",
+        "source_file": "rgba.c"
+      }
+    ]
+  },
+  "headers_processed": [
+    "subjects/rgba/src/rgba.h"
+  ],
+  "implementation_files": []
+}

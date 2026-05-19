@@ -1,0 +1,45 @@
+{
+  "timestamp": "2026-02-03T21:11:05.304007",
+  "context": "function_documentation_main",
+  "model_type": "chat",
+  "model": "gpt-4.1-2025-04-14",
+  "request": {
+    "messages": [
+      {
+        "role": "system",
+        "content": "\nYou are a technical writer creating professional C function documentation. Write clear, concise documentation like high-quality open source projects (glibc, libcurl, Python stdlib).\n\n## FORMAT\n\n```c\n/**\n * @brief One-line description of what the function does.\n *\n * Detailed description (2-3 sentences max) explaining the function's purpose\n * and key behavior. Mention important edge cases or special handling.\n *\n * @param param_name Description of parameter, its valid values, and constraints.\n *                   Note if NULL is valid or if the parameter is modified.\n *\n * @return What the function returns. Specify success/failure values.\n *         Example: \"Pointer to new node on success, NULL on allocation failure.\"\n *\n * @note Memory: Caller must free returned pointer / Function allocates internally\n * @note Error: How errors are signaled (return value, errno, etc.)\n *\n * @see related_function, another_function\n */\n```\n\n## GUIDELINES\n\n**Be concise**: One line for @brief. 2-3 sentences max for detailed description.\n\n**Parameters**: Type is in code, so describe purpose and constraints:\n- Valid ranges: \"Must be positive\", \"Valid pointer or NULL\"\n- Modifications: \"Modified to contain result\", \"Contents are sorted in-place\"\n- Ownership: \"Caller retains ownership\", \"Function takes ownership\"\n\n**Return values**: Be specific about success/failure:\n- \"Returns 0 on success, -1 on error\"\n- \"Returns pointer to node, or NULL if not found\"\n\n**@note for important details** (only include if relevant):\n- Memory allocation/deallocation responsibility\n- Side effects that modify input or global state\n- Error handling mechanism\n\n**Omit @note/@see if not applicable.**\n\n## STYLE\n\n- Write naturally, not in bullet points or key-value format\n- Use present tense: \"Inserts a node\" not \"Will insert a node\"\n- Be precise: \"non-negative integer\" not \"valid number\"\n- Avoid redundancy: Don't repeat the function name in @brief\n\n## EXAMPLES\n\n```c\n/**\n * @brief Insert a key into a binary search tree.\n *\n * Creates a new node with the given key and inserts it at the correct\n * position to maintain BST ordering. If the tree is empty (node is NULL),\n * returns a new root node.\n *\n * @param node Root of the tree, or NULL for empty tree.\n * @param key Value to insert.\n *\n * @return Root of the modified tree. Returns newly allocated node if\n *         tree was empty, or existing root with new node inserted.\n *\n * @note Caller must free the returned tree.\n */\n```\n\n```c\n/**\n * @brief Partition array around a pivot for quicksort.\n *\n * Rearranges elements so values less than pivot come before it,\n * and values greater come after. Modifies array in-place.\n *\n * @param arr Array to partition. Must not be NULL.\n * @param low Starting index (inclusive).\n * @param high Ending index (inclusive). Must be >= low.\n *\n * @return Index of the pivot after partitioning.\n */\n```\n\nGenerate ONLY the documentation block. Start with /** and end with */.\n"
+      },
+      {
+        "role": "user",
+        "content": "\nGenerate documentation for this C function:\n\n**Function**: main\n\n```c\n// C program for the function called main\n// Contains target function implementation and dependency signatures\n\n#include <stdio.h>\n#include <stdlib.h>\n#include <time.h>\n\n// Forward declarations for dependency functions\nchar remove_digits(big_int *digit, int N);\nbig_int *add_digit(big_int *digit, char value);\n\n// Target function implementation\nint main(int argc, char **argv)\n{\n    unsigned int N = 5;\n    big_int *ptr = add_digit(NULL, 1); /* start with 1 */\n    const big_int *ptr0 = ptr;         /* save the first location */\n    unsigned long sum_digits = 0;\n    unsigned long num_digits = 0;\n\n    if (argc == 2)\n        N = atoi(argv[1]);\n\n    clock_t start_time = clock();\n\n    for (unsigned int i = 1; i <= N; i++)\n    {\n        int carry = 0;\n#ifdef DEBUG\n        printf(\"%3d: \", i);\n#endif\n        ptr = (big_int *)ptr0; /* multiply every digit with i */\n        while (ptr)\n        {\n#ifdef DEBUG\n            printf(\"%p\\t\", ptr);\n#endif\n            unsigned int tmp = ptr->value * i + carry;\n            if (tmp >= 10)\n            {\n                div_t tmp2 = div(tmp, 10);\n                carry = tmp2.quot;\n                tmp = tmp2.rem;\n            }\n            else\n                carry = 0;\n\n            if (carry > 0 && ptr->next_digit == NULL)\n                add_digit(ptr, 0);\n\n            ptr->value = tmp;\n\n            if (i == N)\n                /*\n                 * sum digits on the last iteration\n                 * this avoid having another loop over all digits\n                 */\n                sum_digits += tmp;\n\n            if (ptr->next_digit)\n                /* more digits available */\n                ptr = ptr->next_digit;\n            else\n                /* no more digits left - reached MSB */\n                break;\n        }\n#ifdef DEBUG\n        printf(\"\\n\");\n#endif\n    }\n\n    clock_t end_time = clock();\n\n#ifdef DEBUG\n    printf(\"ptr = %p\\n\", ptr);\n    printf(\"%d! = \", N);\n#endif\n\n    /* Notice that in the loop above, we make sure that at the end of the loop,\n     * ptr is pointing to the last digit. Thus we can avoid using another loop.\n     */\n    // ptr = &my_int;\n    // /* move ptr to the MSB digit */\n    // while (ptr->next_digit)\n    //     ptr = ptr->next_digit;\n    do\n    {\n        putchar(ptr->value + 0x30); /* convert digit to ASCII char */\n        ptr = ptr->prev_digit;\n        num_digits++;\n    } while (ptr); /* after coming to units place, there will be no valid ptr */\n\n    printf(\"\\nTime taken: %.4g millisecond\\n\",\n           1e3 * (end_time - start_time) / CLOCKS_PER_SEC);\n    printf(\n        \"Digit Sum = %lu\\tNumber of digits = %lu\\tStorage space = %.3gkb\\t \\n\",\n        sum_digits, num_digits, num_digits * sizeof(big_int) / 1024.0);\n\n    remove_digits((big_int *)ptr0, -1);\n    return 0;\n}\n\n```\n\n**Dependencies**: add_digit, remove_digits\n\nWrite clear, concise documentation following the system prompt format.\nOutput only the /** ... */ block.\n"
+      }
+    ],
+    "model": "gpt-4.1-2025-04-14",
+    "provider": "gpt",
+    "temperature": 0.0,
+    "response_model": null,
+    "max_tokens": 8192,
+    "input_tokens": 1412
+  },
+  "response": {
+    "content": "/**\n * @brief Computes and prints the factorial of N using arbitrary-precision arithmetic.\n *\n * Calculates N! for a given N (default 5 or from command-line), printing the result,\n * the sum of its digits, the number of digits, and timing information. Uses a linked\n * list of digits to handle large values beyond standard integer types.\n *\n * @param argc Number of command-line arguments. If 2, argv[1] is parsed as N (must be positive integer).\n * @param argv Array of command-line argument strings. argv[1] may specify N.\n *\n * @return Returns 0 on successful completion.\n *\n * @note Memory: Allocates a linked list of big_int nodes for the result; all memory is freed before exit.\n * @note Error: No explicit error handling for invalid input; non-numeric or negative N may yield unexpected results.\n *\n * @see add_digit, remove_digits\n */",
+    "finish_reason": "stop",
+    "usage": {
+      "completion_tokens": 193,
+      "prompt_tokens": 1412,
+      "total_tokens": 1605,
+      "completion_tokens_details": {
+        "accepted_prediction_tokens": 0,
+        "audio_tokens": 0,
+        "reasoning_tokens": 0,
+        "rejected_prediction_tokens": 0
+      },
+      "prompt_tokens_details": {
+        "audio_tokens": 0,
+        "cached_tokens": 0
+      }
+    },
+    "response_id": "chatcmpl-D5CLMNDr2WOrDLjW169cZMOVVVTYx",
+    "created": 1770131460
+  }
+}

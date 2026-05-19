@@ -1,0 +1,42 @@
+{
+  "timestamp": "2026-01-15T11:31:02.932553",
+  "context": "function_documentation_get_number",
+  "model_type": "chat_deepseek",
+  "model": "deepseek-chat",
+  "request": {
+    "messages": [
+      {
+        "role": "system",
+        "content": "\nYou are a technical writer creating professional C function documentation. Write clear, concise documentation like high-quality open source projects (glibc, libcurl, Python stdlib).\n\n## FORMAT\n\n```c\n/**\n * @brief One-line description of what the function does.\n *\n * Detailed description (2-3 sentences max) explaining the function's purpose\n * and key behavior. Mention important edge cases or special handling.\n *\n * @param param_name Description of parameter, its valid values, and constraints.\n *                   Note if NULL is valid or if the parameter is modified.\n *\n * @return What the function returns. Specify success/failure values.\n *         Example: \"Pointer to new node on success, NULL on allocation failure.\"\n *\n * @note Memory: Caller must free returned pointer / Function allocates internally\n * @note Error: How errors are signaled (return value, errno, etc.)\n *\n * @see related_function, another_function\n */\n```\n\n## GUIDELINES\n\n**Be concise**: One line for @brief. 2-3 sentences max for detailed description.\n\n**Parameters**: Type is in code, so describe purpose and constraints:\n- Valid ranges: \"Must be positive\", \"Valid pointer or NULL\"\n- Modifications: \"Modified to contain result\", \"Contents are sorted in-place\"\n- Ownership: \"Caller retains ownership\", \"Function takes ownership\"\n\n**Return values**: Be specific about success/failure:\n- \"Returns 0 on success, -1 on error\"\n- \"Returns pointer to node, or NULL if not found\"\n\n**@note for important details** (only include if relevant):\n- Memory allocation/deallocation responsibility\n- Side effects that modify input or global state\n- Error handling mechanism\n\n**Omit @note/@see if not applicable.**\n\n## STYLE\n\n- Write naturally, not in bullet points or key-value format\n- Use present tense: \"Inserts a node\" not \"Will insert a node\"\n- Be precise: \"non-negative integer\" not \"valid number\"\n- Avoid redundancy: Don't repeat the function name in @brief\n\n## EXAMPLES\n\n```c\n/**\n * @brief Insert a key into a binary search tree.\n *\n * Creates a new node with the given key and inserts it at the correct\n * position to maintain BST ordering. If the tree is empty (node is NULL),\n * returns a new root node.\n *\n * @param node Root of the tree, or NULL for empty tree.\n * @param key Value to insert.\n *\n * @return Root of the modified tree. Returns newly allocated node if\n *         tree was empty, or existing root with new node inserted.\n *\n * @note Caller must free the returned tree.\n */\n```\n\n```c\n/**\n * @brief Partition array around a pivot for quicksort.\n *\n * Rearranges elements so values less than pivot come before it,\n * and values greater come after. Modifies array in-place.\n *\n * @param arr Array to partition. Must not be NULL.\n * @param low Starting index (inclusive).\n * @param high Ending index (inclusive). Must be >= low.\n *\n * @return Index of the pivot after partitioning.\n */\n```\n\nGenerate ONLY the documentation block. Start with /** and end with */.\n"
+      },
+      {
+        "role": "user",
+        "content": "\nGenerate documentation for this C function:\n\n**Function**: get_number\n\n```c\n// C program for the function called get_number\n// Contains target function implementation and dependency signatures\n\n#include <stdint.h>\n#include <stdio.h>\n#include <stdlib.h>\n#include <string.h>\n\n// Target function implementation\nint get_number(FILE *fp, char *buffer, uint8_t *out_int)\n{\n    long l = fscanf(fp, \"%s\\n\", buffer);\n    if (!l)\n    {\n        perror(\"Error reading line.\");\n        return -1;\n    }\n    // printf(\"Number: %s\\t length: %ld, %ld\\n\", buffer, strlen(buffer), l);\n\n    long L = strlen(buffer);\n\n    for (int i = 0; i < L; i++)\n    {\n        if (buffer[i] < 0x30 || buffer[i] > 0x39)\n        {\n            perror(\"found inavlid character in the number!\");\n            return -1;\n        }\n        else\n        {\n            out_int[L - i - 1] = buffer[i] - 0x30;\n        }\n    }\n\n    return 0;\n}\n\n```\n\n**Dependencies**: None\n\nWrite clear, concise documentation following the system prompt format.\nOutput only the /** ... */ block.\n"
+      }
+    ],
+    "model": "deepseek-chat",
+    "provider": "deepseek",
+    "temperature": 0.0,
+    "response_model": null,
+    "max_tokens": 8192,
+    "input_tokens": 942
+  },
+  "response": {
+    "content": "/**\n * @brief Read a decimal number from a file stream into a byte array.\n *\n * Reads a line from the file, validates it contains only decimal digits,\n * and stores the digits in little-endian order in the output array.\n * The function expects one number per line in the file.\n *\n * @param fp Input file stream. Must be open for reading.\n * @param buffer Character buffer for reading the line. Must be large enough\n *               for the longest expected line.\n * @param out_int Output array where decimal digits are stored as bytes.\n *                The least significant digit is placed at index 0.\n *\n * @return 0 on success, -1 on failure (read error or invalid character).\n *\n * @note The function modifies the contents of `buffer` and `out_int`.\n * @note On failure, an error message is printed to stderr via `perror`.\n */",
+    "finish_reason": "stop",
+    "usage": {
+      "completion_tokens": 185,
+      "prompt_tokens": 944,
+      "total_tokens": 1129,
+      "completion_tokens_details": null,
+      "prompt_tokens_details": {
+        "audio_tokens": null,
+        "cached_tokens": 640
+      },
+      "prompt_cache_hit_tokens": 640,
+      "prompt_cache_miss_tokens": 304
+    },
+    "response_id": "b6c9bd07-1188-444b-ae98-e1933b61a91a",
+    "created": 1768476655
+  }
+}

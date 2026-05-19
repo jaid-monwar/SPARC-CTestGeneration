@@ -1,0 +1,549 @@
+{
+  "main_file": "test/helper/functions/assert_helper_double.c",
+  "functions": [
+    {
+      "name": "assert_double_equal",
+      "return_type": "void",
+      "parameters": [
+        {
+          "name": "actual",
+          "type": "double"
+        },
+        {
+          "name": "expected",
+          "type": "double"
+        }
+      ],
+      "location": "test/helper/functions/assert_helper_double.c:12",
+      "source_file": "assert_helper_double.c",
+      "description": ""
+    },
+    {
+      "name": "assert_double_not_equal",
+      "return_type": "void",
+      "parameters": [
+        {
+          "name": "actual",
+          "type": "double"
+        },
+        {
+          "name": "not_expected",
+          "type": "double"
+        }
+      ],
+      "location": "test/helper/functions/assert_helper_double.c:22",
+      "source_file": "assert_helper_double.c",
+      "description": ""
+    },
+    {
+      "name": "assert_double_in_range",
+      "return_type": "void",
+      "parameters": [
+        {
+          "name": "actual",
+          "type": "double"
+        },
+        {
+          "name": "min_val",
+          "type": "double"
+        },
+        {
+          "name": "max_val",
+          "type": "double"
+        }
+      ],
+      "location": "test/helper/functions/assert_helper_double.c:34",
+      "source_file": "assert_helper_double.c",
+      "description": ""
+    },
+    {
+      "name": "assert_double_not_in_range",
+      "return_type": "void",
+      "parameters": [
+        {
+          "name": "actual",
+          "type": "double"
+        },
+        {
+          "name": "min_val",
+          "type": "double"
+        },
+        {
+          "name": "max_val",
+          "type": "double"
+        }
+      ],
+      "location": "test/helper/functions/assert_helper_double.c:44",
+      "source_file": "assert_helper_double.c",
+      "description": ""
+    },
+    {
+      "name": "assert_double_greater_than",
+      "return_type": "void",
+      "parameters": [
+        {
+          "name": "actual",
+          "type": "double"
+        },
+        {
+          "name": "threshold",
+          "type": "double"
+        }
+      ],
+      "location": "test/helper/functions/assert_helper_double.c:56",
+      "source_file": "assert_helper_double.c",
+      "description": ""
+    },
+    {
+      "name": "assert_double_less_than",
+      "return_type": "void",
+      "parameters": [
+        {
+          "name": "actual",
+          "type": "double"
+        },
+        {
+          "name": "threshold",
+          "type": "double"
+        }
+      ],
+      "location": "test/helper/functions/assert_helper_double.c:66",
+      "source_file": "assert_helper_double.c",
+      "description": ""
+    },
+    {
+      "name": "assert_double_greater_or_equal",
+      "return_type": "void",
+      "parameters": [
+        {
+          "name": "actual",
+          "type": "double"
+        },
+        {
+          "name": "threshold",
+          "type": "double"
+        }
+      ],
+      "location": "test/helper/functions/assert_helper_double.c:76",
+      "source_file": "assert_helper_double.c",
+      "description": ""
+    },
+    {
+      "name": "assert_double_less_or_equal",
+      "return_type": "void",
+      "parameters": [
+        {
+          "name": "actual",
+          "type": "double"
+        },
+        {
+          "name": "threshold",
+          "type": "double"
+        }
+      ],
+      "location": "test/helper/functions/assert_helper_double.c:86",
+      "source_file": "assert_helper_double.c",
+      "description": ""
+    },
+    {
+      "name": "assert_double_is_zero",
+      "return_type": "void",
+      "parameters": [
+        {
+          "name": "actual",
+          "type": "double"
+        }
+      ],
+      "location": "test/helper/functions/assert_helper_double.c:98",
+      "source_file": "assert_helper_double.c",
+      "description": ""
+    },
+    {
+      "name": "assert_double_is_positive",
+      "return_type": "void",
+      "parameters": [
+        {
+          "name": "actual",
+          "type": "double"
+        }
+      ],
+      "location": "test/helper/functions/assert_helper_double.c:107",
+      "source_file": "assert_helper_double.c",
+      "description": ""
+    },
+    {
+      "name": "assert_double_is_negative",
+      "return_type": "void",
+      "parameters": [
+        {
+          "name": "actual",
+          "type": "double"
+        }
+      ],
+      "location": "test/helper/functions/assert_helper_double.c:116",
+      "source_file": "assert_helper_double.c",
+      "description": ""
+    },
+    {
+      "name": "assert_double_is_nan",
+      "return_type": "void",
+      "parameters": [
+        {
+          "name": "actual",
+          "type": "double"
+        }
+      ],
+      "location": "test/helper/functions/assert_helper_double.c:125",
+      "source_file": "assert_helper_double.c",
+      "description": ""
+    },
+    {
+      "name": "assert_double_is_not_nan",
+      "return_type": "void",
+      "parameters": [
+        {
+          "name": "actual",
+          "type": "double"
+        }
+      ],
+      "location": "test/helper/functions/assert_helper_double.c:134",
+      "source_file": "assert_helper_double.c",
+      "description": ""
+    },
+    {
+      "name": "assert_double_is_infinite",
+      "return_type": "void",
+      "parameters": [
+        {
+          "name": "actual",
+          "type": "double"
+        }
+      ],
+      "location": "test/helper/functions/assert_helper_double.c:143",
+      "source_file": "assert_helper_double.c",
+      "description": ""
+    },
+    {
+      "name": "assert_double_is_not_infinite",
+      "return_type": "void",
+      "parameters": [
+        {
+          "name": "actual",
+          "type": "double"
+        }
+      ],
+      "location": "test/helper/functions/assert_helper_double.c:152",
+      "source_file": "assert_helper_double.c",
+      "description": ""
+    },
+    {
+      "name": "assert_double_is_finite",
+      "return_type": "void",
+      "parameters": [
+        {
+          "name": "actual",
+          "type": "double"
+        }
+      ],
+      "location": "test/helper/functions/assert_helper_double.c:161",
+      "source_file": "assert_helper_double.c",
+      "description": ""
+    },
+    {
+      "name": "assert_double_array_equal",
+      "return_type": "void",
+      "parameters": [
+        {
+          "name": "actual",
+          "type": "const double *"
+        },
+        {
+          "name": "expected",
+          "type": "const double *"
+        },
+        {
+          "name": "size",
+          "type": "int"
+        }
+      ],
+      "location": "test/helper/functions/assert_helper_double.c:172",
+      "source_file": "assert_helper_double.c",
+      "description": ""
+    }
+  ],
+  "source_files": {
+    "test/helper/functions/assert_helper_double.c": [
+      {
+        "name": "assert_double_equal",
+        "return_type": "void",
+        "parameters": [
+          {
+            "name": "actual",
+            "type": "double"
+          },
+          {
+            "name": "expected",
+            "type": "double"
+          }
+        ],
+        "location": "test/helper/functions/assert_helper_double.c:12",
+        "source_file": "assert_helper_double.c",
+        "description": ""
+      },
+      {
+        "name": "assert_double_not_equal",
+        "return_type": "void",
+        "parameters": [
+          {
+            "name": "actual",
+            "type": "double"
+          },
+          {
+            "name": "not_expected",
+            "type": "double"
+          }
+        ],
+        "location": "test/helper/functions/assert_helper_double.c:22",
+        "source_file": "assert_helper_double.c",
+        "description": ""
+      },
+      {
+        "name": "assert_double_in_range",
+        "return_type": "void",
+        "parameters": [
+          {
+            "name": "actual",
+            "type": "double"
+          },
+          {
+            "name": "min_val",
+            "type": "double"
+          },
+          {
+            "name": "max_val",
+            "type": "double"
+          }
+        ],
+        "location": "test/helper/functions/assert_helper_double.c:34",
+        "source_file": "assert_helper_double.c",
+        "description": ""
+      },
+      {
+        "name": "assert_double_not_in_range",
+        "return_type": "void",
+        "parameters": [
+          {
+            "name": "actual",
+            "type": "double"
+          },
+          {
+            "name": "min_val",
+            "type": "double"
+          },
+          {
+            "name": "max_val",
+            "type": "double"
+          }
+        ],
+        "location": "test/helper/functions/assert_helper_double.c:44",
+        "source_file": "assert_helper_double.c",
+        "description": ""
+      },
+      {
+        "name": "assert_double_greater_than",
+        "return_type": "void",
+        "parameters": [
+          {
+            "name": "actual",
+            "type": "double"
+          },
+          {
+            "name": "threshold",
+            "type": "double"
+          }
+        ],
+        "location": "test/helper/functions/assert_helper_double.c:56",
+        "source_file": "assert_helper_double.c",
+        "description": ""
+      },
+      {
+        "name": "assert_double_less_than",
+        "return_type": "void",
+        "parameters": [
+          {
+            "name": "actual",
+            "type": "double"
+          },
+          {
+            "name": "threshold",
+            "type": "double"
+          }
+        ],
+        "location": "test/helper/functions/assert_helper_double.c:66",
+        "source_file": "assert_helper_double.c",
+        "description": ""
+      },
+      {
+        "name": "assert_double_greater_or_equal",
+        "return_type": "void",
+        "parameters": [
+          {
+            "name": "actual",
+            "type": "double"
+          },
+          {
+            "name": "threshold",
+            "type": "double"
+          }
+        ],
+        "location": "test/helper/functions/assert_helper_double.c:76",
+        "source_file": "assert_helper_double.c",
+        "description": ""
+      },
+      {
+        "name": "assert_double_less_or_equal",
+        "return_type": "void",
+        "parameters": [
+          {
+            "name": "actual",
+            "type": "double"
+          },
+          {
+            "name": "threshold",
+            "type": "double"
+          }
+        ],
+        "location": "test/helper/functions/assert_helper_double.c:86",
+        "source_file": "assert_helper_double.c",
+        "description": ""
+      },
+      {
+        "name": "assert_double_is_zero",
+        "return_type": "void",
+        "parameters": [
+          {
+            "name": "actual",
+            "type": "double"
+          }
+        ],
+        "location": "test/helper/functions/assert_helper_double.c:98",
+        "source_file": "assert_helper_double.c",
+        "description": ""
+      },
+      {
+        "name": "assert_double_is_positive",
+        "return_type": "void",
+        "parameters": [
+          {
+            "name": "actual",
+            "type": "double"
+          }
+        ],
+        "location": "test/helper/functions/assert_helper_double.c:107",
+        "source_file": "assert_helper_double.c",
+        "description": ""
+      },
+      {
+        "name": "assert_double_is_negative",
+        "return_type": "void",
+        "parameters": [
+          {
+            "name": "actual",
+            "type": "double"
+          }
+        ],
+        "location": "test/helper/functions/assert_helper_double.c:116",
+        "source_file": "assert_helper_double.c",
+        "description": ""
+      },
+      {
+        "name": "assert_double_is_nan",
+        "return_type": "void",
+        "parameters": [
+          {
+            "name": "actual",
+            "type": "double"
+          }
+        ],
+        "location": "test/helper/functions/assert_helper_double.c:125",
+        "source_file": "assert_helper_double.c",
+        "description": ""
+      },
+      {
+        "name": "assert_double_is_not_nan",
+        "return_type": "void",
+        "parameters": [
+          {
+            "name": "actual",
+            "type": "double"
+          }
+        ],
+        "location": "test/helper/functions/assert_helper_double.c:134",
+        "source_file": "assert_helper_double.c",
+        "description": ""
+      },
+      {
+        "name": "assert_double_is_infinite",
+        "return_type": "void",
+        "parameters": [
+          {
+            "name": "actual",
+            "type": "double"
+          }
+        ],
+        "location": "test/helper/functions/assert_helper_double.c:143",
+        "source_file": "assert_helper_double.c",
+        "description": ""
+      },
+      {
+        "name": "assert_double_is_not_infinite",
+        "return_type": "void",
+        "parameters": [
+          {
+            "name": "actual",
+            "type": "double"
+          }
+        ],
+        "location": "test/helper/functions/assert_helper_double.c:152",
+        "source_file": "assert_helper_double.c",
+        "description": ""
+      },
+      {
+        "name": "assert_double_is_finite",
+        "return_type": "void",
+        "parameters": [
+          {
+            "name": "actual",
+            "type": "double"
+          }
+        ],
+        "location": "test/helper/functions/assert_helper_double.c:161",
+        "source_file": "assert_helper_double.c",
+        "description": ""
+      },
+      {
+        "name": "assert_double_array_equal",
+        "return_type": "void",
+        "parameters": [
+          {
+            "name": "actual",
+            "type": "const double *"
+          },
+          {
+            "name": "expected",
+            "type": "const double *"
+          },
+          {
+            "name": "size",
+            "type": "int"
+          }
+        ],
+        "location": "test/helper/functions/assert_helper_double.c:172",
+        "source_file": "assert_helper_double.c",
+        "description": ""
+      }
+    ]
+  },
+  "headers_processed": [],
+  "implementation_files": []
+}

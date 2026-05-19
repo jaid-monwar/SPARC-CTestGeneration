@@ -1,0 +1,42 @@
+{
+  "timestamp": "2026-01-16T01:54:38.056343",
+  "context": "function_documentation_convert",
+  "model_type": "chat_deepseek",
+  "model": "deepseek-chat",
+  "request": {
+    "messages": [
+      {
+        "role": "system",
+        "content": "\nYou are a technical writer creating professional C function documentation. Write clear, concise documentation like high-quality open source projects (glibc, libcurl, Python stdlib).\n\n## FORMAT\n\n```c\n/**\n * @brief One-line description of what the function does.\n *\n * Detailed description (2-3 sentences max) explaining the function's purpose\n * and key behavior. Mention important edge cases or special handling.\n *\n * @param param_name Description of parameter, its valid values, and constraints.\n *                   Note if NULL is valid or if the parameter is modified.\n *\n * @return What the function returns. Specify success/failure values.\n *         Example: \"Pointer to new node on success, NULL on allocation failure.\"\n *\n * @note Memory: Caller must free returned pointer / Function allocates internally\n * @note Error: How errors are signaled (return value, errno, etc.)\n *\n * @see related_function, another_function\n */\n```\n\n## GUIDELINES\n\n**Be concise**: One line for @brief. 2-3 sentences max for detailed description.\n\n**Parameters**: Type is in code, so describe purpose and constraints:\n- Valid ranges: \"Must be positive\", \"Valid pointer or NULL\"\n- Modifications: \"Modified to contain result\", \"Contents are sorted in-place\"\n- Ownership: \"Caller retains ownership\", \"Function takes ownership\"\n\n**Return values**: Be specific about success/failure:\n- \"Returns 0 on success, -1 on error\"\n- \"Returns pointer to node, or NULL if not found\"\n\n**@note for important details** (only include if relevant):\n- Memory allocation/deallocation responsibility\n- Side effects that modify input or global state\n- Error handling mechanism\n\n**Omit @note/@see if not applicable.**\n\n## STYLE\n\n- Write naturally, not in bullet points or key-value format\n- Use present tense: \"Inserts a node\" not \"Will insert a node\"\n- Be precise: \"non-negative integer\" not \"valid number\"\n- Avoid redundancy: Don't repeat the function name in @brief\n\n## EXAMPLES\n\n```c\n/**\n * @brief Insert a key into a binary search tree.\n *\n * Creates a new node with the given key and inserts it at the correct\n * position to maintain BST ordering. If the tree is empty (node is NULL),\n * returns a new root node.\n *\n * @param node Root of the tree, or NULL for empty tree.\n * @param key Value to insert.\n *\n * @return Root of the modified tree. Returns newly allocated node if\n *         tree was empty, or existing root with new node inserted.\n *\n * @note Caller must free the returned tree.\n */\n```\n\n```c\n/**\n * @brief Partition array around a pivot for quicksort.\n *\n * Rearranges elements so values less than pivot come before it,\n * and values greater come after. Modifies array in-place.\n *\n * @param arr Array to partition. Must not be NULL.\n * @param low Starting index (inclusive).\n * @param high Ending index (inclusive). Must be >= low.\n *\n * @return Index of the pivot after partitioning.\n */\n```\n\nGenerate ONLY the documentation block. Start with /** and end with */.\n"
+      },
+      {
+        "role": "user",
+        "content": "\nGenerate documentation for this C function:\n\n**Function**: convert\n\n```c\n// C program for the function called convert\n// Contains target function implementation and dependency signatures\n\n#include <stdio.h>\t/// for IO operations\n#include <string.h>\t/// for strlen(), strcmp()\n#include <ctype.h>\t/// for isalnum()\n#include <stdlib.h>\t/// for exit()\n#include <stdint.h>\t/// for uint16_t, int16_t\n#include <assert.h>\t/// for assert\n\n// Forward declarations for dependency functions\nchar pop();\nint16_t priority(char opr);\nuint16_t isEmpty();\nchar Top();\nvoid push(char opd);\n\n// Target function implementation\nchar *convert(char inf[]) {\n\tstatic char post[25];\t\t\t\t///< to store the postfix expression\n\tsize_t i;\t\t\t\t\t\t\t///< loop iterator\n\tint j = 0;\t\t\t\t\t\t\t///< keeps track of end of postfix string\n\tfor(i = 0; i < strlen(inf); i++) {\n\t\tif(isalnum(inf[i]))\t{\t\t\t// if scanned element is an alphabet or number\n\t\t\tpost[j] = inf[i];\t\t\t// append in postfix expression\n\t\t\tj++;\n\t\t}\n\t\telse if(inf[i] == '(') {\t\t// if scanned element is opening parentheses\n\t\t\tpush(inf[i]);\t\t\t\t// push on stack.\n\t\t}\n\t\telse if(inf[i] == ')') {\t\t// if scanned element is closing parentheses,\n\t\t\twhile(Top() != '(') {\t\t// pop elements from stack and append in postfix expression\n\t\t\t\tpost[j] = pop();\t\t// until opening parentheses becomes top.\n\t\t\t\tj++;\n\t\t\t}\n\t\t\tpop();\t\t\t\t\t\t// pop opening parentheses\n\t\t}\n\t\telse {\t\t\t\t\t\t\t// if scanned element is an operator\n\t\t\twhile( (!isEmpty()) && (priority(inf[i]) <= priority(Top())) ) {\t// pop and append until stack becomes\n\t\t\t\tpost[j] = pop();\t\t\t\t\t\t\t\t\t\t\t\t// empty or priority of top operator\n\t\t\t\tj++;\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t// becomes smaller than scanned operator\n\t\t\t}\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t// '(' has priority -1\n\t\t\tpush(inf[i]);\t\t\t\t// push the scanned operator\n\t\t}\n\t}\n\twhile(!isEmpty()) {\t\t\t\t\t// pop and append residual operators from stack\n\t\tpost[j] = pop();\n\t\tj++;\n\t}\n\tpost[j] = '\\0';\t\t\t\t\t\t// end postfix string with null character\n\treturn post;\n}\n\n```\n\n**Dependencies**: Top, isEmpty, pop, priority, push\n\nWrite clear, concise documentation following the system prompt format.\nOutput only the /** ... */ block.\n"
+      }
+    ],
+    "model": "deepseek-chat",
+    "provider": "deepseek",
+    "temperature": 0.0,
+    "response_model": null,
+    "max_tokens": 8192,
+    "input_tokens": 1229
+  },
+  "response": {
+    "content": "/**\n * @brief Convert an infix expression to postfix notation.\n *\n * Processes the input string character by character using the Shunting-yard\n * algorithm. Handles alphanumeric operands, parentheses, and operators with\n * precedence. The function relies on external stack operations (push, pop,\n * Top, isEmpty) and operator priority function.\n *\n * @param inf Null-terminated infix expression string. Must contain only\n *            alphanumeric characters, parentheses, and valid operators.\n *\n * @return Pointer to a static buffer containing the postfix string. The\n *         buffer is reused on each call, so the result must be used or\n *         copied before the next call to convert.\n *\n * @note The function uses a static internal buffer of 25 characters.\n *       Longer expressions may cause buffer overflow.\n * @note The input string is assumed to be valid; behavior is undefined\n *       for malformed expressions.\n * @see pop, push, Top, isEmpty, priority\n */",
+    "finish_reason": "stop",
+    "usage": {
+      "completion_tokens": 207,
+      "prompt_tokens": 1243,
+      "total_tokens": 1450,
+      "completion_tokens_details": null,
+      "prompt_tokens_details": {
+        "audio_tokens": null,
+        "cached_tokens": 640
+      },
+      "prompt_cache_hit_tokens": 640,
+      "prompt_cache_miss_tokens": 603
+    },
+    "response_id": "d69b9a32-ff43-4323-b3c7-15dda292ea65",
+    "created": 1768528469
+  }
+}

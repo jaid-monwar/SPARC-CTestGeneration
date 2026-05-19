@@ -1,0 +1,45 @@
+{
+  "timestamp": "2026-02-03T21:10:32.539436",
+  "context": "function_documentation_addWordToTree",
+  "model_type": "chat",
+  "model": "gpt-4.1-2025-04-14",
+  "request": {
+    "messages": [
+      {
+        "role": "system",
+        "content": "\nYou are a technical writer creating professional C function documentation. Write clear, concise documentation like high-quality open source projects (glibc, libcurl, Python stdlib).\n\n## FORMAT\n\n```c\n/**\n * @brief One-line description of what the function does.\n *\n * Detailed description (2-3 sentences max) explaining the function's purpose\n * and key behavior. Mention important edge cases or special handling.\n *\n * @param param_name Description of parameter, its valid values, and constraints.\n *                   Note if NULL is valid or if the parameter is modified.\n *\n * @return What the function returns. Specify success/failure values.\n *         Example: \"Pointer to new node on success, NULL on allocation failure.\"\n *\n * @note Memory: Caller must free returned pointer / Function allocates internally\n * @note Error: How errors are signaled (return value, errno, etc.)\n *\n * @see related_function, another_function\n */\n```\n\n## GUIDELINES\n\n**Be concise**: One line for @brief. 2-3 sentences max for detailed description.\n\n**Parameters**: Type is in code, so describe purpose and constraints:\n- Valid ranges: \"Must be positive\", \"Valid pointer or NULL\"\n- Modifications: \"Modified to contain result\", \"Contents are sorted in-place\"\n- Ownership: \"Caller retains ownership\", \"Function takes ownership\"\n\n**Return values**: Be specific about success/failure:\n- \"Returns 0 on success, -1 on error\"\n- \"Returns pointer to node, or NULL if not found\"\n\n**@note for important details** (only include if relevant):\n- Memory allocation/deallocation responsibility\n- Side effects that modify input or global state\n- Error handling mechanism\n\n**Omit @note/@see if not applicable.**\n\n## STYLE\n\n- Write naturally, not in bullet points or key-value format\n- Use present tense: \"Inserts a node\" not \"Will insert a node\"\n- Be precise: \"non-negative integer\" not \"valid number\"\n- Avoid redundancy: Don't repeat the function name in @brief\n\n## EXAMPLES\n\n```c\n/**\n * @brief Insert a key into a binary search tree.\n *\n * Creates a new node with the given key and inserts it at the correct\n * position to maintain BST ordering. If the tree is empty (node is NULL),\n * returns a new root node.\n *\n * @param node Root of the tree, or NULL for empty tree.\n * @param key Value to insert.\n *\n * @return Root of the modified tree. Returns newly allocated node if\n *         tree was empty, or existing root with new node inserted.\n *\n * @note Caller must free the returned tree.\n */\n```\n\n```c\n/**\n * @brief Partition array around a pivot for quicksort.\n *\n * Rearranges elements so values less than pivot come before it,\n * and values greater come after. Modifies array in-place.\n *\n * @param arr Array to partition. Must not be NULL.\n * @param low Starting index (inclusive).\n * @param high Ending index (inclusive). Must be >= low.\n *\n * @return Index of the pivot after partitioning.\n */\n```\n\nGenerate ONLY the documentation block. Start with /** and end with */.\n"
+      },
+      {
+        "role": "user",
+        "content": "\nGenerate documentation for this C function:\n\n**Function**: addWordToTree\n\n```c\n// C program for the function called addWordToTree\n// Contains target function implementation and dependency signatures\n\n#include <assert.h>    /// for assert\n#include <ctype.h>     /// for type checks\n#include <inttypes.h>  /// for uint64_t based types, int64_t based types\n#include <stdbool.h>   /// for boolean data type\n#include <stdio.h>     /// for IO operations\n#include <stdlib.h>    /// for memory allocation\n#include <string.h>    /// for string operations\n\nstruct Node\n{\n    char *word;          ///< the word (value) of the node\n    uint64_t frequency;  ///< number of occurrences of the word\n    struct Node *left;   ///< pointer to the left child node\n    struct Node *right;  ///< pointer to the right child node\n};\n\n// Forward declarations for dependency functions\nchar *getPointerToWord(char *word);\nint endProgramAbruptly(char *errorMessage);\nstruct Node *allocateMemoryForNode();\n\n// Target function implementation\nstruct Node *addWordToTree(char *word, struct Node *currentNode)\n{\n    if (currentNode == NULL)  // checks if `currentNode` is `NULL`\n    {\n        struct Node *currentNode =\n            allocateMemoryForNode();  // allocates memory for new node\n        currentNode->word = getPointerToWord(word);  // stores `word` in memory\n        currentNode->frequency = 1;  // initializes the word frequency to 1\n        currentNode->left = NULL;    // sets left node to `NULL`\n        currentNode->right = NULL;   // sets right node to `NULL`\n        return currentNode;          // returns pointer to newly created node\n    }\n\n    int64_t compared = strcmp(word, currentNode->word);  ///< holds compare state\n\n    if (compared > 0) {\n        currentNode->right = addWordToTree(word,\n            currentNode->right);  // adds `word` to right sub tree if `word` is\n                                  // alphabetically greater than `currentNode->word`\n    }\n    else if (compared < 0) {\n        currentNode->left = addWordToTree(word,\n            currentNode->left);  // adds `word` to left sub tree if `word` is\n                                 // alphabetically less than `currentNode->word`\n    }\n    else {\n        currentNode->frequency++; // increments `currentNode` frequency if `word` is the same as `currentNode->word`\n    }\n\n    return currentNode; // returns pointer to current node\n}\n\n```\n\n**Dependencies**: addWordToTree, allocateMemoryForNode, getPointerToWord\n\nWrite clear, concise documentation following the system prompt format.\nOutput only the /** ... */ block.\n"
+      }
+    ],
+    "model": "gpt-4.1-2025-04-14",
+    "provider": "gpt",
+    "temperature": 0.0,
+    "response_model": null,
+    "max_tokens": 8192,
+    "input_tokens": 1282
+  },
+  "response": {
+    "content": "/**\n * @brief Insert a word into a binary search tree or increment its frequency.\n *\n * Adds the given word to the binary search tree rooted at currentNode. If the word\n * already exists, increments its frequency; otherwise, inserts a new node in the\n * correct position to maintain lexicographical order. The function allocates memory\n * for new nodes and copies the word as needed.\n *\n * @param word Null-terminated string to insert. Must not be NULL.\n * @param currentNode Root of the tree, or NULL for an empty tree. May be modified if a new node is inserted.\n *\n * @return Pointer to the root of the modified tree. Returns a newly allocated node if the tree was empty.\n *\n * @note Memory: Caller must free the entire tree, including all nodes and stored words.\n * @note Error: If memory allocation fails, the program may terminate via endProgramAbruptly.\n */",
+    "finish_reason": "stop",
+    "usage": {
+      "completion_tokens": 192,
+      "prompt_tokens": 1282,
+      "total_tokens": 1474,
+      "completion_tokens_details": {
+        "accepted_prediction_tokens": 0,
+        "audio_tokens": 0,
+        "reasoning_tokens": 0,
+        "rejected_prediction_tokens": 0
+      },
+      "prompt_tokens_details": {
+        "audio_tokens": 0,
+        "cached_tokens": 0
+      }
+    },
+    "response_id": "chatcmpl-D5CKqbNYisJpSfdADS8RX0g6a7XG0",
+    "created": 1770131428
+  }
+}

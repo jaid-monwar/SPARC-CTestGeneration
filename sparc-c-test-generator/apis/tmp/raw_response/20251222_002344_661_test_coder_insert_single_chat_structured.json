@@ -1,0 +1,140 @@
+{
+  "timestamp": "2025-12-22T00:23:44.661561",
+  "context": "test_coder_insert_single",
+  "model_type": "chat_structured",
+  "model": "gpt-4.1-2025-04-14",
+  "request": {
+    "messages": [
+      {
+        "role": "system",
+        "content": "You are a C test code generator. Convert ONE test design into compilable C test code.\n\nCRITICAL RULES:\n1. ONLY use operations from the operation map - verify every \"op\" field exists\n2. NEVER use: \"VariableDeclaration\" as op, malloc/free/printf, C keywords (sizeof, return, if)\n3. NULL checks: use `assert(ptr == NULL)`, NOT `assert_array_equal`\n4. Declare variables in the operation's `variable_declarations` where first used\n5. Declare return variables BEFORE using in `return_params`\n6. Match operation map types exactly: int* needs `(int[]){1,2,3}`, int[N] uses `{1,2,3}`\n7. Test names: `unit_test_<function>_<scenario>`\n\nOUTPUT FORMAT:\n```json\n{\n  \"test_scenarios\": [{\n    \"test_name\": \"unit_test_<func>_<scenario>\",\n    \"setup\": [{\"op\": \"<helper>\", \"variable_declarations\": [{\"name\": \"v\", \"type\": \"T\", \"value\": \"val\", \"comment\": \"desc\"}], \"input_params\": {...}, \"return_params\": [\"var\"]}],\n    \"steps\": [{\"op\": \"<func_or_assert>\", \"variable_declarations\": [...], \"input_params\": {...}, \"return_params\": [...]}],\n    \"cleanup\": [{\"op\": \"<cleanup_helper>\", \"variable_declarations\": [], \"input_params\": {...}, \"return_params\": []}]\n  }]\n}\n```\n\nEXAMPLE - Delete from BST:\n```json\n{\n  \"test_scenarios\": [{\n    \"test_name\": \"unit_test_deleteNode_leaf\",\n    \"setup\": [{\n      \"op\": \"helper_build_tree\",\n      \"variable_declarations\": [\n        {\"name\": \"vals\", \"type\": \"int[3]\", \"value\": \"{15,10,20}\", \"comment\": \"tree values\"},\n        {\"name\": \"root\", \"type\": \"struct node*\", \"value\": \"NULL\", \"comment\": \"tree\"}\n      ],\n      \"input_params\": {\"values\": \"vals\", \"size\": \"3\"},\n      \"return_params\": [\"root\"]\n    }],\n    \"steps\": [{\n      \"op\": \"deleteNode\",\n      \"variable_declarations\": [{\"name\": \"result\", \"type\": \"struct node*\", \"value\": \"NULL\", \"comment\": \"after delete\"}],\n      \"input_params\": {\"root\": \"root\", \"key\": \"10\"},\n      \"return_params\": [\"result\"]\n    }, {\n      \"op\": \"assert_tree_inorder_equal\",\n      \"variable_declarations\": [{\"name\": \"expected\", \"type\": \"int[2]\", \"value\": \"{15,20}\", \"comment\": \"expected inorder\"}],\n      \"input_params\": {\"root\": \"result\", \"expected\": \"expected\", \"size\": \"2\"},\n      \"return_params\": []\n    }],\n    \"cleanup\": [{\"op\": \"helper_free_tree\", \"variable_declarations\": [], \"input_params\": {\"root\": \"result\"}, \"return_params\": []}]\n  }]\n}\n```\n\nOutput valid JSON only. No explanations."
+      },
+      {
+        "role": "user",
+        "content": "Convert this test design to C code.\n\nFUNCTION: insert\nSIGNATURE: struct node* insert(struct node* node, int key)\n\nSOURCE:\n```c\n// C program for the function called insert\\n// Contains target function implementation and dependency signatures\\n\\n#include <stdio.h>\\n#include <stdlib.h>\\n\\nstruct node {\\n\tint key;\\n\tstruct node *left, *right;\\n};\\n\\n// Forward declarations for dependency functions\\nstruct node* newNode(int item);\\n\\n// Target function implementation\\nstruct node* insert(struct node* node, int key)\\n{\\n\\n\tif (node == NULL)\\n\t\treturn newNode(key);\\n\\n\t\\n\tif (key < node->key)\\n\t\tnode->left = insert(node->left, key);\\n\telse\\n\t\tnode->right = insert(node->right, key);\\n\\n\treturn node;\\n}\\n\n```\n\nTEST DESIGN (Phase 1):\n```json\n{\\n  \"test_scenarios\": [\\n    {\\n      \"test_metadata\": {\\n        \"test_id\": \"INSERT_P1_B1\",\\n        \"test_name\": \"test_insert_left_subtree\",\\n        \"test_category\": \"normal_operation\",\\n        \"description\": \"Verify insert correctly adds a new key to the left subtree when key < node->key.\",\\n        \"rationale\": \"This test exercises the main recursive left-insertion path, ensuring the BST property is maintained and the new node is placed correctly.\"\\n      },\\n      \"path_coverage\": {\\n        \"target_paths\": [\\n          \"P1\"\\n        ],\\n        \"path_conditions\": [\\n          \"node != NULL\",\\n          \"key < node->key\",\\n          \"node->left == NULL\"\\n        ],\\n        \"expected_branches\": [\\n          \"if (node == NULL) \\u2192 false\",\\n          \"if (key < node->key) \\u2192 true\",\\n          \"recursive call: insert(node->left, key) with node->left == NULL \\u2192 triggers newNode\"\\n        ]\\n      },\\n      \"source_functions_required\": {\\n        \"primary\": {\\n          \"name\": \"insert\",\\n          \"signature\": \"struct node* insert(struct node* node, int key)\",\\n          \"extract_from\": \"subjects/bst/bst.c\",\\n          \"reason\": \"Function under test\"\\n        },\\n        \"dependencies\": [\\n          {\\n            \"name\": \"newNode\",\\n            \"signature\": \"struct node* newNode(int item)\",\\n            \"extract_from\": \"subjects/bst/bst.c\",\\n            \"reason\": \"Allocates new node when insertion point is found\",\\n            \"call_path\": \"insert \\u2192 newNode (via recursive insert)\"\\n          }\\n        ]\\n      },\\n      \"helper_functions_required\": {\\n        \"assertions\": [\\n          {\\n            \"name\": \"assert_tree_inorder_equal\",\\n            \"purpose\": \"Verify the inorder traversal of the tree matches the expected sorted array after insertion\",\\n            \"from_pool\": false,\\n            \"from_operation_map\": true,\\n            \"usage\": \"Check BST structure and ordering after insert\"\\n          }\\n        ],\\n        \"utilities\": [\\n          {\\n            \"name\": \"helper_build_tree\",\\n            \"purpose\": \"Builds a BST from an array of values using insert\",\\n            \"from_pool\": false,\\n            \"from_operation_map\": true,\\n            \"usage\": \"Setup initial tree\"\\n          },\\n          {\\n            \"name\": \"helper_free_tree\",\\n            \"purpose\": \"Frees all nodes in the BST\",\\n            \"from_pool\": false,\\n            \"from_operation_map\": true,\\n            \"usage\": \"Cleanup after test\"\\n          }\\n        ]\\n      },\\n      \"test_design\": {\\n        \"setup_requirements\": {\\n          \"data_structures\": [\\n            \"struct node* root\"\\n          ],\\n          \"preconditions\": [\\n            \"Initial tree contains a single node with key 10\"\\n          ],\\n          \"initial_state\": \"A BST with one node (key=10), left and right children are NULL\"\\n        },\\n        \"test_inputs\": {\\n          \"primary_function_args\": [\\n            {\\n              \"param_name\": \"node\",\\n              \"param_type\": \"struct node*\",\\n              \"test_value_semantic\": \"Pointer to root node with key 10\",\\n              \"test_value_category\": \"normal\",\\n              \"concrete_value\": \"root (key=10, left=NULL, right=NULL)\",\\n              \"rationale\": \"Ensures node != NULL and sets up for left insertion\"\\n            },\\n            {\\n              \"param_name\": \"key\",\\n              \"param_type\": \"int\",\\n              \"test_value_semantic\": \"Key less than root's key\",\\n              \"test_value_category\": \"normal\",\\n              \"concrete_value\": \"5\",\\n              \"rationale\": \"Triggers left-insertion path (key < node->key)\"\\n            }\\n          ]\\n        },\\n        \"expected_behavior\": {\\n          \"return_value\": {\\n            \"type\": \"struct node*\",\\n            \"description\": \"Pointer to root node (unchanged address), now with left child containing key 5\",\\n            \"validation\": \"Returned pointer equals original root; left child is new node with key 5\"\\n          },\\n          \"side_effects\": [\\n            {\\n              \"effect\": \"A new node with key 5 is allocated and set as left child of root\",\\n              \"observable_via\": \"Inorder traversal yields [5, 10]\"\\n            }\\n          ],\\n          \"state_changes\": [\\n            \"Single-node tree (10) \\u2192 Two-node tree (5 left of 10)\"\\n          ],\\n          \"invariants_maintained\": [\\n            \"BST property: left < root < right\",\\n            \"No memory leaks\"\\n          ]\\n        },\\n        \"assertions_required\": [\\n          {\\n            \"assertion_id\": \"A1\",\\n            \"assertion_type\": \"pointer_equal\",\\n            \"target\": \"return_value\",\\n            \"expected\": \"root\",\\n            \"description\": \"Returned pointer is the original root node\",\\n            \"failure_meaning\": \"Root node was replaced or memory error\"\\n          },\\n          {\\n            \"assertion_id\": \"A2\",\\n            \"assertion_type\": \"not_null\",\\n            \"target\": \"return_value->left\",\\n            \"expected\": \"non-NULL\",\\n            \"description\": \"Left child was created\",\\n            \"failure_meaning\": \"Left child not allocated\"\\n          },\\n          {\\n            \"assertion_id\": \"A3\",\\n            \"assertion_type\": \"int_equal\",\\n            \"target\": \"return_value->left->key\",\\n            \"expected\": \"5\",\\n            \"description\": \"Left child's key is correct\",\\n            \"failure_meaning\": \"Incorrect key in left child\"\\n          },\\n          {\\n            \"assertion_id\": \"A4\",\\n            \"assertion_type\": \"null_pointer\",\\n            \"target\": \"return_value->left->left\",\\n            \"expected\": \"NULL\",\\n            \"description\": \"Left child's left pointer is NULL\",\\n            \"failure_meaning\": \"Left child's left pointer not NULL\"\\n          },\\n          {\\n            \"assertion_id\": \"A5\",\\n            \"assertion_type\": \"null_pointer\",\\n            \"target\": \"return_value->left->right\",\\n            \"expected\": \"NULL\",\\n            \"description\": \"Left child's right pointer is NULL\",\\n            \"failure_meaning\": \"Left child's right pointer not NULL\"\\n          },\\n          {\\n            \"assertion_id\": \"A6\",\\n            \"assertion_type\": \"assert_tree_inorder_equal\",\\n            \"target\": \"return_value\",\\n            \"expected\": \"[5, 10]\",\\n            \"description\": \"Inorder traversal matches expected sorted order\",\\n            \"failure_meaning\": \"BST property or insertion order violated\"\\n          }\\n        ],\\n        \"cleanup_requirements\": {\\n          \"memory_to_free\": [\\n            \"entire tree (root and left child)\"\\n          ],\\n          \"resources_to_close\": [],\\n          \"final_state\": \"All dynamically allocated nodes freed; no memory leaks\",\\n          \"cleanup_order\": [\\n            \"helper_free_tree(return_value)\"\\n          ]\\n        }\\n      },\\n      \"implementation_hints\": {\\n        \"variable_names\": [\\n          {\\n            \"semantic_name\": \"root\",\\n            \"c_variable_name\": \"root\"\\n          },\\n          {\\n            \"semantic_name\": \"result_tree\",\\n            \"c_variable_name\": \"result\"\\n          }\\n        ],\\n        \"operation_sequence\": [\\n          \"Create root node with key 10 (left/right NULL)\",\\n          \"Call insert(root, 5)\",\\n          \"Check returned pointer equals root\",\\n          \"Check root->left is not NULL and key is 5\",\\n          \"Check root->left->left and root->left->right are NULL\",\\n          \"Check inorder traversal is [5, 10]\",\\n          \"Free all nodes\"\\n        ],\\n        \"edge_cases_to_note\": [\\n          \"Do not test duplicate key insertion here\",\\n          \"Do not test right-insertion path here\"\\n        ]\\n      },\\n      \"execution_path\": {\\n        \"path_id\": 1,\\n        \"path\": \"START | START --> CONDITION | if-else head --> STATEMENT | (node == NULL) --> MERGE | if-else merge --> CONDITION | if-else head --> STATEMENT | (key < node->key) --> STATEMENT | node->left = insert(node->left, key); --> MERGE | if-else merge --> RETURN | return node;\"\\n      }\\n    }\\n  ]\\n}\n```\n\nTARGET PATH: Path 1: START | START --> CONDITION | if-else head --> STATEMENT | (node == NULL) --> MERGE | if-else merge --> CONDITION | if-else head --> STATEMENT | (key < node->key) --> STATEMENT | node->left = insert(node->left, key); --> MERGE | if-else merge --> RETURN | return node;\n\nOPERATION MAP (ONLY use these):\n```json\n{\\n  \"dependency_analysis\": {\\n    \"source_functions\": [\\n      {\\n        \"name\": \"deleteNode\",\\n        \"paths\": [\\n          {\\n            \"path_id\": 1,\\n            \"path\": \"START | START --> CONDITION | if-else head --> STATEMENT | (root == NULL) --> MERGE | if-else merge --> CONDITION | if-else head --> STATEMENT | (key < root->key) --> STATEMENT | (key > root->key) --> CONDITION | if-else head --> STATEMENT | (root->left == NULL) --> STATEMENT | struct node* temp = root->right; --> STATEMENT | free(root); --> RETURN | return temp;\"\\n          },\\n          {\\n            \"path_id\": 2,\\n            \"path\": \"START | START --> CONDITION | if-else head --> STATEMENT | (root == NULL) --> MERGE | if-else merge --> CONDITION | if-else head --> STATEMENT | (key < root->key) --> STATEMENT | (key > root->key) --> CONDITION | if-else head --> STATEMENT | (root->left == NULL) --> STATEMENT | (root->right == NULL) --> STATEMENT | struct node* temp = root->left; --> STATEMENT | free(root); --> RETURN | return temp;\"\\n          },\\n          {\\n            \"path_id\": 3,\\n            \"path\": \"START | START --> CONDITION | if-else head --> STATEMENT | (root == NULL) --> RETURN | return root;\"\\n          },\\n          {\\n            \"path_id\": 4,\\n            \"path\": \"START | START --> CONDITION | if-else head --> STATEMENT | (root == NULL) --> MERGE | if-else merge --> CONDITION | if-else head --> STATEMENT | (key < root->key) --> STATEMENT | root->left = deleteNode(root->left, key); --> MERGE | if-else merge --> RETURN | return root;\"\\n          },\\n          {\\n            \"path_id\": 5,\\n            \"path\": \"START | START --> CONDITION | if-else head --> STATEMENT | (root == NULL) --> MERGE | if-else merge --> CONDITION | if-else head --> STATEMENT | (key < root->key) --> STATEMENT | (key > root->key) --> STATEMENT | root->right = deleteNode(root->right, key); --> MERGE | if-else merge --> RETURN | return root;\"\\n          },\\n          {\\n            \"path_id\": 6,\\n            \"path\": \"START | START --> CONDITION | if-else head --> STATEMENT | (root == NULL) --> MERGE | if-else merge --> CONDITION | if-else head --> STATEMENT | (key < root->key) --> STATEMENT | (key > root->key) --> CONDITION | if-else head --> STATEMENT | (root->left == NULL) --> STATEMENT | (root->right == NULL) --> MERGE | if-else merge --> STATEMENT | struct node* temp = minValueNode(root->right); --> STATEMENT | root->key = temp->key; --> STATEMENT | root->right = deleteNode(root->right, temp->key); --> MERGE | if-else merge --> RETURN | return root;\"\\n          }\\n        ]\\n      },\\n      {\\n        \"name\": \"inorder\",\\n        \"paths\": [\\n          {\\n            \"path_id\": 1,\\n            \"path\": \"START | START --> CONDITION | if-else head --> STATEMENT | (root != NULL) --> STATEMENT | inorder(root->left); --> STATEMENT | printf(\\\\ --> STATEMENT | inorder(root->right); --> MERGE | if-else merge --> RETURN | implicit return\"\\n          },\\n          {\\n            \"path_id\": 2,\\n            \"path\": \"START | START --> CONDITION | if-else head --> STATEMENT | (root != NULL) --> MERGE | if-else merge --> RETURN | implicit return\"\\n          }\\n        ]\\n      },\\n      {\\n        \"name\": \"insert\",\\n        \"paths\": [\\n          {\\n            \"path_id\": 1,\\n            \"path\": \"START | START --> CONDITION | if-else head --> STATEMENT | (node == NULL) --> MERGE | if-else merge --> CONDITION | if-else head --> STATEMENT | (key < node->key) --> STATEMENT | node->left = insert(node->left, key); --> MERGE | if-else merge --> RETURN | return node;\"\\n          },\\n          {\\n            \"path_id\": 2,\\n            \"path\": \"START | START --> CONDITION | if-else head --> STATEMENT | (node == NULL) --> MERGE | if-else merge --> CONDITION | if-else head --> STATEMENT | (key < node->key) --> STATEMENT | node->right = insert(node->right, key); --> MERGE | if-else merge --> RETURN | return node;\"\\n          },\\n          {\\n            \"path_id\": 3,\\n            \"path\": \"START | START --> CONDITION | if-else head --> STATEMENT | (node == NULL) --> RETURN | return newNode(key);\"\\n          }\\n        ]\\n      },\\n      {\\n        \"name\": \"minValueNode\",\\n        \"paths\": [\\n          {\\n            \"path_id\": 1,\\n            \"path\": \"START | START --> STATEMENT | struct node* current = node; --> STATEMENT | (current && current->left != NULL) --> FOR_EXIT | loop exit --> RETURN | return current;\"\\n          }\\n        ]\\n      },\\n      {\\n        \"name\": \"newNode\",\\n        \"paths\": [\\n          {\\n            \"path_id\": 1,\\n            \"path\": \"START | START --> STATEMENT | struct node* temp\\n\\t\\t= (struct node*)malloc(sizeof(struct node)); --> STATEMENT | temp->key = item; --> STATEMENT | temp->left = NULL; --> STATEMENT | temp->right = NULL; --> RETURN | return temp;\"\\n          }\\n        ]\\n      }\\n    ],\\n    \"planned_created_functions\": [\\n      {\\n        \"name\": \"helper_build_tree\",\\n        \"calls\": [\\n          \"insert\",\\n          \"malloc\"\\n        ]\\n      },\\n      {\\n        \"name\": \"helper_tree_to_inorder_array\",\\n        \"calls\": [\\n          \"malloc\"\\n        ]\\n      },\\n      {\\n        \"name\": \"assert_tree_inorder_equal\",\\n        \"calls\": [\\n          \"helper_tree_to_inorder_array\",\\n          \"assert_array_equal\",\\n          \"free\"\\n        ]\\n      },\\n      {\\n        \"name\": \"helper_free_tree\",\\n        \"calls\": [\\n          \"free\"\\n        ]\\n      }\\n    ],\\n    \"required_from_pool\": [\\n      \"assert_array_equal\"\\n    ]\\n  },\\n  \"assertion_operations\": {\\n    \"searched_from_pool\": [\\n      {\\n        \"name\": \"assert_array_equal\",\\n        \"return_type\": \"void\",\\n        \"parameters\": [\\n          {\\n            \"name\": \"actual\",\\n            \"type\": \"const int *\"\\n          },\\n          {\\n            \"name\": \"expected\",\\n            \"type\": \"const int *\"\\n          },\\n          {\\n            \"name\": \"size\",\\n            \"type\": \"int\"\\n          }\\n        ]\\n      }\\n    ],\\n    \"created\": [\\n      {\\n        \"name\": \"assert_tree_inorder_equal\",\\n        \"description\": \"Asserts that the inorder traversal of the given tree matches the expected array.\",\\n        \"return_type\": \"void\",\\n        \"parameters\": [\\n          {\\n            \"name\": \"root\",\\n            \"type\": \"struct node *\"\\n          },\\n          {\\n            \"name\": \"expected\",\\n            \"type\": \"const int *\"\\n          },\\n          {\\n            \"name\": \"size\",\\n            \"type\": \"int\"\\n          }\\n        ]\\n      }\\n    ]\\n  },\\n  \"utility_operations\": {\\n    \"searched_from_pool\": [],\\n    \"created\": [\\n      {\\n        \"name\": \"helper_build_tree\",\\n        \"description\": \"Builds a binary search tree from an array of values using insert.\",\\n        \"return_type\": \"struct node *\",\\n        \"parameters\": [\\n          {\\n            \"name\": \"values\",\\n            \"type\": \"int *\"\\n          },\\n          {\\n            \"name\": \"size\",\\n            \"type\": \"int\"\\n          }\\n        ]\\n      },\\n      {\\n        \"name\": \"helper_tree_to_inorder_array\",\\n        \"description\": \"Converts the tree to an inorder array of keys. The size must be provided and match the number of nodes.\",\\n        \"return_type\": \"int *\",\\n        \"parameters\": [\\n          {\\n            \"name\": \"root\",\\n            \"type\": \"struct node *\"\\n          },\\n          {\\n            \"name\": \"size\",\\n            \"type\": \"int\"\\n          }\\n        ]\\n      },\\n      {\\n        \"name\": \"helper_free_tree\",\\n        \"description\": \"Frees all nodes in the binary search tree.\",\\n        \"return_type\": \"void\",\\n        \"parameters\": [\\n          {\\n            \"name\": \"root\",\\n            \"type\": \"struct node *\"\\n          }\\n        ]\\n      }\\n    ]\\n  }\\n}\n```\n\nGenerate ONE test scenario. Use ONLY operations from the map above.\nOutput valid JSON only."
+      }
+    ],
+    "model": "gpt-4.1-2025-04-14",
+    "temperature": 0.0,
+    "response_model": "<class 'apis.formats.response_format.TestScenarios'>",
+    "max_tokens": 8192,
+    "input_tokens": 5268
+  },
+  "response": {
+    "parsed_content": {
+      "test_scenarios": [
+        {
+          "test_name": "unit_test_insert_left_subtree",
+          "setup": [
+            {
+              "op": "helper_build_tree",
+              "variable_declarations": [
+                {
+                  "name": "vals",
+                  "type": "int[1]",
+                  "value": "{10}",
+                  "comment": "Initial tree with root key 10"
+                },
+                {
+                  "name": "root",
+                  "type": "struct node*",
+                  "value": "NULL",
+                  "comment": "BST root"
+                }
+              ],
+              "input_params": {
+                "values": "vals",
+                "size": "1"
+              },
+              "return_params": [
+                "root"
+              ]
+            }
+          ],
+          "steps": [
+            {
+              "op": "insert",
+              "variable_declarations": [
+                {
+                  "name": "result",
+                  "type": "struct node*",
+                  "value": "NULL",
+                  "comment": "Resulting tree after insert"
+                }
+              ],
+              "input_params": {
+                "node": "root",
+                "key": "5"
+              },
+              "return_params": [
+                "result"
+              ]
+            },
+            {
+              "op": "assert_array_equal",
+              "variable_declarations": [
+                {
+                  "name": "expected_inorder",
+                  "type": "int[2]",
+                  "value": "{5, 10}",
+                  "comment": "Expected inorder traversal"
+                },
+                {
+                  "name": "actual_inorder",
+                  "type": "int*",
+                  "value": "NULL",
+                  "comment": "Actual inorder array"
+                }
+              ],
+              "input_params": {
+                "actual": "helper_tree_to_inorder_array(result, 2)",
+                "expected": "expected_inorder",
+                "size": "2"
+              },
+              "return_params": []
+            },
+            {
+              "op": "assert_tree_inorder_equal",
+              "variable_declarations": [],
+              "input_params": {
+                "root": "result",
+                "expected": "expected_inorder",
+                "size": "2"
+              },
+              "return_params": []
+            }
+          ],
+          "cleanup": [
+            {
+              "op": "helper_free_tree",
+              "variable_declarations": [],
+              "input_params": {
+                "root": "result"
+              },
+              "return_params": []
+            }
+          ]
+        }
+      ]
+    },
+    "raw_content": "{\n  \"test_scenarios\": [\n    {\n      \"test_name\": \"unit_test_insert_left_subtree\",\n      \"setup\": [\n        {\n          \"op\": \"helper_build_tree\",\n          \"variable_declarations\": [\n            {\n              \"name\": \"vals\",\n              \"type\": \"int[1]\",\n              \"value\": \"{10}\",\n              \"comment\": \"Initial tree with root key 10\"\n            },\n            {\n              \"name\": \"root\",\n              \"type\": \"struct node*\",\n              \"value\": \"NULL\",\n              \"comment\": \"BST root\"\n            }\n          ],\n          \"input_params\": {\n            \"values\": \"vals\",\n            \"size\": \"1\"\n          },\n          \"return_params\": [\n            \"root\"\n          ]\n        }\n      ],\n      \"steps\": [\n        {\n          \"op\": \"insert\",\n          \"variable_declarations\": [\n            {\n              \"name\": \"result\",\n              \"type\": \"struct node*\",\n              \"value\": \"NULL\",\n              \"comment\": \"Resulting tree after insert\"\n            }\n          ],\n          \"input_params\": {\n            \"node\": \"root\",\n            \"key\": \"5\"\n          },\n          \"return_params\": [\n            \"result\"\n          ]\n        },\n        {\n          \"op\": \"assert_array_equal\",\n          \"variable_declarations\": [\n            {\n              \"name\": \"expected_inorder\",\n              \"type\": \"int[2]\",\n              \"value\": \"{5, 10}\",\n              \"comment\": \"Expected inorder traversal\"\n            },\n            {\n              \"name\": \"actual_inorder\",\n              \"type\": \"int*\",\n              \"value\": \"NULL\",\n              \"comment\": \"Actual inorder array\"\n            }\n          ],\n          \"input_params\": {\n            \"actual\": \"helper_tree_to_inorder_array(result, 2)\",\n            \"expected\": \"expected_inorder\",\n            \"size\": \"2\"\n          },\n          \"return_params\": []\n        },\n        {\n          \"op\": \"assert_tree_inorder_equal\",\n          \"variable_declarations\": [],\n          \"input_params\": {\n            \"root\": \"result\",\n            \"expected\": \"expected_inorder\",\n            \"size\": \"2\"\n          },\n          \"return_params\": []\n        }\n      ],\n      \"cleanup\": [\n        {\n          \"op\": \"helper_free_tree\",\n          \"variable_declarations\": [],\n          \"input_params\": {\n            \"root\": \"result\"\n          },\n          \"return_params\": []\n        }\n      ]\n    }\n  ]\n}",
+    "finish_reason": "stop",
+    "usage": {
+      "completion_tokens": 519,
+      "prompt_tokens": 5784,
+      "total_tokens": 6303,
+      "completion_tokens_details": {
+        "accepted_prediction_tokens": 0,
+        "audio_tokens": 0,
+        "reasoning_tokens": 0,
+        "rejected_prediction_tokens": 0
+      },
+      "prompt_tokens_details": {
+        "audio_tokens": 0,
+        "cached_tokens": 1024
+      }
+    },
+    "response_id": "chatcmpl-CpINgia70CKoVPQkNy8FUFU8mCoat",
+    "created": 1766341420
+  }
+}

@@ -1,0 +1,45 @@
+{
+  "timestamp": "2026-02-03T21:10:13.470506",
+  "context": "function_documentation_trie_print",
+  "model_type": "chat",
+  "model": "gpt-4.1-2025-04-14",
+  "request": {
+    "messages": [
+      {
+        "role": "system",
+        "content": "\nYou are a technical writer creating professional C function documentation. Write clear, concise documentation like high-quality open source projects (glibc, libcurl, Python stdlib).\n\n## FORMAT\n\n```c\n/**\n * @brief One-line description of what the function does.\n *\n * Detailed description (2-3 sentences max) explaining the function's purpose\n * and key behavior. Mention important edge cases or special handling.\n *\n * @param param_name Description of parameter, its valid values, and constraints.\n *                   Note if NULL is valid or if the parameter is modified.\n *\n * @return What the function returns. Specify success/failure values.\n *         Example: \"Pointer to new node on success, NULL on allocation failure.\"\n *\n * @note Memory: Caller must free returned pointer / Function allocates internally\n * @note Error: How errors are signaled (return value, errno, etc.)\n *\n * @see related_function, another_function\n */\n```\n\n## GUIDELINES\n\n**Be concise**: One line for @brief. 2-3 sentences max for detailed description.\n\n**Parameters**: Type is in code, so describe purpose and constraints:\n- Valid ranges: \"Must be positive\", \"Valid pointer or NULL\"\n- Modifications: \"Modified to contain result\", \"Contents are sorted in-place\"\n- Ownership: \"Caller retains ownership\", \"Function takes ownership\"\n\n**Return values**: Be specific about success/failure:\n- \"Returns 0 on success, -1 on error\"\n- \"Returns pointer to node, or NULL if not found\"\n\n**@note for important details** (only include if relevant):\n- Memory allocation/deallocation responsibility\n- Side effects that modify input or global state\n- Error handling mechanism\n\n**Omit @note/@see if not applicable.**\n\n## STYLE\n\n- Write naturally, not in bullet points or key-value format\n- Use present tense: \"Inserts a node\" not \"Will insert a node\"\n- Be precise: \"non-negative integer\" not \"valid number\"\n- Avoid redundancy: Don't repeat the function name in @brief\n\n## EXAMPLES\n\n```c\n/**\n * @brief Insert a key into a binary search tree.\n *\n * Creates a new node with the given key and inserts it at the correct\n * position to maintain BST ordering. If the tree is empty (node is NULL),\n * returns a new root node.\n *\n * @param node Root of the tree, or NULL for empty tree.\n * @param key Value to insert.\n *\n * @return Root of the modified tree. Returns newly allocated node if\n *         tree was empty, or existing root with new node inserted.\n *\n * @note Caller must free the returned tree.\n */\n```\n\n```c\n/**\n * @brief Partition array around a pivot for quicksort.\n *\n * Rearranges elements so values less than pivot come before it,\n * and values greater come after. Modifies array in-place.\n *\n * @param arr Array to partition. Must not be NULL.\n * @param low Starting index (inclusive).\n * @param high Ending index (inclusive). Must be >= low.\n *\n * @return Index of the pivot after partitioning.\n */\n```\n\nGenerate ONLY the documentation block. Start with /** and end with */.\n"
+      },
+      {
+        "role": "user",
+        "content": "\nGenerate documentation for this C function:\n\n**Function**: trie_print\n\n```c\n// C program for the function called trie_print\n// Contains target function implementation and dependency signatures\n\n#include <stdbool.h>\n#include <stdio.h>\n#include <stdlib.h>\n#include <string.h>\n\nstruct trie {\n    struct trie *children[ALPHABET_SIZE];\n    bool end_of_word;\n};\n\n// Forward declarations for dependency functions\n\n// Target function implementation\nvoid trie_print (\n    struct trie * trie,\n    char prefix[],\n    unsigned prefix_len\n)\n{\n\n    // An end-of-word marker means that this is a complete word, print it.\n    if (true == trie->end_of_word) {\n        printf(\"%.*s\\n\", prefix_len, prefix);\n    }\n\n    // However, there can be longer words with the same prefix; traverse into\n    // those as well.\n    for (int i = 0; i < ALPHABET_SIZE; i++) {\n\n        // No words on this character\n        if (NULL == trie->children[i]) {\n            continue;\n        }\n\n        // If you have a separate index mapping, then you'd need the inverse of\n        // the map here. Since we subtracted 'a' for the index, we can just add\n        // 'a' to get the inverse map function.\n        prefix[prefix_len] = i + 'a';\n\n        // traverse the print into the child\n        trie_print(trie->children[i], prefix, prefix_len + 1);\n    }\n}\n\n```\n\n**Dependencies**: trie_print\n\nWrite clear, concise documentation following the system prompt format.\nOutput only the /** ... */ block.\n"
+      }
+    ],
+    "model": "gpt-4.1-2025-04-14",
+    "provider": "gpt",
+    "temperature": 0.0,
+    "response_model": null,
+    "max_tokens": 8192,
+    "input_tokens": 1015
+  },
+  "response": {
+    "content": "/**\n * @brief Recursively prints all words stored in a trie.\n *\n * Traverses the trie and prints each complete word to standard output,\n * using the provided prefix buffer to build words as it descends. Words\n * are printed one per line in lexicographical order based on child traversal.\n *\n * @param trie Pointer to the root or current trie node. Must not be NULL.\n * @param prefix Character buffer used to build the current word prefix.\n *               Must be large enough to hold the longest word plus a null terminator.\n * @param prefix_len Current length of the prefix. Should be 0 when called for the root.\n *\n * @return None.\n *\n * @note The function does not modify the trie structure. The prefix buffer is modified in-place.\n */",
+    "finish_reason": "stop",
+    "usage": {
+      "completion_tokens": 161,
+      "prompt_tokens": 1015,
+      "total_tokens": 1176,
+      "completion_tokens_details": {
+        "accepted_prediction_tokens": 0,
+        "audio_tokens": 0,
+        "reasoning_tokens": 0,
+        "rejected_prediction_tokens": 0
+      },
+      "prompt_tokens_details": {
+        "audio_tokens": 0,
+        "cached_tokens": 0
+      }
+    },
+    "response_id": "chatcmpl-D5CKXsph29ydRmAXXS2yeJM2jn4H2",
+    "created": 1770131409
+  }
+}

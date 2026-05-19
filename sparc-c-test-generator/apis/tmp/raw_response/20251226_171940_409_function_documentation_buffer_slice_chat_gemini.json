@@ -1,0 +1,33 @@
+{
+  "timestamp": "2025-12-26T17:19:40.409788",
+  "context": "function_documentation_buffer_slice",
+  "model_type": "chat_gemini",
+  "model": "gemini-2.5-flash",
+  "request": {
+    "messages": [
+      {
+        "role": "system",
+        "content": "\nYou are a technical writer creating professional C function documentation. Write clear, concise documentation like high-quality open source projects (glibc, libcurl, Python stdlib).\n\n## FORMAT\n\n```c\n/**\n * @brief One-line description of what the function does.\n *\n * Detailed description (2-3 sentences max) explaining the function's purpose\n * and key behavior. Mention important edge cases or special handling.\n *\n * @param param_name Description of parameter, its valid values, and constraints.\n *                   Note if NULL is valid or if the parameter is modified.\n *\n * @return What the function returns. Specify success/failure values.\n *         Example: \"Pointer to new node on success, NULL on allocation failure.\"\n *\n * @note Memory: Caller must free returned pointer / Function allocates internally\n * @note Error: How errors are signaled (return value, errno, etc.)\n *\n * @see related_function, another_function\n */\n```\n\n## GUIDELINES\n\n**Be concise**: One line for @brief. 2-3 sentences max for detailed description.\n\n**Parameters**: Type is in code, so describe purpose and constraints:\n- Valid ranges: \"Must be positive\", \"Valid pointer or NULL\"\n- Modifications: \"Modified to contain result\", \"Contents are sorted in-place\"\n- Ownership: \"Caller retains ownership\", \"Function takes ownership\"\n\n**Return values**: Be specific about success/failure:\n- \"Returns 0 on success, -1 on error\"\n- \"Returns pointer to node, or NULL if not found\"\n\n**@note for important details** (only include if relevant):\n- Memory allocation/deallocation responsibility\n- Side effects that modify input or global state\n- Error handling mechanism\n\n**Omit @note/@see if not applicable.**\n\n## STYLE\n\n- Write naturally, not in bullet points or key-value format\n- Use present tense: \"Inserts a node\" not \"Will insert a node\"\n- Be precise: \"non-negative integer\" not \"valid number\"\n- Avoid redundancy: Don't repeat the function name in @brief\n\n## EXAMPLES\n\n```c\n/**\n * @brief Insert a key into a binary search tree.\n *\n * Creates a new node with the given key and inserts it at the correct\n * position to maintain BST ordering. If the tree is empty (node is NULL),\n * returns a new root node.\n *\n * @param node Root of the tree, or NULL for empty tree.\n * @param key Value to insert.\n *\n * @return Root of the modified tree. Returns newly allocated node if\n *         tree was empty, or existing root with new node inserted.\n *\n * @note Caller must free the returned tree.\n */\n```\n\n```c\n/**\n * @brief Partition array around a pivot for quicksort.\n *\n * Rearranges elements so values less than pivot come before it,\n * and values greater come after. Modifies array in-place.\n *\n * @param arr Array to partition. Must not be NULL.\n * @param low Starting index (inclusive).\n * @param high Ending index (inclusive). Must be >= low.\n *\n * @return Index of the pivot after partitioning.\n */\n```\n\nGenerate ONLY the documentation block. Start with /** and end with */.\n"
+      },
+      {
+        "role": "user",
+        "content": "\nGenerate documentation for this C function:\n\n**Function**: buffer_slice\n\n```c\n// C program for the function called buffer_slice\n// Contains target function implementation and dependency signatures\n\n#include <string.h>\n#include <stdio.h>\n#include <stdarg.h>\n#include <stdlib.h>\n#include <ctype.h>\n#include <sys/types.h>\n#include \"buffer.h\"\n\n// Forward declarations for dependency functions\nbuffer_t *\nbuffer_new_with_size(size_t n);\n\n// Target function implementation\nbuffer_t *\nbuffer_slice(buffer_t *buf, size_t from, ssize_t to) {\n  size_t len = strlen(buf->data);\n\n  // bad range\n  if (to < from) return NULL;\n\n  // relative to end\n  if (to < 0) to = len - ~to;\n\n  // cap end\n  if (to > len) to = len;\n\n  size_t n = to - from;\n  buffer_t *self = buffer_new_with_size(n);\n  memcpy(self->data, buf->data + from, n);\n  return self;\n}\n\n```\n\n**Dependencies**: buffer_new_with_size\n\nWrite clear, concise documentation following the system prompt format.\nOutput only the /** ... */ block.\n"
+      }
+    ],
+    "model": "gemini-2.5-flash",
+    "provider": "gemini",
+    "temperature": 0.0,
+    "response_model": null,
+    "max_tokens": 8192,
+    "input_tokens": 921
+  },
+  "response": {
+    "content": "/**\n * @brief Creates a new buffer containing a slice of an existing buffer.\n *\n * Extracts a substring from `buf->data` based on the `from` (inclusive)\n * and `to` (exclusive) indices. Negative `to` values are interpreted as\n * offsets from the end of the string, similar to Python slicing (e.g., -1\n * means up to the end, -2 means up to the second to last character).\n *\n * @param buf The source buffer. Must not be NULL. `buf->data` must be a\n *            null-terminated string.\n * @param from The starting index of the slice (inclusive). Must be non-negative.\n * @param to The ending index of the slice (exclusive). Can be positive or\n *           negative. If positive, it's an absolute index. If negative, it's\n *           an offset from the end of the string.\n *\n * @return Pointer to a newly allocated `buffer_t` containing the slice on\n *         success. Returns NULL if `to` is less than `from`, or on memory\n *         allocation failure.\n *\n * @note Memory: The caller is responsible for freeing the returned `buffer_t`\n *               using `buffer_free()` or a similar function.\n * @see buffer_new_with_size\n */",
+    "finish_reason": "1",
+    "usage": {
+      "prompt_tokens": 1032,
+      "completion_tokens": 295,
+      "total_tokens": 3214
+    }
+  }
+}

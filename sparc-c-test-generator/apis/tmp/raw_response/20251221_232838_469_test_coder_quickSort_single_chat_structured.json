@@ -1,0 +1,160 @@
+{
+  "timestamp": "2025-12-21T23:28:38.469063",
+  "context": "test_coder_quickSort_single",
+  "model_type": "chat_structured",
+  "model": "gpt-4.1-2025-04-14",
+  "request": {
+    "messages": [
+      {
+        "role": "system",
+        "content": "You are a C test code generator. Convert ONE test design into compilable C test code.\n\nCRITICAL RULES:\n1. ONLY use operations from the operation map - verify every \"op\" field exists\n2. NEVER use: \"VariableDeclaration\" as op, malloc/free/printf, C keywords (sizeof, return, if)\n3. NULL checks: use `assert(ptr == NULL)`, NOT `assert_array_equal`\n4. Declare variables in the operation's `variable_declarations` where first used\n5. Declare return variables BEFORE using in `return_params`\n6. Match operation map types exactly: int* needs `(int[]){1,2,3}`, int[N] uses `{1,2,3}`\n7. Test names: `unit_test_<function>_<scenario>`\n\nOUTPUT FORMAT:\n```json\n{\n  \"test_scenarios\": [{\n    \"test_name\": \"unit_test_<func>_<scenario>\",\n    \"setup\": [{\"op\": \"<helper>\", \"variable_declarations\": [{\"name\": \"v\", \"type\": \"T\", \"value\": \"val\", \"comment\": \"desc\"}], \"input_params\": {...}, \"return_params\": [\"var\"]}],\n    \"steps\": [{\"op\": \"<func_or_assert>\", \"variable_declarations\": [...], \"input_params\": {...}, \"return_params\": [...]}],\n    \"cleanup\": [{\"op\": \"<cleanup_helper>\", \"variable_declarations\": [], \"input_params\": {...}, \"return_params\": []}]\n  }]\n}\n```\n\nEXAMPLE - Delete from BST:\n```json\n{\n  \"test_scenarios\": [{\n    \"test_name\": \"unit_test_deleteNode_leaf\",\n    \"setup\": [{\n      \"op\": \"helper_build_tree\",\n      \"variable_declarations\": [\n        {\"name\": \"vals\", \"type\": \"int[3]\", \"value\": \"{15,10,20}\", \"comment\": \"tree values\"},\n        {\"name\": \"root\", \"type\": \"struct node*\", \"value\": \"NULL\", \"comment\": \"tree\"}\n      ],\n      \"input_params\": {\"values\": \"vals\", \"size\": \"3\"},\n      \"return_params\": [\"root\"]\n    }],\n    \"steps\": [{\n      \"op\": \"deleteNode\",\n      \"variable_declarations\": [{\"name\": \"result\", \"type\": \"struct node*\", \"value\": \"NULL\", \"comment\": \"after delete\"}],\n      \"input_params\": {\"root\": \"root\", \"key\": \"10\"},\n      \"return_params\": [\"result\"]\n    }, {\n      \"op\": \"assert_tree_inorder_equal\",\n      \"variable_declarations\": [{\"name\": \"expected\", \"type\": \"int[2]\", \"value\": \"{15,20}\", \"comment\": \"expected inorder\"}],\n      \"input_params\": {\"root\": \"result\", \"expected\": \"expected\", \"size\": \"2\"},\n      \"return_params\": []\n    }],\n    \"cleanup\": [{\"op\": \"helper_free_tree\", \"variable_declarations\": [], \"input_params\": {\"root\": \"result\"}, \"return_params\": []}]\n  }]\n}\n```\n\nOutput valid JSON only. No explanations."
+      },
+      {
+        "role": "user",
+        "content": "Convert this test design to C code.\n\nFUNCTION: quickSort\nSIGNATURE: void quickSort(int arr[], int low, int high)\n\nSOURCE:\n```c\n// C program for the function called quickSort\\n// Contains target function implementation and dependency signatures\\n\\n// Forward declarations for dependency functions\\nint partition (int arr[], int low, int high);\\nvoid swap(int* a, int* b);\\n\\n// Target function implementation\\nvoid quickSort(int arr[], int low, int high)\\n{\\n    if (low < high) {\\n        int i = partition(arr, low, high);\\n        quickSort(arr, low, i - 1);\\n        quickSort(arr, i + 1, high);\\n    }\\n}\\n\n```\n\nTEST DESIGN (Phase 1):\n```json\n{\\n  \"test_scenarios\": [\\n    {\\n      \"test_metadata\": {\\n        \"test_id\": \"QUICKSORT_P1_N1\",\\n        \"test_name\": \"test_quickSort_unsorted_array_normal\",\\n        \"test_category\": \"normal_operation\",\\n        \"description\": \"Verify quickSort correctly sorts a typical unsorted array (length > 1) in-place, exercising the full recursive path.\",\\n        \"rationale\": \"This test ensures the main recursive path is exercised, including partitioning and recursive calls, and verifies that the array is sorted and all elements are preserved. It detects bugs in partitioning, recursion, and in-place modification.\"\\n      },\\n      \"path_coverage\": {\\n        \"target_paths\": [\\n          \"1\"\\n        ],\\n        \"path_conditions\": [\\n          \"arr is not NULL\",\\n          \"low < high (array has at least two elements, or subarray is nontrivial)\"\\n        ],\\n        \"expected_branches\": [\\n          \"if (low < high) \\u2192 true\",\\n          \"partition called\",\\n          \"quickSort(arr, low, i-1) called\",\\n          \"quickSort(arr, i+1, high) called\"\\n        ]\\n      },\\n      \"source_functions_required\": {\\n        \"primary\": {\\n          \"name\": \"quickSort\",\\n          \"signature\": \"void quickSort(int arr[], int low, int high)\",\\n          \"extract_from\": \"subjects/sorting/quick_sort.c\",\\n          \"reason\": \"Function under test\"\\n        },\\n        \"dependencies\": [\\n          {\\n            \"name\": \"partition\",\\n            \"signature\": \"int partition(int arr[], int low, int high)\",\\n            \"extract_from\": \"subjects/sorting/quick_sort.c\",\\n            \"reason\": \"Required for partitioning step in quickSort\",\\n            \"call_path\": \"quickSort \\u2192 partition\"\\n          },\\n          {\\n            \"name\": \"quickSort\",\\n            \"signature\": \"void quickSort(int arr[], int low, int high)\",\\n            \"extract_from\": \"subjects/sorting/quick_sort.c\",\\n            \"reason\": \"Recursive calls to itself for subarrays\",\\n            \"call_path\": \"quickSort \\u2192 quickSort\"\\n          }\\n        ]\\n      },\\n      \"helper_functions_required\": {\\n        \"assertions\": [\\n          {\\n            \"name\": \"assert_array_sorted\",\\n            \"purpose\": \"Verify the array is sorted in ascending order after quickSort\",\\n            \"from_pool\": true,\\n            \"from_operation_map\": true,\\n            \"usage\": \"After quickSort completes, check that the array is sorted\"\\n          },\\n          {\\n            \"name\": \"assert_array_equal\",\\n            \"purpose\": \"Verify the sorted array contains the same elements as the original (permutation check)\",\\n            \"from_pool\": true,\\n            \"from_operation_map\": true,\\n            \"usage\": \"After sorting, compare sorted array to expected sorted array\"\\n          }\\n        ],\\n        \"utilities\": [\\n          {\\n            \"name\": \"create_int_test_array\",\\n            \"purpose\": \"Allocate and initialize a test array with given values\",\\n            \"from_pool\": true,\\n            \"from_operation_map\": true,\\n            \"usage\": \"Setup: create the input array for sorting\"\\n          },\\n          {\\n            \"name\": \"helper_copy_int_array\",\\n            \"purpose\": \"Create a deep copy of an integer array for expected value/reference\",\\n            \"from_pool\": false,\\n            \"from_operation_map\": true,\\n            \"usage\": \"Setup: create a copy of the input array to sort and compare\"\\n          },\\n          {\\n            \"name\": \"cleanup_int_test_array\",\\n            \"purpose\": \"Free memory allocated for the test array\",\\n            \"from_pool\": true,\\n            \"from_operation_map\": true,\\n            \"usage\": \"Cleanup: free all allocated arrays\"\\n          }\\n        ]\\n      },\\n      \"test_design\": {\\n        \"setup_requirements\": {\\n          \"data_structures\": [\\n            \"int *input_array\",\\n            \"int *expected_sorted_array\"\\n          ],\\n          \"preconditions\": [\\n            \"input_array is allocated and initialized with unsorted values\",\\n            \"expected_sorted_array is a sorted copy of input_array\"\\n          ],\\n          \"initial_state\": \"input_array contains unsorted integers; expected_sorted_array contains the same values in sorted order\"\\n        },\\n        \"test_inputs\": {\\n          \"primary_function_args\": [\\n            {\\n              \"param_name\": \"arr\",\\n              \"param_type\": \"int[]\",\\n              \"test_value_semantic\": \"pointer to unsorted integer array\",\\n              \"test_value_category\": \"normal\",\\n              \"concrete_value\": \"input_array (e.g., {5, 2, 9, 1, 5, 6})\",\\n              \"rationale\": \"Triggers the main recursive path (low < high) and exercises partitioning and recursion\"\\n            },\\n            {\\n              \"param_name\": \"low\",\\n              \"param_type\": \"int\",\\n              \"test_value_semantic\": \"start index of array (0)\",\\n              \"test_value_category\": \"normal\",\\n              \"concrete_value\": \"0\",\\n              \"rationale\": \"Sorts the entire array from the beginning\"\\n            },\\n            {\\n              \"param_name\": \"high\",\\n              \"param_type\": \"int\",\\n              \"test_value_semantic\": \"end index of array (size-1)\",\\n              \"test_value_category\": \"normal\",\\n              \"concrete_value\": \"5 (for 6-element array)\",\\n              \"rationale\": \"Sorts the entire array to the end\"\\n            }\\n          ]\\n        },\\n        \"expected_behavior\": {\\n          \"return_value\": {\\n            \"type\": \"void\",\\n            \"description\": \"No return value; arr is sorted in-place\",\\n            \"validation\": \"No return value to check\"\\n          },\\n          \"side_effects\": [\\n            {\\n              \"effect\": \"input_array is sorted in ascending order\",\\n              \"observable_via\": \"assert_array_sorted(input_array, size)\"\\n            },\\n            {\\n              \"effect\": \"input_array contains the same elements as before (permutation)\",\\n              \"observable_via\": \"assert_array_equal(input_array, expected_sorted_array, size)\"\\n            }\\n          ],\\n          \"state_changes\": [\\n            \"input_array: unsorted \\u2192 sorted\"\\n          ],\\n          \"invariants_maintained\": [\\n            \"No memory leaks\",\\n            \"No out-of-bounds access\",\\n            \"All original elements are present after sorting\"\\n          ]\\n        },\\n        \"assertions_required\": [\\n          {\\n            \"assertion_id\": \"A1\",\\n            \"assertion_type\": \"array_sorted\",\\n            \"target\": \"input_array\",\\n            \"expected\": \"ascending order\",\\n            \"description\": \"Verify the array is sorted in ascending order after quickSort\",\\n            \"failure_meaning\": \"Sorting failed or partition/recursion bug\"\\n          },\\n          {\\n            \"assertion_id\": \"A2\",\\n            \"assertion_type\": \"array_equal\",\\n            \"target\": \"input_array vs expected_sorted_array\",\\n            \"expected\": \"identical contents\",\\n            \"description\": \"Verify the sorted array contains the same elements as the original (permutation check)\",\\n            \"failure_meaning\": \"Elements lost, duplicated, or corrupted during sort\"\\n          }\\n        ],\\n        \"cleanup_requirements\": {\\n          \"memory_to_free\": [\\n            \"input_array\",\\n            \"expected_sorted_array\"\\n          ],\\n          \"resources_to_close\": [],\\n          \"final_state\": \"All allocated arrays are freed; no memory leaks\",\\n          \"cleanup_order\": [\\n            \"cleanup_int_test_array(input_array)\",\\n            \"cleanup_int_test_array(expected_sorted_array)\"\\n          ]\\n        }\\n      },\\n      \"implementation_hints\": {\\n        \"variable_names\": [\\n          {\\n            \"semantic_name\": \"input_array\",\\n            \"c_variable_name\": \"input_array\"\\n          },\\n          {\\n            \"semantic_name\": \"expected_sorted_array\",\\n            \"c_variable_name\": \"expected_sorted_array\"\\n          },\\n          {\\n            \"semantic_name\": \"array_size\",\\n            \"c_variable_name\": \"size\"\\n          }\\n        ],\\n        \"operation_sequence\": [\\n          \"Define unsorted input values (e.g., {5, 2, 9, 1, 5, 6})\",\\n          \"Create input_array using create_int_test_array\",\\n          \"Create expected_sorted_array using helper_copy_int_array, then sort it (e.g., with qsort or manual sort)\",\\n          \"Call quickSort(input_array, 0, size-1)\",\\n          \"Assert input_array is sorted using assert_array_sorted\",\\n          \"Assert input_array equals expected_sorted_array using assert_array_equal\",\\n          \"Cleanup both arrays\"\\n        ],\\n        \"edge_cases_to_note\": [\\n          \"Array with duplicate values (e.g., two 5s) to check stability of element preservation\",\\n          \"Array with minimum and maximum values\",\\n          \"No NULL or empty array tested here (not this path)\"\\n        ]\\n      },\\n      \"execution_path\": {\\n        \"path_id\": 1,\\n        \"path\": \"START | START --> CONDITION | if-else head --> STATEMENT | (low < high) --> STATEMENT | int i = partition(arr, low, high); --> STATEMENT | quickSort(arr, low, i - 1); --> STATEMENT | quickSort(arr, i + 1, high); --> MERGE | if-else merge --> RETURN | implicit return\"\\n      }\\n    }\\n  ]\\n}\n```\n\nTARGET PATH: Path 1: START | START --> CONDITION | if-else head --> STATEMENT | (low < high) --> STATEMENT | int i = partition(arr, low, high); --> STATEMENT | quickSort(arr, low, i - 1); --> STATEMENT | quickSort(arr, i + 1, high); --> MERGE | if-else merge --> RETURN | implicit return\n\nOPERATION MAP (ONLY use these):\n```json\n{\\n  \"dependency_analysis\": {\\n    \"source_functions\": [\\n      {\\n        \"name\": \"partition\",\\n        \"paths\": [\\n          {\\n            \"path_id\": 1,\\n            \"path\": \"START | START -->  --> STATEMENT | int i = low - 1; --> EMPTY | loop head --> STATEMENT | int j = low; --> STATEMENT | j <= high - 1 --> FOR_EXIT | loop exit -->  --> RETURN | return i + 1;\"\\n          }\\n        ]\\n      },\\n      {\\n        \"name\": \"quickSort\",\\n        \"paths\": [\\n          {\\n            \"path_id\": 1,\\n            \"path\": \"START | START --> CONDITION | if-else head --> STATEMENT | (low < high) --> STATEMENT | int i = partition(arr, low, high); --> STATEMENT | quickSort(arr, low, i - 1); --> STATEMENT | quickSort(arr, i + 1, high); --> MERGE | if-else merge --> RETURN | implicit return\"\\n          },\\n          {\\n            \"path_id\": 2,\\n            \"path\": \"START | START --> CONDITION | if-else head --> STATEMENT | (low < high) --> MERGE | if-else merge --> RETURN | implicit return\"\\n          }\\n        ]\\n      },\\n      {\\n        \"name\": \"swap\",\\n        \"paths\": [\\n          {\\n            \"path_id\": 1,\\n            \"path\": \"START | START --> STATEMENT | int t = *a; --> STATEMENT | *a = *b; --> STATEMENT | *b = t; --> RETURN | implicit return\"\\n          }\\n        ]\\n      }\\n    ],\\n    \"planned_created_functions\": [\\n      {\\n        \"name\": \"helper_copy_int_array\",\\n        \"calls\": [\\n          \"malloc\"\\n        ]\\n      }\\n    ],\\n    \"required_from_pool\": [\\n      \"assert_array_equal\",\\n      \"assert_array_sorted\",\\n      \"create_int_test_array\",\\n      \"reset_int_test_array\",\\n      \"cleanup_int_test_array\"\\n    ]\\n  },\\n  \"assertion_operations\": {\\n    \"searched_from_pool\": [\\n      {\\n        \"name\": \"assert_array_equal\",\\n        \"return_type\": \"void\",\\n        \"parameters\": [\\n          {\\n            \"name\": \"actual\",\\n            \"type\": \"const int *\"\\n          },\\n          {\\n            \"name\": \"expected\",\\n            \"type\": \"const int *\"\\n          },\\n          {\\n            \"name\": \"size\",\\n            \"type\": \"int\"\\n          }\\n        ]\\n      },\\n      {\\n        \"name\": \"assert_array_sorted\",\\n        \"return_type\": \"void\",\\n        \"parameters\": [\\n          {\\n            \"name\": \"actual_array\",\\n            \"type\": \"const int *\"\\n          },\\n          {\\n            \"name\": \"size\",\\n            \"type\": \"int\"\\n          }\\n        ]\\n      },\\n      {\\n        \"name\": \"assert_int_equal\",\\n        \"return_type\": \"void\",\\n        \"parameters\": [\\n          {\\n            \"name\": \"actual\",\\n            \"type\": \"int\"\\n          },\\n          {\\n            \"name\": \"expected\",\\n            \"type\": \"int\"\\n          }\\n        ]\\n      }\\n    ],\\n    \"created\": []\\n  },\\n  \"utility_operations\": {\\n    \"searched_from_pool\": [\\n      {\\n        \"name\": \"create_int_test_array\",\\n        \"return_type\": \"int *\",\\n        \"parameters\": [\\n          {\\n            \"name\": \"values\",\\n            \"type\": \"const int *\"\\n          },\\n          {\\n            \"name\": \"size\",\\n            \"type\": \"int\"\\n          }\\n        ]\\n      },\\n      {\\n        \"name\": \"reset_int_test_array\",\\n        \"return_type\": \"void\",\\n        \"parameters\": [\\n          {\\n            \"name\": \"array\",\\n            \"type\": \"int *\"\\n          },\\n          {\\n            \"name\": \"size\",\\n            \"type\": \"int\"\\n          }\\n        ]\\n      },\\n      {\\n        \"name\": \"cleanup_int_test_array\",\\n        \"return_type\": \"void\",\\n        \"parameters\": [\\n          {\\n            \"name\": \"array\",\\n            \"type\": \"int *\"\\n          }\\n        ]\\n      }\\n    ],\\n    \"created\": [\\n      {\\n        \"name\": \"helper_copy_int_array\",\\n        \"description\": \"Creates a deep copy of an integer array of given size. The returned array must be freed by the caller.\",\\n        \"return_type\": \"int *\",\\n        \"parameters\": [\\n          {\\n            \"name\": \"src\",\\n            \"type\": \"const int *\"\\n          },\\n          {\\n            \"name\": \"size\",\\n            \"type\": \"int\"\\n          }\\n        ]\\n      }\\n    ]\\n  }\\n}\n```\n\nGenerate ONE test scenario. Use ONLY operations from the map above.\nOutput valid JSON only."
+      }
+    ],
+    "model": "gpt-4.1-2025-04-14",
+    "temperature": 0.0,
+    "response_model": "<class 'apis.formats.response_format.TestScenarios'>",
+    "max_tokens": 8192,
+    "input_tokens": 4473
+  },
+  "response": {
+    "parsed_content": {
+      "test_scenarios": [
+        {
+          "test_name": "unit_test_quickSort_unsorted_array_normal",
+          "setup": [
+            {
+              "op": "create_int_test_array",
+              "variable_declarations": [
+                {
+                  "name": "unsorted_vals",
+                  "type": "int[6]",
+                  "value": "{5, 2, 9, 1, 5, 6}",
+                  "comment": "Unsorted input values"
+                },
+                {
+                  "name": "size",
+                  "type": "int",
+                  "value": "6",
+                  "comment": "Array size"
+                },
+                {
+                  "name": "input_array",
+                  "type": "int*",
+                  "value": "NULL",
+                  "comment": "Array to be sorted"
+                }
+              ],
+              "input_params": {
+                "values": "unsorted_vals",
+                "size": "size"
+              },
+              "return_params": [
+                "input_array"
+              ]
+            },
+            {
+              "op": "helper_copy_int_array",
+              "variable_declarations": [
+                {
+                  "name": "expected_sorted_array",
+                  "type": "int*",
+                  "value": "NULL",
+                  "comment": "Expected sorted array"
+                }
+              ],
+              "input_params": {
+                "src": "unsorted_vals",
+                "size": "size"
+              },
+              "return_params": [
+                "expected_sorted_array"
+              ]
+            }
+          ],
+          "steps": [
+            {
+              "op": "quickSort",
+              "variable_declarations": [],
+              "input_params": {
+                "arr": "input_array",
+                "low": "0",
+                "high": "size - 1"
+              },
+              "return_params": []
+            },
+            {
+              "op": "quickSort",
+              "variable_declarations": [],
+              "input_params": {
+                "arr": "expected_sorted_array",
+                "low": "0",
+                "high": "size - 1"
+              },
+              "return_params": []
+            },
+            {
+              "op": "assert_array_sorted",
+              "variable_declarations": [],
+              "input_params": {
+                "actual_array": "input_array",
+                "size": "size"
+              },
+              "return_params": []
+            },
+            {
+              "op": "assert_array_equal",
+              "variable_declarations": [],
+              "input_params": {
+                "actual": "input_array",
+                "expected": "expected_sorted_array",
+                "size": "size"
+              },
+              "return_params": []
+            }
+          ],
+          "cleanup": [
+            {
+              "op": "cleanup_int_test_array",
+              "variable_declarations": [],
+              "input_params": {
+                "array": "input_array"
+              },
+              "return_params": []
+            },
+            {
+              "op": "cleanup_int_test_array",
+              "variable_declarations": [],
+              "input_params": {
+                "array": "expected_sorted_array"
+              },
+              "return_params": []
+            }
+          ]
+        }
+      ]
+    },
+    "raw_content": "{\n  \"test_scenarios\": [\n    {\n      \"test_name\": \"unit_test_quickSort_unsorted_array_normal\",\n      \"setup\": [\n        {\n          \"op\": \"create_int_test_array\",\n          \"variable_declarations\": [\n            {\n              \"name\": \"unsorted_vals\",\n              \"type\": \"int[6]\",\n              \"value\": \"{5, 2, 9, 1, 5, 6}\",\n              \"comment\": \"Unsorted input values\"\n            },\n            {\n              \"name\": \"size\",\n              \"type\": \"int\",\n              \"value\": \"6\",\n              \"comment\": \"Array size\"\n            },\n            {\n              \"name\": \"input_array\",\n              \"type\": \"int*\",\n              \"value\": \"NULL\",\n              \"comment\": \"Array to be sorted\"\n            }\n          ],\n          \"input_params\": {\n            \"values\": \"unsorted_vals\",\n            \"size\": \"size\"\n          },\n          \"return_params\": [\n            \"input_array\"\n          ]\n        },\n        {\n          \"op\": \"helper_copy_int_array\",\n          \"variable_declarations\": [\n            {\n              \"name\": \"expected_sorted_array\",\n              \"type\": \"int*\",\n              \"value\": \"NULL\",\n              \"comment\": \"Expected sorted array\"\n            }\n          ],\n          \"input_params\": {\n            \"src\": \"unsorted_vals\",\n            \"size\": \"size\"\n          },\n          \"return_params\": [\n            \"expected_sorted_array\"\n          ]\n        }\n      ],\n      \"steps\": [\n        {\n          \"op\": \"quickSort\",\n          \"variable_declarations\": [],\n          \"input_params\": {\n            \"arr\": \"input_array\",\n            \"low\": \"0\",\n            \"high\": \"size - 1\"\n          },\n          \"return_params\": []\n        },\n        {\n          \"op\": \"quickSort\",\n          \"variable_declarations\": [],\n          \"input_params\": {\n            \"arr\": \"expected_sorted_array\",\n            \"low\": \"0\",\n            \"high\": \"size - 1\"\n          },\n          \"return_params\": []\n        },\n        {\n          \"op\": \"assert_array_sorted\",\n          \"variable_declarations\": [],\n          \"input_params\": {\n            \"actual_array\": \"input_array\",\n            \"size\": \"size\"\n          },\n          \"return_params\": []\n        },\n        {\n          \"op\": \"assert_array_equal\",\n          \"variable_declarations\": [],\n          \"input_params\": {\n            \"actual\": \"input_array\",\n            \"expected\": \"expected_sorted_array\",\n            \"size\": \"size\"\n          },\n          \"return_params\": []\n        }\n      ],\n      \"cleanup\": [\n        {\n          \"op\": \"cleanup_int_test_array\",\n          \"variable_declarations\": [],\n          \"input_params\": {\n            \"array\": \"input_array\"\n          },\n          \"return_params\": []\n        },\n        {\n          \"op\": \"cleanup_int_test_array\",\n          \"variable_declarations\": [],\n          \"input_params\": {\n            \"array\": \"expected_sorted_array\"\n          },\n          \"return_params\": []\n        }\n      ]\n    }\n  ]\n}",
+    "finish_reason": "stop",
+    "usage": {
+      "completion_tokens": 647,
+      "prompt_tokens": 4989,
+      "total_tokens": 5636,
+      "completion_tokens_details": {
+        "accepted_prediction_tokens": 0,
+        "audio_tokens": 0,
+        "reasoning_tokens": 0,
+        "rejected_prediction_tokens": 0
+      },
+      "prompt_tokens_details": {
+        "audio_tokens": 0,
+        "cached_tokens": 1024
+      }
+    },
+    "response_id": "chatcmpl-CpHWKJKTMzvOiIxG6KHWVGbHxS7TF",
+    "created": 1766338112
+  }
+}

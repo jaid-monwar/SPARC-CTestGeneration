@@ -1,0 +1,42 @@
+{
+  "timestamp": "2026-01-14T18:56:40.741503",
+  "context": "function_documentation_new_game",
+  "model_type": "chat_deepseek",
+  "model": "deepseek-chat",
+  "request": {
+    "messages": [
+      {
+        "role": "system",
+        "content": "\nYou are a technical writer creating professional C function documentation. Write clear, concise documentation like high-quality open source projects (glibc, libcurl, Python stdlib).\n\n## FORMAT\n\n```c\n/**\n * @brief One-line description of what the function does.\n *\n * Detailed description (2-3 sentences max) explaining the function's purpose\n * and key behavior. Mention important edge cases or special handling.\n *\n * @param param_name Description of parameter, its valid values, and constraints.\n *                   Note if NULL is valid or if the parameter is modified.\n *\n * @return What the function returns. Specify success/failure values.\n *         Example: \"Pointer to new node on success, NULL on allocation failure.\"\n *\n * @note Memory: Caller must free returned pointer / Function allocates internally\n * @note Error: How errors are signaled (return value, errno, etc.)\n *\n * @see related_function, another_function\n */\n```\n\n## GUIDELINES\n\n**Be concise**: One line for @brief. 2-3 sentences max for detailed description.\n\n**Parameters**: Type is in code, so describe purpose and constraints:\n- Valid ranges: \"Must be positive\", \"Valid pointer or NULL\"\n- Modifications: \"Modified to contain result\", \"Contents are sorted in-place\"\n- Ownership: \"Caller retains ownership\", \"Function takes ownership\"\n\n**Return values**: Be specific about success/failure:\n- \"Returns 0 on success, -1 on error\"\n- \"Returns pointer to node, or NULL if not found\"\n\n**@note for important details** (only include if relevant):\n- Memory allocation/deallocation responsibility\n- Side effects that modify input or global state\n- Error handling mechanism\n\n**Omit @note/@see if not applicable.**\n\n## STYLE\n\n- Write naturally, not in bullet points or key-value format\n- Use present tense: \"Inserts a node\" not \"Will insert a node\"\n- Be precise: \"non-negative integer\" not \"valid number\"\n- Avoid redundancy: Don't repeat the function name in @brief\n\n## EXAMPLES\n\n```c\n/**\n * @brief Insert a key into a binary search tree.\n *\n * Creates a new node with the given key and inserts it at the correct\n * position to maintain BST ordering. If the tree is empty (node is NULL),\n * returns a new root node.\n *\n * @param node Root of the tree, or NULL for empty tree.\n * @param key Value to insert.\n *\n * @return Root of the modified tree. Returns newly allocated node if\n *         tree was empty, or existing root with new node inserted.\n *\n * @note Caller must free the returned tree.\n */\n```\n\n```c\n/**\n * @brief Partition array around a pivot for quicksort.\n *\n * Rearranges elements so values less than pivot come before it,\n * and values greater come after. Modifies array in-place.\n *\n * @param arr Array to partition. Must not be NULL.\n * @param low Starting index (inclusive).\n * @param high Ending index (inclusive). Must be >= low.\n *\n * @return Index of the pivot after partitioning.\n */\n```\n\nGenerate ONLY the documentation block. Start with /** and end with */.\n"
+      },
+      {
+        "role": "user",
+        "content": "\nGenerate documentation for this C function:\n\n**Function**: new_game\n\n```c\n// C program for the function called new_game\n// Contains target function implementation and dependency signatures\n\n#include <ctype.h> /// for tolower()\n#include <stdio.h> /// for I/O operations\n#include <stdlib.h> /// for exit(), rand() and memory functions\n#include <string.h> /// for string operations strlen, strchr, strcpy\n#include <time.h> /// for srand()\n#include \"header.h\"\n\n// Target function implementation\nstruct game_instance new_game() {\n\n    char word[30]; // used throughout function\n\n    FILE *fptr;\n    fptr = fopen(\"games/words.txt\", \"r\");\n\n    if (fptr == NULL){\n        fprintf(stderr, \"File not found.\\n\");\n        exit(EXIT_FAILURE);\n    }\n\n    // counts number of words in file - assumes each word on new line\n    int line_number = 0;\n    while (fgets(word, 30, fptr) != NULL) {\n        line_number++;\n    }\n\n    rewind(fptr);\n\n    // generates random number\n    int random_num;\n    srand(time(NULL));\n    random_num = rand() % line_number;\n\n    // selects randomly generated word\n    int s = 0;\n    while (s <= random_num){\n        fgets(word, 30, fptr);\n        s++;\n    }\n\n    // formats string correctly\n    if (strchr(word, '\\n') != NULL){\n        word[strlen(word) - 1] = '\\0';\n    }\n\n    fclose(fptr);\n\n    // creates new game instance\n    struct game_instance current_game;\n    strcpy(current_game.current_word, word);\n    current_game.size = (int)strlen(word);\n    for (int i = 0; i < current_game.size; i++) {\n        current_game.hidden[i] = '_';\n    }\n    current_game.hidden[current_game.size] = '\\0';\n    current_game.incorrect = 0;\n    current_game.guesses_size = 0;\n    memset(current_game.guesses, 0, sizeof(current_game.guesses));\n\n    return current_game;\n}\n\n```\n\n**Dependencies**: None\n\nWrite clear, concise documentation following the system prompt format.\nOutput only the /** ... */ block.\n"
+      }
+    ],
+    "model": "deepseek-chat",
+    "provider": "deepseek",
+    "temperature": 0.0,
+    "response_model": null,
+    "max_tokens": 8192,
+    "input_tokens": 1143
+  },
+  "response": {
+    "content": "/**\n * @brief Create a new game instance with a random word.\n *\n * Selects a random word from the words file and initializes a game instance\n * with the word hidden. The hidden word is represented as underscores.\n *\n * @return A fully initialized game_instance struct containing the selected\n *         word, its hidden representation, and reset counters.\n *\n * @note Exits the program with failure if the words file cannot be opened.\n * @note The words file is assumed to have one word per line.\n */\n",
+    "finish_reason": "stop",
+    "usage": {
+      "completion_tokens": 106,
+      "prompt_tokens": 1158,
+      "total_tokens": 1264,
+      "completion_tokens_details": null,
+      "prompt_tokens_details": {
+        "audio_tokens": null,
+        "cached_tokens": 640
+      },
+      "prompt_cache_hit_tokens": 640,
+      "prompt_cache_miss_tokens": 518
+    },
+    "response_id": "73c041a6-4f26-464a-ab20-a5129678cd91",
+    "created": 1768416997
+  }
+}

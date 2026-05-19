@@ -1,0 +1,45 @@
+{
+  "timestamp": "2026-02-03T21:13:33.730524",
+  "context": "function_documentation_test3",
+  "model_type": "chat",
+  "model": "gpt-4.1-2025-04-14",
+  "request": {
+    "messages": [
+      {
+        "role": "system",
+        "content": "\nYou are a technical writer creating professional C function documentation. Write clear, concise documentation like high-quality open source projects (glibc, libcurl, Python stdlib).\n\n## FORMAT\n\n```c\n/**\n * @brief One-line description of what the function does.\n *\n * Detailed description (2-3 sentences max) explaining the function's purpose\n * and key behavior. Mention important edge cases or special handling.\n *\n * @param param_name Description of parameter, its valid values, and constraints.\n *                   Note if NULL is valid or if the parameter is modified.\n *\n * @return What the function returns. Specify success/failure values.\n *         Example: \"Pointer to new node on success, NULL on allocation failure.\"\n *\n * @note Memory: Caller must free returned pointer / Function allocates internally\n * @note Error: How errors are signaled (return value, errno, etc.)\n *\n * @see related_function, another_function\n */\n```\n\n## GUIDELINES\n\n**Be concise**: One line for @brief. 2-3 sentences max for detailed description.\n\n**Parameters**: Type is in code, so describe purpose and constraints:\n- Valid ranges: \"Must be positive\", \"Valid pointer or NULL\"\n- Modifications: \"Modified to contain result\", \"Contents are sorted in-place\"\n- Ownership: \"Caller retains ownership\", \"Function takes ownership\"\n\n**Return values**: Be specific about success/failure:\n- \"Returns 0 on success, -1 on error\"\n- \"Returns pointer to node, or NULL if not found\"\n\n**@note for important details** (only include if relevant):\n- Memory allocation/deallocation responsibility\n- Side effects that modify input or global state\n- Error handling mechanism\n\n**Omit @note/@see if not applicable.**\n\n## STYLE\n\n- Write naturally, not in bullet points or key-value format\n- Use present tense: \"Inserts a node\" not \"Will insert a node\"\n- Be precise: \"non-negative integer\" not \"valid number\"\n- Avoid redundancy: Don't repeat the function name in @brief\n\n## EXAMPLES\n\n```c\n/**\n * @brief Insert a key into a binary search tree.\n *\n * Creates a new node with the given key and inserts it at the correct\n * position to maintain BST ordering. If the tree is empty (node is NULL),\n * returns a new root node.\n *\n * @param node Root of the tree, or NULL for empty tree.\n * @param key Value to insert.\n *\n * @return Root of the modified tree. Returns newly allocated node if\n *         tree was empty, or existing root with new node inserted.\n *\n * @note Caller must free the returned tree.\n */\n```\n\n```c\n/**\n * @brief Partition array around a pivot for quicksort.\n *\n * Rearranges elements so values less than pivot come before it,\n * and values greater come after. Modifies array in-place.\n *\n * @param arr Array to partition. Must not be NULL.\n * @param low Starting index (inclusive).\n * @param high Ending index (inclusive). Must be >= low.\n *\n * @return Index of the pivot after partitioning.\n */\n```\n\nGenerate ONLY the documentation block. Start with /** and end with */.\n"
+      },
+      {
+        "role": "user",
+        "content": "\nGenerate documentation for this C function:\n\n**Function**: test3\n\n```c\n// C program for the function called test3\n// Contains target function implementation and dependency signatures\n\n#include <assert.h>\n#include <limits.h>\n#include <math.h>\n#include <stdbool.h>\n#include <stdio.h>\n#include <stdlib.h>\n#include <time.h>\n\nstruct adaline\n{\n    double eta;      /**< learning rate of the algorithm */\n    double *weights; /**< weights of the neural network */\n    int num_weights; /**< number of weights of the neural network */\n};\n\n// Forward declarations for dependency functions\nvoid adaline_fit(struct adaline *ada, double **X, const int *y, const int N);\ndouble adaline_fit_sample(struct adaline *ada, const double *x, const int y);\nchar *adaline_get_weights_str(const struct adaline *ada);\nstruct adaline new_adaline(const int num_features, const double eta);\nint adaline_activation(double x);\nvoid delete_adaline(struct adaline *ada);\nint adaline_predict(struct adaline *ada, const double *x, double *out);\n\n// Target function implementation\nvoid test3(double eta)\n{\n    struct adaline ada = new_adaline(6, eta);  // 2 features\n\n    const int N = 50;  // number of sample points\n\n    double **X = (double **)malloc(N * sizeof(double *));\n    int *Y = (int *)malloc(N * sizeof(int));  // corresponding y-values\n    for (int i = 0; i < N; i++) X[i] = (double *)malloc(6 * sizeof(double));\n\n    // generate sample points in the interval\n    // [-range2/100 , (range2-1)/100]\n    int range = 200;          // sample points full-range\n    int range2 = range >> 1;  // sample points half-range\n    for (int i = 0; i < N; i++)\n    {\n        double x0 = ((rand() % range) - range2) / 100.f;\n        double x1 = ((rand() % range) - range2) / 100.f;\n        double x2 = ((rand() % range) - range2) / 100.f;\n        X[i][0] = x0;\n        X[i][1] = x1;\n        X[i][2] = x2;\n        X[i][3] = x0 * x0;\n        X[i][4] = x1 * x1;\n        X[i][5] = x2 * x2;\n        Y[i] = (x0 * x0 + x1 * x1 + x2 * x2) <= 1 ? 1 : -1;\n    }\n\n    printf(\"------- Test 3 -------\\n\");\n    printf(\"Model before fit: %s\\n\", adaline_get_weights_str(&ada));\n\n    adaline_fit(&ada, X, Y, N);\n    printf(\"Model after fit: %s\\n\", adaline_get_weights_str(&ada));\n\n    int N_test_cases = 5;\n    double test_x[6];\n    for (int i = 0; i < N_test_cases; i++)\n    {\n        double x0 = ((rand() % range) - range2) / 100.f;\n        double x1 = ((rand() % range) - range2) / 100.f;\n        double x2 = ((rand() % range) - range2) / 100.f;\n        test_x[0] = x0;\n        test_x[1] = x1;\n        test_x[2] = x2;\n        test_x[3] = x0 * x0;\n        test_x[4] = x1 * x1;\n        test_x[5] = x2 * x2;\n        int pred = adaline_predict(&ada, test_x, NULL);\n        printf(\"Predict for x=(% 3.2f,% 3.2f): % d\\n\", x0, x1, pred);\n\n        int expected_val = (x0 * x0 + x1 * x1 + x2 * x2) <= 1 ? 1 : -1;\n        assert(pred == expected_val);\n        printf(\" ...passed\\n\");\n    }\n\n    for (int i = 0; i < N; i++) free(X[i]);\n    free(X);\n    free(Y);\n    delete_adaline(&ada);\n}\n\n```\n\n**Dependencies**: adaline_fit, adaline_get_weights_str, adaline_predict, delete_adaline, new_adaline\n\nWrite clear, concise documentation following the system prompt format.\nOutput only the /** ... */ block.\n"
+      }
+    ],
+    "model": "gpt-4.1-2025-04-14",
+    "provider": "gpt",
+    "temperature": 0.0,
+    "response_model": null,
+    "max_tokens": 8192,
+    "input_tokens": 1658
+  },
+  "response": {
+    "content": "/**\n * @brief Trains and tests an Adaline model on synthetic 3D data.\n *\n * Initializes an Adaline model with six features and the specified learning rate,\n * generates random training data representing points in 3D space, and fits the model.\n * After training, the function tests the model on new random samples, printing predictions\n * and verifying correctness with assertions.\n *\n * @param eta Learning rate for the Adaline model. Must be positive.\n *\n * @note Memory: Allocates and frees all required memory internally.\n * @note Error: Aborts via assert if a prediction does not match the expected value.\n *\n * @see adaline_fit, adaline_predict, new_adaline, delete_adaline\n */",
+    "finish_reason": "stop",
+    "usage": {
+      "completion_tokens": 150,
+      "prompt_tokens": 1658,
+      "total_tokens": 1808,
+      "completion_tokens_details": {
+        "accepted_prediction_tokens": 0,
+        "audio_tokens": 0,
+        "reasoning_tokens": 0,
+        "rejected_prediction_tokens": 0
+      },
+      "prompt_tokens_details": {
+        "audio_tokens": 0,
+        "cached_tokens": 0
+      }
+    },
+    "response_id": "chatcmpl-D5CNmvARfdVEATVjHDzVY7EEJY2fK",
+    "created": 1770131610
+  }
+}

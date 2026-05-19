@@ -1,0 +1,661 @@
+{
+  "timestamp": "2026-01-16T01:56:04.570821",
+  "context": "operation_map_generation",
+  "model_type": "chat_deepseek_structured_attempt1",
+  "model": "deepseek-chat",
+  "request": {
+    "messages": [
+      {
+        "role": "system",
+        "content": "\n🚨 CRITICAL RULES - VIOLATION = IMMEDIATE REJECTION 🚨\n1. **NO DUPLICATE NAMES**: Never create functions with same names as source code\n2. **NO HARDCODED VALUES**: All data must come from parameters, never {50, 30, 20}\n3. **PARAMETERIZED ONLY**: Every function must accept explicit parameters\n4. **NO PLACEHOLDER CODE**: Every function must contain COMPLETE, WORKING C code - NO TODO comments, NO placeholder comments like \"// Perform operation\", NO functions that only malloc/free without doing actual work\n5. **NO PRIVATE FUNCTIONS**: Never call functions that are NOT declared in the header file. Functions with trailing underscores (like `node_contains_`, `get_quadrant_`) are typically private/static and FORBIDDEN\n\n\n##⚠️ MANDATORY WORKFLOW ⚠️:\n\n1. **Analyze the C source code and header file**: \n   - **Note**: Source function names and their paths are pre-defined and will be loaded from source_functions.json - you do NOT need to generate them\n   - **Extract all public function declarations** from the header file - these are the ONLY functions you can call from the source code\n   - **FORBIDDEN**: Never call functions not declared in the header file (private/static functions like `node_contains_`, `get_quadrant_`)\n2. **Focus on BASIC helpers only**: Create only fundamental assertion and utility helpers that provide NEW functionality. Do NOT create:\n   - Wrapper functions that just call existing helpers\n   - Complete test functions that combine multiple operations\n   - Functions that duplicate existing functionality\n3. Carefully separate operations into two categories:\n   - **assertion_operations**: Include BASIC assertion functions for validating specific conditions.\n   - **utility_operations**: Include BASIC utility functions for fundamental setup/init functions, cleanup functions, or reset functions.\n    Important:\n    - Do not place assertion-type functions under utility_operations.\n    - Do not place utility-type functions under assertion_operations.\n4. For each category:\n   - If there are existing helper functions that are relevant for unit testing (either as dependencies OR as useful operations for test scenarios), list all the **names** in `\"searched_from_pool\"` **ONLY if they do NOT conflict with source code function names**.\n   - **CRITICAL: Before adding ANY function name to \"searched_from_pool\", verify it does NOT match ANY function name in the source C code being tested.**\n   - **Include in searched_from_pool**:\n     a. Functions that your created functions will call (dependencies)\n     b. Functions that would be useful for test scenarios even if not called by created functions\n     c. Any assertion or utility functions relevant to testing the source code\n   - If no perfect match exists for needed functionality, define a **new helper** in `\"created\"` with:\n     - `\"name\"`: The function name you're creating. **🚨 CRITICAL RULE 🚨** Please use prefix \"helper_\" for all helper functions to avoid conflicts with source code function names.\n     - `\"description\"`: Clear explanation of the helper's purpose\n     - `\"return_type\"`: C return type (e.g., `void`, `int`, `struct node *`)\n     - `\"parameters\"`: List of objects with `\"name\"` and `\"type\"`\n     - `\"code_block\"`: The complete, compilable C implementation of the helper function. **🚨 MANDATORY: MUST CONTAIN ACTUAL WORKING CODE 🚨** - NO PLACEHOLDER COMMENTS! Include all necessary declarations and statements so that the function can be compiled and run as-is. \n       **FORBIDDEN PATTERNS**:\n       ❌ `// TODO: implement this` \n       ❌ `// Perform some operation`\n       ❌ `// Call some_function(...)`\n       ❌ Functions with only malloc/free and no actual logic\n       **REQUIRED**: Every function must contain complete, functional C code that actually performs the described operation.\n   - **🚨 CRITICAL DEPENDENCY RULE 🚨**: If your created function calls ANY other function (like `assert_array_equal`, `malloc`, custom helpers, etc.), you MUST ensure those functions are available by:\n     1. **For standard library functions** (malloc, printf, etc.): Include appropriate headers in your code_block\n     2. **For helper pool functions** (assert_array_equal, etc.): Add them to `\"searched_from_pool\"` \n     3. **For source code functions**: ONLY call functions that are declared in the header file - never call private/static functions\n     4. **Example**: If you create a function that calls `assert_array_equal`, you MUST include `assert_array_equal` in the `\"searched_from_pool\"` section, otherwise compilation will fail with \"undefined reference\" errors.\n   - **🚨 HEADER FILE VALIDATION 🚨**: Before calling ANY function from the source code, verify it exists in the header file:\n     - ✅ **ALLOWED**: `insert(root, key)` (if declared in header)\n     - ❌ **FORBIDDEN**: `node_contains_(root, point)` (private function with underscore)\n     - ❌ **FORBIDDEN**: `get_quadrant_(root, point)` (private function with underscore)\n     - ❌ **FORBIDDEN**: Any function not declared in the header file\n   - Only generate new helper functions in `\"created\"` if no existing function in available helper functions performs the same or a highly similar task. **PREFER REUSING existing helpers over creating new ones**. If an equivalent function already exists, reuse it instead of creating a new one.\n   - **AVOID WRAPPER FUNCTIONS**: Do not create functions that simply call existing helpers without adding significant new functionality.\n   - **FOCUS ON GAPS**: Only create helpers that fill genuine functionality gaps not covered by existing helper pool functions.\n   - **CRITICAL CONFLICT RESOLUTION**: If a helper function from the pool has the same name as a source code function, do NOT include it in \"searched_from_pool\". Instead, create a new function in \"created\" with a different name that performs the same functionality.\n   - **STRICT NAMING REQUIREMENT**: Before finalizing any function name in `\"created\"` or `\"searched_from_pool\"`, verify it does NOT match any function name from the source code or helper functions. This is mandatory to prevent compilation conflicts.\n4. **MANDATORY DEPENDENCY MANAGEMENT**:\n   - **Create dependency_analysis section** with these 2 required fields:\n     - **\"planned_created_functions\"**: For each function you plan to create, list:\n       - `\"name\"`: The function name you're creating\n       - `\"calls\"`: Array of ALL functions it will call (including `malloc`, `printf`, `assert_array_equal`, etc.)\n     - **\"required_from_pool\"**: List ALL helper pool functions needed by your created functions\n   - **Note**: \"source_functions\" will be automatically loaded from source_functions.json and merged - you do NOT need to generate it\n   \n   - **Dependency validation rules**:\n     - **Scan every `\"created\"` function** for external function calls\n     - **For each function call**, determine if it's:\n       - Standard library (`malloc`, `printf`) → Include proper #includes in code_block\n       - Helper pool function (`assert_array_equal`) → Add to \"required_from_pool\"\n       - Source code function (`insert`, `newNode`) → ONLY allowed if declared in header file, list in \"calls\"\n       - Private/static function (`node_contains_`, `get_quadrant_`) → ❌ FORBIDDEN - causes compilation errors\n     - **CRITICAL**: Every function in \"required_from_pool\" MUST appear in \"searched_from_pool\" sections\n     - **HEADER VALIDATION**: Every source code function call must be verified against the header file declarations\n     - **NOTE**: \"searched_from_pool\" can include MORE functions than \"required_from_pool\" - include any helper pool functions that are relevant for unit testing, even if not directly called by created functions\n     - **Compilation will fail** with \"undefined reference\" errors if dependencies are missing\n\n5. Include all possible operations that are necessary for generating **complete** test scenarios later.\n6. Make sure the operations are comprehensive enough to write complete test scenarios for all functions in the source code.\n7. Before producing the final JSON output, double-check the classification:\n   - If a function performs any kind of checking, validation, or result verification, it must be under assertion_operations.\n   - If a function only supports test setup, teardown, or data preparation, it must be under utility_operations.\n8. **FINAL DEPENDENCY VERIFICATION**: Before outputting JSON, verify that ALL functions called by your created functions are either:\n   - Standard library functions (with proper #includes)\n   - Listed in your `\"searched_from_pool\"` sections\n   - Source code functions that are declared in the header file (never private/static functions)\n   - Defined within the same `\"created\"` function\n\n## FORBIDDEN PATTERNS (REAL EXAMPLES THAT CAUSED ERRORS):\n```c\n// ❌ WRONG - Same name as source (causes \"error: redefinition of 'newNode'\")\nstruct node* newNode(int item) { ... }\n\n// ❌ WRONG - Hardcoded values (generates same key = 50 for all inserts)\nvoid setup() {\n    int values[] = {50, 30, 20};  // Results in: int key = 50; insert(root, key); insert(root, key);\n}\n\n// ❌ WRONG - Missing dependencies (causes \"undefined reference to 'assert_array_equal'\")\nvoid check_array(int *arr) {\n    assert_array_equal(arr, expected);  // Function not in searched_from_pool\n}\n\n// ❌ WRONG - Creates utility operations with same name as source code functions\nvoid insert() { ... }  // Conflicts with source insert() function\n\n// ❌ WRONG - Wrapper functions that just call existing helpers (useless)\nvoid verify_tree_structure(struct node *test_root, struct node *expected_root) {\n    assert_tree_equal(test_root, expected_root);  // Just calls existing function\n}\n\n// ❌ WRONG - Complete test functions (not basic helpers)\nvoid test_delete_node(struct node *root, int key) {\n    root = deleteNode(root, key);\n    assert_root_key(root, expected_key);\n    // This is a complete test, not a basic helper\n}\n\n// ❌ WRONG - Functions with only comments, no actual code (USELESS!)\nvoid assert_tree_structure(struct node *tree, int *expected, int size) {\n    int *actual = malloc(size * sizeof(int));\n    // Perform inorder traversal to fill actual_array\n    // Call assert_array_equal(actual_array, expected_array, size);\n    free(actual);  // Allocates and frees memory but does NOTHING useful!\n}\n\n// ❌ WRONG - Functions with TODO comments instead of real implementation\nvoid helper_function(int *data) {\n    // TODO: implement this function\n    return;  // Does nothing!\n}\n\n// ❌ WRONG - Calling private/static functions not in header file\nvoid helper_check_node(struct node* root, Point point) {\n    if (node_contains_(root, point)) {  // FORBIDDEN - private function!\n        // ...\n    }\n}\n\n// ❌ WRONG - Calling functions with underscores (typically private)\nint helper_find_quadrant(struct node* root, Point point) {\n    return get_quadrant_(root, point);  // FORBIDDEN - private function!\n}\n```\n\n## CORRECT PATTERNS:\n```c\n// ✅ RIGHT - Unique name, parameterized, provides NEW functionality with COMPLETE CODE\nstruct node* helper_build_tree(int *values, int size) {\n    struct node* root = NULL;\n    for (int i = 0; i < size; i++) {\n        root = insert(root, values[i]);\n    }\n    return root;\n}\n\n// ✅ RIGHT - Basic assertion helper that doesn't exist in pool with ACTUAL IMPLEMENTATION\nvoid assert_node_count(struct node* root, int expected_count) {\n    int actual_count = 0;\n    // Count nodes using recursive traversal\n    if (root != NULL) {\n        actual_count = 1 + count_subtree(root->left) + count_subtree(root->right);\n    }\n    assert(actual_count == expected_count);\n}\n\n// ✅ RIGHT - Basic utility helper for specific data preparation with WORKING CODE\nint* create_test_array(int size, int start_value) {\n    int* arr = malloc(size * sizeof(int));\n    for (int i = 0; i < size; i++) {\n        arr[i] = start_value + i;\n    }\n    return arr;\n}\n\n// ✅ RIGHT - Tree structure verification with COMPLETE FUNCTIONAL IMPLEMENTATION\nvoid assert_tree_structure(struct node *actual_tree, int *expected_array, int size) {\n    int *actual_array = malloc(size * sizeof(int));\n    int index = 0;\n    \n    // Perform inorder traversal to fill actual_array\n    inorder_to_array(actual_tree, actual_array, &index);\n    \n    // Compare arrays\n    for (int i = 0; i < size; i++) {\n        assert(actual_array[i] == expected_array[i]);\n    }\n    \n    free(actual_array);\n}\n\n// Helper function for inorder traversal\nvoid inorder_to_array(struct node* root, int* arr, int* index) {\n    if (root != NULL) {\n        inorder_to_array(root->left, arr, index);\n        arr[(*index)++] = root->data;\n        inorder_to_array(root->right, arr, index);\n    }\n}\n\n// ✅ RIGHT - Only calling public functions from header file\nvoid helper_validate_tree(struct node* root, Point point) {\n    // Only call functions declared in the header file\n    struct node* result = insert(root, point);  // OK if insert() is in header\n    // Never call node_contains_() or get_quadrant_() - they're private!\n}\n\n"
+      },
+      {
+        "role": "user",
+        "content": "\nYou are creating an **operation map** for C unit tests.\n\nBelow is the C source file to be tested:\n/**\n * @file\n * @brief [Infix to Postfix converter](https://www.includehelp.com/c/infix-to-postfix-conversion-using-stack-with-c-program.aspx) implementation\n * @details\n * The input infix expression is of type string upto 24 characters.\n * Supported operations- '+', '-', '/', '*', '%'\n * @author [Kumar Yash](https://github.com/kumaryash18)\n * @see infix_to_postfix.c\n */\n \n#include <stdio.h>\t/// for IO operations\n#include <string.h>\t/// for strlen(), strcmp()\n#include <ctype.h>\t/// for isalnum()\n#include <stdlib.h>\t/// for exit()\n#include <stdint.h>\t/// for uint16_t, int16_t\n#include <assert.h>\t/// for assert\n\n/**\n * @brief array implementation of stack using structure\n */\nstruct Stack {\n\tchar stack[10];\t\t///< array stack\n\tint top;\t\t///< stores index of the top element\n};\nstruct Stack st;\t\t///< global declaration of stack st\n\n/**\n * @brief Function to initialize/reset the stack\n * @returns void\n */\nvoid initStack() {\n\tst.top = -1;\n}\n\n/**\n * @brief Function to push on the stack\n * @param opd character to be pushed in the stack\n * @returns void\n */\nvoid push(char opd) {\n\tif(st.top == 9)\t{\t\t// overflow condition\n\t\tprintf(\"Stack overflow...\");\n\t\texit(1);\n\t}\n\tst.top++;\n\tst.stack[st.top] = opd;\n}\n\n/**\n * @brief Function to pop from the stack\n * @returns popped character\n */\nchar pop() {\n\tchar item;\t\t\t\t///< to store the popped value to be returned\n\tif(st.top == -1) {\t\t// underflow condition\n\t\tprintf(\"Stack underflow...\");\n\t\texit(1);\n\t}\n\titem = st.stack[st.top];\n\tst.top--;\n\treturn item;\n}\n\n/**\n * @brief Function to check whether the stack is empty or not\n * @returns 1 if the stack IS empty\n * @returns 0 if the stack is NOT empty\n */\nuint16_t isEmpty() {\n\tif(st.top == -1) {\n\t\treturn 1;\n\t}\n\treturn 0;\n}\n\n/**\n * @brief Function to get top of the stack\n * @returns top of stack\n */\nchar Top() {\n\treturn st.stack[st.top];\n}\n\n/**\n * @brief Function to check priority of operators\n * @param opr operator whose priority is to be checked\n * @returns 0 if operator is '+' or '-'\n * @returns 1 if operator is '/' or '*' or '%'\n * @returns -1 otherwise\n */\nint16_t priority(char opr) {\n\tif(opr == '+' || opr == '-') {\n\t\treturn 0;\n\t}\n\telse if(opr == '/' || opr == '*' || opr == '%') {\n\t\treturn 1;\n\t}\n\telse {\n\t\treturn -1;\n\t}\n}\n\n/**\n * @brief Function to convert infix expression to postfix expression\n * @param inf the input infix expression\n * @returns output postfix expression\n */\nchar *convert(char inf[]) {\n\tstatic char post[25];\t\t\t\t///< to store the postfix expression\n\tsize_t i;\t\t\t\t\t\t\t///< loop iterator\n\tint j = 0;\t\t\t\t\t\t\t///< keeps track of end of postfix string\n\tfor(i = 0; i < strlen(inf); i++) {\n\t\tif(isalnum(inf[i]))\t{\t\t\t// if scanned element is an alphabet or number\n\t\t\tpost[j] = inf[i];\t\t\t// append in postfix expression\n\t\t\tj++;\n\t\t}\n\t\telse if(inf[i] == '(') {\t\t// if scanned element is opening parentheses\n\t\t\tpush(inf[i]);\t\t\t\t// push on stack.\n\t\t}\n\t\telse if(inf[i] == ')') {\t\t// if scanned element is closing parentheses,\n\t\t\twhile(Top() != '(') {\t\t// pop elements from stack and append in postfix expression\n\t\t\t\tpost[j] = pop();\t\t// until opening parentheses becomes top.\n\t\t\t\tj++;\n\t\t\t}\n\t\t\tpop();\t\t\t\t\t\t// pop opening parentheses\n\t\t}\n\t\telse {\t\t\t\t\t\t\t// if scanned element is an operator\n\t\t\twhile( (!isEmpty()) && (priority(inf[i]) <= priority(Top())) ) {\t// pop and append until stack becomes\n\t\t\t\tpost[j] = pop();\t\t\t\t\t\t\t\t\t\t\t\t// empty or priority of top operator\n\t\t\t\tj++;\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t// becomes smaller than scanned operator\n\t\t\t}\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t// '(' has priority -1\n\t\t\tpush(inf[i]);\t\t\t\t// push the scanned operator\n\t\t}\n\t}\n\twhile(!isEmpty()) {\t\t\t\t\t// pop and append residual operators from stack\n\t\tpost[j] = pop();\n\t\tj++;\n\t}\n\tpost[j] = '\\0';\t\t\t\t\t\t// end postfix string with null character\n\treturn post;\n}\n\n/**\n * @brief Safe version of convert that copies result to user-provided buffer\n * @param inf the input infix expression\n * @param output buffer to store the postfix expression (must be at least 25 chars)\n * @param output_size size of the output buffer\n * @returns 0 on success, -1 on error (output buffer too small)\n */\nint convert_safe(char inf[], char *output, size_t output_size) {\n\tif (output == NULL || output_size < 25) {\n\t\treturn -1;\n\t}\n\tinitStack();  // Reset stack before conversion\n\tchar *result = convert(inf);\n\tsize_t len = strlen(result);\n\tif (len >= output_size) {\n\t\treturn -1;\n\t}\n\tstrcpy(output, result);\n\treturn 0;\n}\n\n/**\n * @brief Get the current stack size (number of elements)\n * @returns number of elements in the stack\n */\nint getStackSize() {\n\treturn st.top + 1;\n}\n\n/**\n * @brief Check if the stack is full\n * @returns 1 if stack is full, 0 otherwise\n */\nuint16_t isFull() {\n\treturn (st.top == 9) ? 1 : 0;\n}\n\n/**\n * @brief Peek at a specific position in the stack (for testing)\n * @param pos position to peek (0 = bottom, top = st.top)\n * @returns character at position, or '\\0' if invalid position\n */\nchar peekAt(int pos) {\n\tif (pos < 0 || pos > st.top) {\n\t\treturn '\\0';\n\t}\n\treturn st.stack[pos];\n}\n\n/**\n * @brief Validate if an infix expression has balanced parentheses\n * @param inf the input infix expression\n * @returns 1 if balanced, 0 if not balanced\n */\nint isBalancedParentheses(char inf[]) {\n\tint count = 0;\n\tfor (int i = 0; inf[i] != '\\0'; i++) {\n\t\tif (inf[i] == '(') {\n\t\t\tcount++;\n\t\t} else if (inf[i] == ')') {\n\t\t\tcount--;\n\t\t\tif (count < 0) {\n\t\t\t\treturn 0;  // More closing than opening\n\t\t\t}\n\t\t}\n\t}\n\treturn (count == 0) ? 1 : 0;\n}\n\n/**\n * @brief Check if a character is a valid operator\n * @param c character to check\n * @returns 1 if valid operator, 0 otherwise\n */\nint isOperator(char c) {\n\treturn (c == '+' || c == '-' || c == '*' || c == '/' || c == '%') ? 1 : 0;\n}\n\n/**\n * @brief Count the number of operators in an expression\n * @param expr the expression to analyze\n * @returns number of operators found\n */\nint countOperators(char expr[]) {\n\tint count = 0;\n\tfor (int i = 0; expr[i] != '\\0'; i++) {\n\t\tif (isOperator(expr[i])) {\n\t\t\tcount++;\n\t\t}\n\t}\n\treturn count;\n}\n\n/**\n * @brief Count the number of operands (alphanumeric) in an expression\n * @param expr the expression to analyze\n * @returns number of operands found\n */\nint countOperands(char expr[]) {\n\tint count = 0;\n\tfor (int i = 0; expr[i] != '\\0'; i++) {\n\t\tif (isalnum(expr[i])) {\n\t\t\tcount++;\n\t\t}\n\t}\n\treturn count;\n}\n\n\nBelow is the header file with public function declarations:\n/**\n * @file header.h\n * @brief Header file for Infix to Postfix converter\n */\n\n#ifndef CONV_INFIX_TO_POSTFIX2_H\n#define CONV_INFIX_TO_POSTFIX2_H\n\n#include <stdint.h>\n#include <stddef.h>\n\n/**\n * @brief array implementation of stack using structure\n */\nstruct Stack {\n\tchar stack[10];\t\t///< array stack\n\tint top;\t\t///< stores index of the top element\n};\n\nextern struct Stack st;\t\t///< global declaration of stack st\n\n/**\n * @brief Function to initialize/reset the stack\n * @returns void\n */\nvoid initStack(void);\n\n/**\n * @brief Function to push on the stack\n * @param opd character to be pushed in the stack\n * @returns void\n */\nvoid push(char opd);\n\n/**\n * @brief Function to pop from the stack\n * @returns popped character\n */\nchar pop(void);\n\n/**\n * @brief Function to check whether the stack is empty or not\n * @returns 1 if the stack IS empty\n * @returns 0 if the stack is NOT empty\n */\nuint16_t isEmpty(void);\n\n/**\n * @brief Function to get top of the stack\n * @returns top of stack\n */\nchar Top(void);\n\n/**\n * @brief Function to check priority of operators\n * @param opr operator whose priority is to be checked\n * @returns 0 if operator is '+' or '-'\n * @returns 1 if operator is '/' or '*' or '%'\n * @returns -1 otherwise\n */\nint16_t priority(char opr);\n\n/**\n * @brief Function to convert infix expression to postfix expression\n * @param inf the input infix expression\n * @returns output postfix expression\n */\nchar *convert(char inf[]);\n\n/**\n * @brief Safe version of convert that copies result to user-provided buffer\n * @param inf the input infix expression\n * @param output buffer to store the postfix expression (must be at least 25 chars)\n * @param output_size size of the output buffer\n * @returns 0 on success, -1 on error (output buffer too small)\n */\nint convert_safe(char inf[], char *output, size_t output_size);\n\n/**\n * @brief Get the current stack size (number of elements)\n * @returns number of elements in the stack\n */\nint getStackSize(void);\n\n/**\n * @brief Check if the stack is full\n * @returns 1 if stack is full, 0 otherwise\n */\nuint16_t isFull(void);\n\n/**\n * @brief Peek at a specific position in the stack (for testing)\n * @param pos position to peek (0 = bottom, top = st.top)\n * @returns character at position, or '\\0' if invalid position\n */\nchar peekAt(int pos);\n\n/**\n * @brief Validate if an infix expression has balanced parentheses\n * @param inf the input infix expression\n * @returns 1 if balanced, 0 if not balanced\n */\nint isBalancedParentheses(char inf[]);\n\n/**\n * @brief Check if a character is a valid operator\n * @param c character to check\n * @returns 1 if valid operator, 0 otherwise\n */\nint isOperator(char c);\n\n/**\n * @brief Count the number of operators in an expression\n * @param expr the expression to analyze\n * @returns number of operators found\n */\nint countOperators(char expr[]);\n\n/**\n * @brief Count the number of operands (alphanumeric) in an expression\n * @param expr the expression to analyze\n * @returns number of operands found\n */\nint countOperands(char expr[]);\n\n#endif /* CONV_INFIX_TO_POSTFIX2_H */\n\n\nBelow is a list of available helper functions retrieved from the helper pool:\nHere are all 5 available helper functions you can use:\\n\\n1. capture_stdout_start\\n   Description: Create a pipe\\n   Returns: stdout_capture_t *\\n\\n2. capture_stdout_stop\\n   Description: Flush stdout to ensure all output is written to pipe\\n   Returns: char *\\n   Parameters: stdout_capture_t * cap\\n\\n3. assert_stdout_equals\\n   Returns: void\\n   Parameters: stdout_capture_t * cap, const char * expected\\n\\n4. assert_stdout_contains\\n   Returns: void\\n   Parameters: stdout_capture_t * cap, const char * expected_substring\\n\\n5. assert_stdout_not_empty\\n   Returns: void\\n   Parameters: stdout_capture_t * cap\\n\\n\n\nYou task:\n1. Identify public header functions (Note: source function names will be loaded from source_functions.json).\n2. Classify helpers into 'assertion_operations' and 'utility_operations'.\n3. Create new helpers in 'created' only if no existing helper covers the functionality.\n4. Fill 'searched_from_pool' with relevant helpers (verify no conflicts with source code names).\n5. Track dependencies in 'dependency_analysis' (planned_created_functions and required_from_pool only).\n6. Ensure output JSON strictly follows the format with all created and searched helpers.    \n\n## OUTPUT FORMAT:\n**REQUIRED JSON structure with dependency_analysis:**\n```json\n{\n  \"dependency_analysis\": {\n    \"planned_created_functions\": [\n      {\"name\": \"helper_build_tree\", \"calls\": [\"insert\", \"malloc\", \"free\"]},\n      {\"name\": \"verify_tree_structure\", \"calls\": [\"assert_array_equal\", \"printf\"]}\n    ],\n    \"required_from_pool\": [\"assert_array_equal\"]\n  },\n  \"assertion_operations\": {\n    \"searched_from_pool\": [\"assert_array_equal\"],\n    \"created\": [\n      {\n        \"name\": \"verify_tree_structure\",\n        \"description\": \"Verifies tree structure matches expected\",\n        \"return_type\": \"void\",\n        \"parameters\": [{\"name\": \"root\", \"type\": \"struct node *\"}],\n        \"code_block\": \"#include <stdio.h>\nvoid verify_tree_structure(struct node *root) {\n  // calls assert_array_equal\n}\"\n      }\n    ]\n  },\n  \"utility_operations\": {\n    \"searched_from_pool\": [\"init_test_root\", \"cleanup_test_tree\", \"reset_test_root\"],\n    \"created\": [\n      {\n        \"name\": \"helper_build_tree\", \n        \"description\": \"Builds tree from array of values\",\n        \"return_type\": \"struct node *\",\n        \"parameters\": [{\"name\": \"values\", \"type\": \"int *\"}, {\"name\": \"size\", \"type\": \"int\"}],\n        \"code_block\": \"#include <stdlib.h>\nstruct node* helper_build_tree(int *values, int size) {\n  // calls insert, malloc, free\n}\"\n      }\n    ]\n  }\n}\n```\n\n**VALIDATION**: Ensure \"required_from_pool\" functions appear in \"searched_from_pool\" sections! \n**HEADER VALIDATION**: Ensure all source code function calls are declared in the header file!\n**NOTE**: \"searched_from_pool\" may include additional relevant functions beyond just \"required_from_pool\"!\n"
+      }
+    ],
+    "model": "deepseek-chat",
+    "provider": "deepseek",
+    "temperature": 0,
+    "response_model": "<class 'apis.formats.response_format.OperationMap'>",
+    "max_tokens": 8192,
+    "input_tokens": 6143
+  },
+  "response": {
+    "parsed_content": {
+      "dependency_analysis": {
+        "planned_created_functions": [
+          {
+            "name": "helper_assert_postfix",
+            "calls": [
+              "convert",
+              "strcmp",
+              "assert"
+            ]
+          },
+          {
+            "name": "helper_assert_stack_state",
+            "calls": [
+              "getStackSize",
+              "peekAt",
+              "assert"
+            ]
+          },
+          {
+            "name": "helper_assert_balanced_parentheses",
+            "calls": [
+              "isBalancedParentheses",
+              "assert"
+            ]
+          },
+          {
+            "name": "helper_assert_operator_count",
+            "calls": [
+              "countOperators",
+              "assert"
+            ]
+          },
+          {
+            "name": "helper_assert_operand_count",
+            "calls": [
+              "countOperands",
+              "assert"
+            ]
+          },
+          {
+            "name": "helper_assert_priority",
+            "calls": [
+              "priority",
+              "assert"
+            ]
+          },
+          {
+            "name": "helper_assert_operator",
+            "calls": [
+              "isOperator",
+              "assert"
+            ]
+          },
+          {
+            "name": "helper_assert_stack_empty",
+            "calls": [
+              "isEmpty",
+              "assert"
+            ]
+          },
+          {
+            "name": "helper_assert_stack_full",
+            "calls": [
+              "isFull",
+              "assert"
+            ]
+          },
+          {
+            "name": "helper_assert_convert_safe",
+            "calls": [
+              "convert_safe",
+              "strcmp",
+              "assert"
+            ]
+          },
+          {
+            "name": "helper_setup_stack",
+            "calls": [
+              "initStack",
+              "push"
+            ]
+          },
+          {
+            "name": "helper_reset_stack",
+            "calls": [
+              "initStack"
+            ]
+          },
+          {
+            "name": "helper_create_infix_string",
+            "calls": [
+              "malloc",
+              "strcpy"
+            ]
+          },
+          {
+            "name": "helper_create_postfix_string",
+            "calls": [
+              "malloc",
+              "strcpy"
+            ]
+          }
+        ],
+        "required_from_pool": []
+      },
+      "assertion_operations": {
+        "searched_from_pool": [],
+        "created": [
+          {
+            "name": "helper_assert_postfix",
+            "description": "Asserts that the postfix conversion result matches the expected string",
+            "return_type": "void",
+            "parameters": [
+              {
+                "name": "infix",
+                "type": "char *"
+              },
+              {
+                "name": "expected_postfix",
+                "type": "char *"
+              }
+            ],
+            "code_block": "#include <assert.h>\n#include <string.h>\nvoid helper_assert_postfix(char *infix, char *expected_postfix) {\n    initStack();\n    char *result = convert(infix);\n    assert(strcmp(result, expected_postfix) == 0);\n}"
+          },
+          {
+            "name": "helper_assert_stack_state",
+            "description": "Asserts that the stack has a specific size and contains expected characters at given positions",
+            "return_type": "void",
+            "parameters": [
+              {
+                "name": "expected_size",
+                "type": "int"
+              },
+              {
+                "name": "expected_chars",
+                "type": "char *"
+              }
+            ],
+            "code_block": "#include <assert.h>\n#include <string.h>\nvoid helper_assert_stack_state(int expected_size, char *expected_chars) {\n    int actual_size = getStackSize();\n    assert(actual_size == expected_size);\n    for (int i = 0; i < expected_size; i++) {\n        assert(peekAt(i) == expected_chars[i]);\n    }\n}"
+          },
+          {
+            "name": "helper_assert_balanced_parentheses",
+            "description": "Asserts that an infix expression has balanced parentheses",
+            "return_type": "void",
+            "parameters": [
+              {
+                "name": "infix",
+                "type": "char *"
+              }
+            ],
+            "code_block": "#include <assert.h>\nvoid helper_assert_balanced_parentheses(char *infix) {\n    int result = isBalancedParentheses(infix);\n    assert(result == 1);\n}"
+          },
+          {
+            "name": "helper_assert_operator_count",
+            "description": "Asserts that an expression contains a specific number of operators",
+            "return_type": "void",
+            "parameters": [
+              {
+                "name": "expr",
+                "type": "char *"
+              },
+              {
+                "name": "expected_count",
+                "type": "int"
+              }
+            ],
+            "code_block": "#include <assert.h>\nvoid helper_assert_operator_count(char *expr, int expected_count) {\n    int actual_count = countOperators(expr);\n    assert(actual_count == expected_count);\n}"
+          },
+          {
+            "name": "helper_assert_operand_count",
+            "description": "Asserts that an expression contains a specific number of operands",
+            "return_type": "void",
+            "parameters": [
+              {
+                "name": "expr",
+                "type": "char *"
+              },
+              {
+                "name": "expected_count",
+                "type": "int"
+              }
+            ],
+            "code_block": "#include <assert.h>\nvoid helper_assert_operand_count(char *expr, int expected_count) {\n    int actual_count = countOperands(expr);\n    assert(actual_count == expected_count);\n}"
+          },
+          {
+            "name": "helper_assert_priority",
+            "description": "Asserts that an operator has a specific priority value",
+            "return_type": "void",
+            "parameters": [
+              {
+                "name": "opr",
+                "type": "char"
+              },
+              {
+                "name": "expected_priority",
+                "type": "int"
+              }
+            ],
+            "code_block": "#include <assert.h>\nvoid helper_assert_priority(char opr, int expected_priority) {\n    int actual_priority = priority(opr);\n    assert(actual_priority == expected_priority);\n}"
+          },
+          {
+            "name": "helper_assert_operator",
+            "description": "Asserts that a character is a valid operator",
+            "return_type": "void",
+            "parameters": [
+              {
+                "name": "c",
+                "type": "char"
+              }
+            ],
+            "code_block": "#include <assert.h>\nvoid helper_assert_operator(char c) {\n    int result = isOperator(c);\n    assert(result == 1);\n}"
+          },
+          {
+            "name": "helper_assert_stack_empty",
+            "description": "Asserts that the stack is empty",
+            "return_type": "void",
+            "parameters": [],
+            "code_block": "#include <assert.h>\nvoid helper_assert_stack_empty(void) {\n    int result = isEmpty();\n    assert(result == 1);\n}"
+          },
+          {
+            "name": "helper_assert_stack_full",
+            "description": "Asserts that the stack is full",
+            "return_type": "void",
+            "parameters": [],
+            "code_block": "#include <assert.h>\nvoid helper_assert_stack_full(void) {\n    int result = isFull();\n    assert(result == 1);\n}"
+          },
+          {
+            "name": "helper_assert_convert_safe",
+            "description": "Asserts that convert_safe returns expected result and output matches expected string",
+            "return_type": "void",
+            "parameters": [
+              {
+                "name": "infix",
+                "type": "char *"
+              },
+              {
+                "name": "expected_postfix",
+                "type": "char *"
+              },
+              {
+                "name": "buffer_size",
+                "type": "size_t"
+              }
+            ],
+            "code_block": "#include <assert.h>\n#include <string.h>\n#include <stdlib.h>\nvoid helper_assert_convert_safe(char *infix, char *expected_postfix, size_t buffer_size) {\n    char *output = malloc(buffer_size);\n    int result = convert_safe(infix, output, buffer_size);\n    assert(result == 0);\n    assert(strcmp(output, expected_postfix) == 0);\n    free(output);\n}"
+          }
+        ]
+      },
+      "utility_operations": {
+        "searched_from_pool": [
+          "capture_stdout_start",
+          "capture_stdout_stop",
+          "assert_stdout_equals",
+          "assert_stdout_contains",
+          "assert_stdout_not_empty"
+        ],
+        "created": [
+          {
+            "name": "helper_setup_stack",
+            "description": "Initializes the stack and pushes a sequence of characters onto it",
+            "return_type": "void",
+            "parameters": [
+              {
+                "name": "chars",
+                "type": "char *"
+              },
+              {
+                "name": "count",
+                "type": "int"
+              }
+            ],
+            "code_block": "#include <string.h>\nvoid helper_setup_stack(char *chars, int count) {\n    initStack();\n    for (int i = 0; i < count; i++) {\n        push(chars[i]);\n    }\n}"
+          },
+          {
+            "name": "helper_reset_stack",
+            "description": "Resets the stack to empty state",
+            "return_type": "void",
+            "parameters": [],
+            "code_block": "void helper_reset_stack(void) {\n    initStack();\n}"
+          },
+          {
+            "name": "helper_create_infix_string",
+            "description": "Creates a dynamically allocated copy of an infix string",
+            "return_type": "char *",
+            "parameters": [
+              {
+                "name": "infix",
+                "type": "char *"
+              }
+            ],
+            "code_block": "#include <stdlib.h>\n#include <string.h>\nchar *helper_create_infix_string(char *infix) {\n    size_t len = strlen(infix);\n    char *copy = malloc(len + 1);\n    strcpy(copy, infix);\n    return copy;\n}"
+          },
+          {
+            "name": "helper_create_postfix_string",
+            "description": "Creates a dynamically allocated copy of a postfix string",
+            "return_type": "char *",
+            "parameters": [
+              {
+                "name": "postfix",
+                "type": "char *"
+              }
+            ],
+            "code_block": "#include <stdlib.h>\n#include <string.h>\nchar *helper_create_postfix_string(char *postfix) {\n    size_t len = strlen(postfix);\n    char *copy = malloc(len + 1);\n    strcpy(copy, postfix);\n    return copy;\n}"
+          }
+        ]
+      }
+    },
+    "validated_content": {
+      "dependency_analysis": {
+        "source_functions": null,
+        "planned_created_functions": [
+          {
+            "name": "helper_assert_postfix",
+            "calls": [
+              "convert",
+              "strcmp",
+              "assert"
+            ]
+          },
+          {
+            "name": "helper_assert_stack_state",
+            "calls": [
+              "getStackSize",
+              "peekAt",
+              "assert"
+            ]
+          },
+          {
+            "name": "helper_assert_balanced_parentheses",
+            "calls": [
+              "isBalancedParentheses",
+              "assert"
+            ]
+          },
+          {
+            "name": "helper_assert_operator_count",
+            "calls": [
+              "countOperators",
+              "assert"
+            ]
+          },
+          {
+            "name": "helper_assert_operand_count",
+            "calls": [
+              "countOperands",
+              "assert"
+            ]
+          },
+          {
+            "name": "helper_assert_priority",
+            "calls": [
+              "priority",
+              "assert"
+            ]
+          },
+          {
+            "name": "helper_assert_operator",
+            "calls": [
+              "isOperator",
+              "assert"
+            ]
+          },
+          {
+            "name": "helper_assert_stack_empty",
+            "calls": [
+              "isEmpty",
+              "assert"
+            ]
+          },
+          {
+            "name": "helper_assert_stack_full",
+            "calls": [
+              "isFull",
+              "assert"
+            ]
+          },
+          {
+            "name": "helper_assert_convert_safe",
+            "calls": [
+              "convert_safe",
+              "strcmp",
+              "assert"
+            ]
+          },
+          {
+            "name": "helper_setup_stack",
+            "calls": [
+              "initStack",
+              "push"
+            ]
+          },
+          {
+            "name": "helper_reset_stack",
+            "calls": [
+              "initStack"
+            ]
+          },
+          {
+            "name": "helper_create_infix_string",
+            "calls": [
+              "malloc",
+              "strcpy"
+            ]
+          },
+          {
+            "name": "helper_create_postfix_string",
+            "calls": [
+              "malloc",
+              "strcpy"
+            ]
+          }
+        ],
+        "required_from_pool": []
+      },
+      "assertion_operations": {
+        "searched_from_pool": [],
+        "created": [
+          {
+            "name": "helper_assert_postfix",
+            "description": "Asserts that the postfix conversion result matches the expected string",
+            "return_type": "void",
+            "parameters": [
+              {
+                "name": "infix",
+                "type": "char *"
+              },
+              {
+                "name": "expected_postfix",
+                "type": "char *"
+              }
+            ],
+            "code_block": "#include <assert.h>\n#include <string.h>\nvoid helper_assert_postfix(char *infix, char *expected_postfix) {\n    initStack();\n    char *result = convert(infix);\n    assert(strcmp(result, expected_postfix) == 0);\n}"
+          },
+          {
+            "name": "helper_assert_stack_state",
+            "description": "Asserts that the stack has a specific size and contains expected characters at given positions",
+            "return_type": "void",
+            "parameters": [
+              {
+                "name": "expected_size",
+                "type": "int"
+              },
+              {
+                "name": "expected_chars",
+                "type": "char *"
+              }
+            ],
+            "code_block": "#include <assert.h>\n#include <string.h>\nvoid helper_assert_stack_state(int expected_size, char *expected_chars) {\n    int actual_size = getStackSize();\n    assert(actual_size == expected_size);\n    for (int i = 0; i < expected_size; i++) {\n        assert(peekAt(i) == expected_chars[i]);\n    }\n}"
+          },
+          {
+            "name": "helper_assert_balanced_parentheses",
+            "description": "Asserts that an infix expression has balanced parentheses",
+            "return_type": "void",
+            "parameters": [
+              {
+                "name": "infix",
+                "type": "char *"
+              }
+            ],
+            "code_block": "#include <assert.h>\nvoid helper_assert_balanced_parentheses(char *infix) {\n    int result = isBalancedParentheses(infix);\n    assert(result == 1);\n}"
+          },
+          {
+            "name": "helper_assert_operator_count",
+            "description": "Asserts that an expression contains a specific number of operators",
+            "return_type": "void",
+            "parameters": [
+              {
+                "name": "expr",
+                "type": "char *"
+              },
+              {
+                "name": "expected_count",
+                "type": "int"
+              }
+            ],
+            "code_block": "#include <assert.h>\nvoid helper_assert_operator_count(char *expr, int expected_count) {\n    int actual_count = countOperators(expr);\n    assert(actual_count == expected_count);\n}"
+          },
+          {
+            "name": "helper_assert_operand_count",
+            "description": "Asserts that an expression contains a specific number of operands",
+            "return_type": "void",
+            "parameters": [
+              {
+                "name": "expr",
+                "type": "char *"
+              },
+              {
+                "name": "expected_count",
+                "type": "int"
+              }
+            ],
+            "code_block": "#include <assert.h>\nvoid helper_assert_operand_count(char *expr, int expected_count) {\n    int actual_count = countOperands(expr);\n    assert(actual_count == expected_count);\n}"
+          },
+          {
+            "name": "helper_assert_priority",
+            "description": "Asserts that an operator has a specific priority value",
+            "return_type": "void",
+            "parameters": [
+              {
+                "name": "opr",
+                "type": "char"
+              },
+              {
+                "name": "expected_priority",
+                "type": "int"
+              }
+            ],
+            "code_block": "#include <assert.h>\nvoid helper_assert_priority(char opr, int expected_priority) {\n    int actual_priority = priority(opr);\n    assert(actual_priority == expected_priority);\n}"
+          },
+          {
+            "name": "helper_assert_operator",
+            "description": "Asserts that a character is a valid operator",
+            "return_type": "void",
+            "parameters": [
+              {
+                "name": "c",
+                "type": "char"
+              }
+            ],
+            "code_block": "#include <assert.h>\nvoid helper_assert_operator(char c) {\n    int result = isOperator(c);\n    assert(result == 1);\n}"
+          },
+          {
+            "name": "helper_assert_stack_empty",
+            "description": "Asserts that the stack is empty",
+            "return_type": "void",
+            "parameters": [],
+            "code_block": "#include <assert.h>\nvoid helper_assert_stack_empty(void) {\n    int result = isEmpty();\n    assert(result == 1);\n}"
+          },
+          {
+            "name": "helper_assert_stack_full",
+            "description": "Asserts that the stack is full",
+            "return_type": "void",
+            "parameters": [],
+            "code_block": "#include <assert.h>\nvoid helper_assert_stack_full(void) {\n    int result = isFull();\n    assert(result == 1);\n}"
+          },
+          {
+            "name": "helper_assert_convert_safe",
+            "description": "Asserts that convert_safe returns expected result and output matches expected string",
+            "return_type": "void",
+            "parameters": [
+              {
+                "name": "infix",
+                "type": "char *"
+              },
+              {
+                "name": "expected_postfix",
+                "type": "char *"
+              },
+              {
+                "name": "buffer_size",
+                "type": "size_t"
+              }
+            ],
+            "code_block": "#include <assert.h>\n#include <string.h>\n#include <stdlib.h>\nvoid helper_assert_convert_safe(char *infix, char *expected_postfix, size_t buffer_size) {\n    char *output = malloc(buffer_size);\n    int result = convert_safe(infix, output, buffer_size);\n    assert(result == 0);\n    assert(strcmp(output, expected_postfix) == 0);\n    free(output);\n}"
+          }
+        ]
+      },
+      "utility_operations": {
+        "searched_from_pool": [
+          "capture_stdout_start",
+          "capture_stdout_stop",
+          "assert_stdout_equals",
+          "assert_stdout_contains",
+          "assert_stdout_not_empty"
+        ],
+        "created": [
+          {
+            "name": "helper_setup_stack",
+            "description": "Initializes the stack and pushes a sequence of characters onto it",
+            "return_type": "void",
+            "parameters": [
+              {
+                "name": "chars",
+                "type": "char *"
+              },
+              {
+                "name": "count",
+                "type": "int"
+              }
+            ],
+            "code_block": "#include <string.h>\nvoid helper_setup_stack(char *chars, int count) {\n    initStack();\n    for (int i = 0; i < count; i++) {\n        push(chars[i]);\n    }\n}"
+          },
+          {
+            "name": "helper_reset_stack",
+            "description": "Resets the stack to empty state",
+            "return_type": "void",
+            "parameters": [],
+            "code_block": "void helper_reset_stack(void) {\n    initStack();\n}"
+          },
+          {
+            "name": "helper_create_infix_string",
+            "description": "Creates a dynamically allocated copy of an infix string",
+            "return_type": "char *",
+            "parameters": [
+              {
+                "name": "infix",
+                "type": "char *"
+              }
+            ],
+            "code_block": "#include <stdlib.h>\n#include <string.h>\nchar *helper_create_infix_string(char *infix) {\n    size_t len = strlen(infix);\n    char *copy = malloc(len + 1);\n    strcpy(copy, infix);\n    return copy;\n}"
+          },
+          {
+            "name": "helper_create_postfix_string",
+            "description": "Creates a dynamically allocated copy of a postfix string",
+            "return_type": "char *",
+            "parameters": [
+              {
+                "name": "postfix",
+                "type": "char *"
+              }
+            ],
+            "code_block": "#include <stdlib.h>\n#include <string.h>\nchar *helper_create_postfix_string(char *postfix) {\n    size_t len = strlen(postfix);\n    char *copy = malloc(len + 1);\n    strcpy(copy, postfix);\n    return copy;\n}"
+          }
+        ]
+      }
+    },
+    "raw_content": "{\n    \"dependency_analysis\": {\n        \"planned_created_functions\": [\n            {\n                \"name\": \"helper_assert_postfix\",\n                \"calls\": [\"convert\", \"strcmp\", \"assert\"]\n            },\n            {\n                \"name\": \"helper_assert_stack_state\",\n                \"calls\": [\"getStackSize\", \"peekAt\", \"assert\"]\n            },\n            {\n                \"name\": \"helper_assert_balanced_parentheses\",\n                \"calls\": [\"isBalancedParentheses\", \"assert\"]\n            },\n            {\n                \"name\": \"helper_assert_operator_count\",\n                \"calls\": [\"countOperators\", \"assert\"]\n            },\n            {\n                \"name\": \"helper_assert_operand_count\",\n                \"calls\": [\"countOperands\", \"assert\"]\n            },\n            {\n                \"name\": \"helper_assert_priority\",\n                \"calls\": [\"priority\", \"assert\"]\n            },\n            {\n                \"name\": \"helper_assert_operator\",\n                \"calls\": [\"isOperator\", \"assert\"]\n            },\n            {\n                \"name\": \"helper_assert_stack_empty\",\n                \"calls\": [\"isEmpty\", \"assert\"]\n            },\n            {\n                \"name\": \"helper_assert_stack_full\",\n                \"calls\": [\"isFull\", \"assert\"]\n            },\n            {\n                \"name\": \"helper_assert_convert_safe\",\n                \"calls\": [\"convert_safe\", \"strcmp\", \"assert\"]\n            },\n            {\n                \"name\": \"helper_setup_stack\",\n                \"calls\": [\"initStack\", \"push\"]\n            },\n            {\n                \"name\": \"helper_reset_stack\",\n                \"calls\": [\"initStack\"]\n            },\n            {\n                \"name\": \"helper_create_infix_string\",\n                \"calls\": [\"malloc\", \"strcpy\"]\n            },\n            {\n                \"name\": \"helper_create_postfix_string\",\n                \"calls\": [\"malloc\", \"strcpy\"]\n            }\n        ],\n        \"required_from_pool\": []\n    },\n    \"assertion_operations\": {\n        \"searched_from_pool\": [],\n        \"created\": [\n            {\n                \"name\": \"helper_assert_postfix\",\n                \"description\": \"Asserts that the postfix conversion result matches the expected string\",\n                \"return_type\": \"void\",\n                \"parameters\": [\n                    {\n                        \"name\": \"infix\",\n                        \"type\": \"char *\"\n                    },\n                    {\n                        \"name\": \"expected_postfix\",\n                        \"type\": \"char *\"\n                    }\n                ],\n                \"code_block\": \"#include <assert.h>\\n#include <string.h>\\nvoid helper_assert_postfix(char *infix, char *expected_postfix) {\\n    initStack();\\n    char *result = convert(infix);\\n    assert(strcmp(result, expected_postfix) == 0);\\n}\"\n            },\n            {\n                \"name\": \"helper_assert_stack_state\",\n                \"description\": \"Asserts that the stack has a specific size and contains expected characters at given positions\",\n                \"return_type\": \"void\",\n                \"parameters\": [\n                    {\n                        \"name\": \"expected_size\",\n                        \"type\": \"int\"\n                    },\n                    {\n                        \"name\": \"expected_chars\",\n                        \"type\": \"char *\"\n                    }\n                ],\n                \"code_block\": \"#include <assert.h>\\n#include <string.h>\\nvoid helper_assert_stack_state(int expected_size, char *expected_chars) {\\n    int actual_size = getStackSize();\\n    assert(actual_size == expected_size);\\n    for (int i = 0; i < expected_size; i++) {\\n        assert(peekAt(i) == expected_chars[i]);\\n    }\\n}\"\n            },\n            {\n                \"name\": \"helper_assert_balanced_parentheses\",\n                \"description\": \"Asserts that an infix expression has balanced parentheses\",\n                \"return_type\": \"void\",\n                \"parameters\": [\n                    {\n                        \"name\": \"infix\",\n                        \"type\": \"char *\"\n                    }\n                ],\n                \"code_block\": \"#include <assert.h>\\nvoid helper_assert_balanced_parentheses(char *infix) {\\n    int result = isBalancedParentheses(infix);\\n    assert(result == 1);\\n}\"\n            },\n            {\n                \"name\": \"helper_assert_operator_count\",\n                \"description\": \"Asserts that an expression contains a specific number of operators\",\n                \"return_type\": \"void\",\n                \"parameters\": [\n                    {\n                        \"name\": \"expr\",\n                        \"type\": \"char *\"\n                    },\n                    {\n                        \"name\": \"expected_count\",\n                        \"type\": \"int\"\n                    }\n                ],\n                \"code_block\": \"#include <assert.h>\\nvoid helper_assert_operator_count(char *expr, int expected_count) {\\n    int actual_count = countOperators(expr);\\n    assert(actual_count == expected_count);\\n}\"\n            },\n            {\n                \"name\": \"helper_assert_operand_count\",\n                \"description\": \"Asserts that an expression contains a specific number of operands\",\n                \"return_type\": \"void\",\n                \"parameters\": [\n                    {\n                        \"name\": \"expr\",\n                        \"type\": \"char *\"\n                    },\n                    {\n                        \"name\": \"expected_count\",\n                        \"type\": \"int\"\n                    }\n                ],\n                \"code_block\": \"#include <assert.h>\\nvoid helper_assert_operand_count(char *expr, int expected_count) {\\n    int actual_count = countOperands(expr);\\n    assert(actual_count == expected_count);\\n}\"\n            },\n            {\n                \"name\": \"helper_assert_priority\",\n                \"description\": \"Asserts that an operator has a specific priority value\",\n                \"return_type\": \"void\",\n                \"parameters\": [\n                    {\n                        \"name\": \"opr\",\n                        \"type\": \"char\"\n                    },\n                    {\n                        \"name\": \"expected_priority\",\n                        \"type\": \"int\"\n                    }\n                ],\n                \"code_block\": \"#include <assert.h>\\nvoid helper_assert_priority(char opr, int expected_priority) {\\n    int actual_priority = priority(opr);\\n    assert(actual_priority == expected_priority);\\n}\"\n            },\n            {\n                \"name\": \"helper_assert_operator\",\n                \"description\": \"Asserts that a character is a valid operator\",\n                \"return_type\": \"void\",\n                \"parameters\": [\n                    {\n                        \"name\": \"c\",\n                        \"type\": \"char\"\n                    }\n                ],\n                \"code_block\": \"#include <assert.h>\\nvoid helper_assert_operator(char c) {\\n    int result = isOperator(c);\\n    assert(result == 1);\\n}\"\n            },\n            {\n                \"name\": \"helper_assert_stack_empty\",\n                \"description\": \"Asserts that the stack is empty\",\n                \"return_type\": \"void\",\n                \"parameters\": [],\n                \"code_block\": \"#include <assert.h>\\nvoid helper_assert_stack_empty(void) {\\n    int result = isEmpty();\\n    assert(result == 1);\\n}\"\n            },\n            {\n                \"name\": \"helper_assert_stack_full\",\n                \"description\": \"Asserts that the stack is full\",\n                \"return_type\": \"void\",\n                \"parameters\": [],\n                \"code_block\": \"#include <assert.h>\\nvoid helper_assert_stack_full(void) {\\n    int result = isFull();\\n    assert(result == 1);\\n}\"\n            },\n            {\n                \"name\": \"helper_assert_convert_safe\",\n                \"description\": \"Asserts that convert_safe returns expected result and output matches expected string\",\n                \"return_type\": \"void\",\n                \"parameters\": [\n                    {\n                        \"name\": \"infix\",\n                        \"type\": \"char *\"\n                    },\n                    {\n                        \"name\": \"expected_postfix\",\n                        \"type\": \"char *\"\n                    },\n                    {\n                        \"name\": \"buffer_size\",\n                        \"type\": \"size_t\"\n                    }\n                ],\n                \"code_block\": \"#include <assert.h>\\n#include <string.h>\\n#include <stdlib.h>\\nvoid helper_assert_convert_safe(char *infix, char *expected_postfix, size_t buffer_size) {\\n    char *output = malloc(buffer_size);\\n    int result = convert_safe(infix, output, buffer_size);\\n    assert(result == 0);\\n    assert(strcmp(output, expected_postfix) == 0);\\n    free(output);\\n}\"\n            }\n        ]\n    },\n    \"utility_operations\": {\n        \"searched_from_pool\": [\"capture_stdout_start\", \"capture_stdout_stop\", \"assert_stdout_equals\", \"assert_stdout_contains\", \"assert_stdout_not_empty\"],\n        \"created\": [\n            {\n                \"name\": \"helper_setup_stack\",\n                \"description\": \"Initializes the stack and pushes a sequence of characters onto it\",\n                \"return_type\": \"void\",\n                \"parameters\": [\n                    {\n                        \"name\": \"chars\",\n                        \"type\": \"char *\"\n                    },\n                    {\n                        \"name\": \"count\",\n                        \"type\": \"int\"\n                    }\n                ],\n                \"code_block\": \"#include <string.h>\\nvoid helper_setup_stack(char *chars, int count) {\\n    initStack();\\n    for (int i = 0; i < count; i++) {\\n        push(chars[i]);\\n    }\\n}\"\n            },\n            {\n                \"name\": \"helper_reset_stack\",\n                \"description\": \"Resets the stack to empty state\",\n                \"return_type\": \"void\",\n                \"parameters\": [],\n                \"code_block\": \"void helper_reset_stack(void) {\\n    initStack();\\n}\"\n            },\n            {\n                \"name\": \"helper_create_infix_string\",\n                \"description\": \"Creates a dynamically allocated copy of an infix string\",\n                \"return_type\": \"char *\",\n                \"parameters\": [\n                    {\n                        \"name\": \"infix\",\n                        \"type\": \"char *\"\n                    }\n                ],\n                \"code_block\": \"#include <stdlib.h>\\n#include <string.h>\\nchar *helper_create_infix_string(char *infix) {\\n    size_t len = strlen(infix);\\n    char *copy = malloc(len + 1);\\n    strcpy(copy, infix);\\n    return copy;\\n}\"\n            },\n            {\n                \"name\": \"helper_create_postfix_string\",\n                \"description\": \"Creates a dynamically allocated copy of a postfix string\",\n                \"return_type\": \"char *\",\n                \"parameters\": [\n                    {\n                        \"name\": \"postfix\",\n                        \"type\": \"char *\"\n                    }\n                ],\n                \"code_block\": \"#include <stdlib.h>\\n#include <string.h>\\nchar *helper_create_postfix_string(char *postfix) {\\n    size_t len = strlen(postfix);\\n    char *copy = malloc(len + 1);\\n    strcpy(copy, postfix);\\n    return copy;\\n}\"\n            }\n        ]\n    }\n}",
+    "finish_reason": "stop",
+    "usage": {
+      "completion_tokens": 2397,
+      "prompt_tokens": 6715,
+      "total_tokens": 9112,
+      "completion_tokens_details": null,
+      "prompt_tokens_details": {
+        "audio_tokens": null,
+        "cached_tokens": 3328
+      },
+      "prompt_cache_hit_tokens": 3328,
+      "prompt_cache_miss_tokens": 3387
+    },
+    "response_id": "b6db6b5a-860a-454c-87a0-b41fb08446e3",
+    "created": 1768528483,
+    "attempt": 1,
+    "validation_error": null
+  }
+}

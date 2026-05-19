@@ -1,0 +1,36 @@
+KLEE: WARNING: undefined reference to function: acos
+KLEE: WARNING: undefined reference to function: asin
+KLEE: WARNING: undefined reference to function: atan
+KLEE: WARNING: undefined reference to function: ceil
+KLEE: WARNING: undefined reference to function: cos
+KLEE: WARNING: undefined reference to function: cosh
+KLEE: WARNING: undefined reference to function: exp
+KLEE: WARNING: undefined reference to function: floor
+KLEE: WARNING: undefined reference to function: log
+KLEE: WARNING: undefined reference to function: log10
+KLEE: WARNING: undefined reference to function: pow
+KLEE: WARNING: undefined reference to function: sin
+KLEE: WARNING: undefined reference to function: sinh
+KLEE: WARNING: undefined reference to function: sqrt
+KLEE: WARNING: undefined reference to function: strcmp
+KLEE: WARNING: undefined reference to function: tan
+KLEE: WARNING: undefined reference to function: tanh
+KLEE: WARNING ONCE: silently concretizing (reason: floating point) expression (ReadLSB w64 0 input0) to value 0 (subjects_new/tulipindicators/src/tulipindicators.c:1539)
+KLEE: WARNING ONCE: calling external: acos((ReadLSB w64 0 input0)) at subjects_new/tulipindicators/src/tulipindicators.c:1540 288
+KLEE: WARNING ONCE: silently concretizing (reason: floating point) expression (ReadLSB w64 0 input1) to value 0 (subjects_new/tulipindicators/src/tulipindicators.c:1555)
+KLEE: WARNING ONCE: Alignment of memory from call "malloc" is not modelled. Using alignment of 8.
+KLEE: WARNING ONCE: calling external: asin((ReadLSB w64 0 input0)) at subjects_new/tulipindicators/src/tulipindicators.c:1883 288
+KLEE: WARNING ONCE: calling external: atan((ReadLSB w64 0 input0)) at subjects_new/tulipindicators/src/tulipindicators.c:1884 288
+KLEE: WARNING ONCE: calling external: sqrt(0) at subjects_new/tulipindicators/src/tulipindicators.c:2037 13
+KLEE: WARNING ONCE: calling external: ceil((ReadLSB w64 0 input0)) at subjects_new/tulipindicators/src/tulipindicators.c:2114 288
+KLEE: WARNING ONCE: calling external: cos((ReadLSB w64 0 input0)) at subjects_new/tulipindicators/src/tulipindicators.c:2141 286
+KLEE: WARNING ONCE: calling external: cosh((ReadLSB w64 0 input0)) at subjects_new/tulipindicators/src/tulipindicators.c:2142 288
+KLEE: WARNING ONCE: calling external: exp((ReadLSB w64 0 input0)) at subjects_new/tulipindicators/src/tulipindicators.c:2458 286
+KLEE: WARNING ONCE: calling external: log(4602712680823980524) at subjects_new/tulipindicators/src/tulipindicators.c:2516 57
+KLEE: WARNING ONCE: calling external: floor((ReadLSB w64 0 input0)) at subjects_new/tulipindicators/src/tulipindicators.c:2523 290
+KLEE: WARNING ONCE: calling external: pow(4604180019048437076, 4611686018427387904) at subjects_new/tulipindicators/src/tulipindicators.c:2625 12
+KLEE: WARNING ONCE: calling external: log10((ReadLSB w64 0 input0)) at subjects_new/tulipindicators/src/tulipindicators.c:2735 290
+KLEE: WARNING ONCE: calling external: sin(0) at subjects_new/tulipindicators/src/tulipindicators.c:3056 47
+KLEE: WARNING ONCE: calling external: sinh((ReadLSB w64 0 input0)) at subjects_new/tulipindicators/src/tulipindicators.c:3350 288
+KLEE: WARNING ONCE: calling external: tan((ReadLSB w64 0 input0)) at subjects_new/tulipindicators/src/tulipindicators.c:3679 286
+KLEE: WARNING ONCE: calling external: tanh((ReadLSB w64 0 input0)) at subjects_new/tulipindicators/src/tulipindicators.c:3680 288

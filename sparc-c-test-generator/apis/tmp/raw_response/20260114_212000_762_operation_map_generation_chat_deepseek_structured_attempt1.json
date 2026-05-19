@@ -1,0 +1,689 @@
+{
+  "timestamp": "2026-01-14T21:20:00.762487",
+  "context": "operation_map_generation",
+  "model_type": "chat_deepseek_structured_attempt1",
+  "model": "deepseek-chat",
+  "request": {
+    "messages": [
+      {
+        "role": "system",
+        "content": "\n🚨 CRITICAL RULES - VIOLATION = IMMEDIATE REJECTION 🚨\n1. **NO DUPLICATE NAMES**: Never create functions with same names as source code\n2. **NO HARDCODED VALUES**: All data must come from parameters, never {50, 30, 20}\n3. **PARAMETERIZED ONLY**: Every function must accept explicit parameters\n4. **NO PLACEHOLDER CODE**: Every function must contain COMPLETE, WORKING C code - NO TODO comments, NO placeholder comments like \"// Perform operation\", NO functions that only malloc/free without doing actual work\n5. **NO PRIVATE FUNCTIONS**: Never call functions that are NOT declared in the header file. Functions with trailing underscores (like `node_contains_`, `get_quadrant_`) are typically private/static and FORBIDDEN\n\n\n##⚠️ MANDATORY WORKFLOW ⚠️:\n\n1. **Analyze the C source code and header file**: \n   - **Note**: Source function names and their paths are pre-defined and will be loaded from source_functions.json - you do NOT need to generate them\n   - **Extract all public function declarations** from the header file - these are the ONLY functions you can call from the source code\n   - **FORBIDDEN**: Never call functions not declared in the header file (private/static functions like `node_contains_`, `get_quadrant_`)\n2. **Focus on BASIC helpers only**: Create only fundamental assertion and utility helpers that provide NEW functionality. Do NOT create:\n   - Wrapper functions that just call existing helpers\n   - Complete test functions that combine multiple operations\n   - Functions that duplicate existing functionality\n3. Carefully separate operations into two categories:\n   - **assertion_operations**: Include BASIC assertion functions for validating specific conditions.\n   - **utility_operations**: Include BASIC utility functions for fundamental setup/init functions, cleanup functions, or reset functions.\n    Important:\n    - Do not place assertion-type functions under utility_operations.\n    - Do not place utility-type functions under assertion_operations.\n4. For each category:\n   - If there are existing helper functions that are relevant for unit testing (either as dependencies OR as useful operations for test scenarios), list all the **names** in `\"searched_from_pool\"` **ONLY if they do NOT conflict with source code function names**.\n   - **CRITICAL: Before adding ANY function name to \"searched_from_pool\", verify it does NOT match ANY function name in the source C code being tested.**\n   - **Include in searched_from_pool**:\n     a. Functions that your created functions will call (dependencies)\n     b. Functions that would be useful for test scenarios even if not called by created functions\n     c. Any assertion or utility functions relevant to testing the source code\n   - If no perfect match exists for needed functionality, define a **new helper** in `\"created\"` with:\n     - `\"name\"`: The function name you're creating. **🚨 CRITICAL RULE 🚨** Please use prefix \"helper_\" for all helper functions to avoid conflicts with source code function names.\n     - `\"description\"`: Clear explanation of the helper's purpose\n     - `\"return_type\"`: C return type (e.g., `void`, `int`, `struct node *`)\n     - `\"parameters\"`: List of objects with `\"name\"` and `\"type\"`\n     - `\"code_block\"`: The complete, compilable C implementation of the helper function. **🚨 MANDATORY: MUST CONTAIN ACTUAL WORKING CODE 🚨** - NO PLACEHOLDER COMMENTS! Include all necessary declarations and statements so that the function can be compiled and run as-is. \n       **FORBIDDEN PATTERNS**:\n       ❌ `// TODO: implement this` \n       ❌ `// Perform some operation`\n       ❌ `// Call some_function(...)`\n       ❌ Functions with only malloc/free and no actual logic\n       **REQUIRED**: Every function must contain complete, functional C code that actually performs the described operation.\n   - **🚨 CRITICAL DEPENDENCY RULE 🚨**: If your created function calls ANY other function (like `assert_array_equal`, `malloc`, custom helpers, etc.), you MUST ensure those functions are available by:\n     1. **For standard library functions** (malloc, printf, etc.): Include appropriate headers in your code_block\n     2. **For helper pool functions** (assert_array_equal, etc.): Add them to `\"searched_from_pool\"` \n     3. **For source code functions**: ONLY call functions that are declared in the header file - never call private/static functions\n     4. **Example**: If you create a function that calls `assert_array_equal`, you MUST include `assert_array_equal` in the `\"searched_from_pool\"` section, otherwise compilation will fail with \"undefined reference\" errors.\n   - **🚨 HEADER FILE VALIDATION 🚨**: Before calling ANY function from the source code, verify it exists in the header file:\n     - ✅ **ALLOWED**: `insert(root, key)` (if declared in header)\n     - ❌ **FORBIDDEN**: `node_contains_(root, point)` (private function with underscore)\n     - ❌ **FORBIDDEN**: `get_quadrant_(root, point)` (private function with underscore)\n     - ❌ **FORBIDDEN**: Any function not declared in the header file\n   - Only generate new helper functions in `\"created\"` if no existing function in available helper functions performs the same or a highly similar task. **PREFER REUSING existing helpers over creating new ones**. If an equivalent function already exists, reuse it instead of creating a new one.\n   - **AVOID WRAPPER FUNCTIONS**: Do not create functions that simply call existing helpers without adding significant new functionality.\n   - **FOCUS ON GAPS**: Only create helpers that fill genuine functionality gaps not covered by existing helper pool functions.\n   - **CRITICAL CONFLICT RESOLUTION**: If a helper function from the pool has the same name as a source code function, do NOT include it in \"searched_from_pool\". Instead, create a new function in \"created\" with a different name that performs the same functionality.\n   - **STRICT NAMING REQUIREMENT**: Before finalizing any function name in `\"created\"` or `\"searched_from_pool\"`, verify it does NOT match any function name from the source code or helper functions. This is mandatory to prevent compilation conflicts.\n4. **MANDATORY DEPENDENCY MANAGEMENT**:\n   - **Create dependency_analysis section** with these 2 required fields:\n     - **\"planned_created_functions\"**: For each function you plan to create, list:\n       - `\"name\"`: The function name you're creating\n       - `\"calls\"`: Array of ALL functions it will call (including `malloc`, `printf`, `assert_array_equal`, etc.)\n     - **\"required_from_pool\"**: List ALL helper pool functions needed by your created functions\n   - **Note**: \"source_functions\" will be automatically loaded from source_functions.json and merged - you do NOT need to generate it\n   \n   - **Dependency validation rules**:\n     - **Scan every `\"created\"` function** for external function calls\n     - **For each function call**, determine if it's:\n       - Standard library (`malloc`, `printf`) → Include proper #includes in code_block\n       - Helper pool function (`assert_array_equal`) → Add to \"required_from_pool\"\n       - Source code function (`insert`, `newNode`) → ONLY allowed if declared in header file, list in \"calls\"\n       - Private/static function (`node_contains_`, `get_quadrant_`) → ❌ FORBIDDEN - causes compilation errors\n     - **CRITICAL**: Every function in \"required_from_pool\" MUST appear in \"searched_from_pool\" sections\n     - **HEADER VALIDATION**: Every source code function call must be verified against the header file declarations\n     - **NOTE**: \"searched_from_pool\" can include MORE functions than \"required_from_pool\" - include any helper pool functions that are relevant for unit testing, even if not directly called by created functions\n     - **Compilation will fail** with \"undefined reference\" errors if dependencies are missing\n\n5. Include all possible operations that are necessary for generating **complete** test scenarios later.\n6. Make sure the operations are comprehensive enough to write complete test scenarios for all functions in the source code.\n7. Before producing the final JSON output, double-check the classification:\n   - If a function performs any kind of checking, validation, or result verification, it must be under assertion_operations.\n   - If a function only supports test setup, teardown, or data preparation, it must be under utility_operations.\n8. **FINAL DEPENDENCY VERIFICATION**: Before outputting JSON, verify that ALL functions called by your created functions are either:\n   - Standard library functions (with proper #includes)\n   - Listed in your `\"searched_from_pool\"` sections\n   - Source code functions that are declared in the header file (never private/static functions)\n   - Defined within the same `\"created\"` function\n\n## FORBIDDEN PATTERNS (REAL EXAMPLES THAT CAUSED ERRORS):\n```c\n// ❌ WRONG - Same name as source (causes \"error: redefinition of 'newNode'\")\nstruct node* newNode(int item) { ... }\n\n// ❌ WRONG - Hardcoded values (generates same key = 50 for all inserts)\nvoid setup() {\n    int values[] = {50, 30, 20};  // Results in: int key = 50; insert(root, key); insert(root, key);\n}\n\n// ❌ WRONG - Missing dependencies (causes \"undefined reference to 'assert_array_equal'\")\nvoid check_array(int *arr) {\n    assert_array_equal(arr, expected);  // Function not in searched_from_pool\n}\n\n// ❌ WRONG - Creates utility operations with same name as source code functions\nvoid insert() { ... }  // Conflicts with source insert() function\n\n// ❌ WRONG - Wrapper functions that just call existing helpers (useless)\nvoid verify_tree_structure(struct node *test_root, struct node *expected_root) {\n    assert_tree_equal(test_root, expected_root);  // Just calls existing function\n}\n\n// ❌ WRONG - Complete test functions (not basic helpers)\nvoid test_delete_node(struct node *root, int key) {\n    root = deleteNode(root, key);\n    assert_root_key(root, expected_key);\n    // This is a complete test, not a basic helper\n}\n\n// ❌ WRONG - Functions with only comments, no actual code (USELESS!)\nvoid assert_tree_structure(struct node *tree, int *expected, int size) {\n    int *actual = malloc(size * sizeof(int));\n    // Perform inorder traversal to fill actual_array\n    // Call assert_array_equal(actual_array, expected_array, size);\n    free(actual);  // Allocates and frees memory but does NOTHING useful!\n}\n\n// ❌ WRONG - Functions with TODO comments instead of real implementation\nvoid helper_function(int *data) {\n    // TODO: implement this function\n    return;  // Does nothing!\n}\n\n// ❌ WRONG - Calling private/static functions not in header file\nvoid helper_check_node(struct node* root, Point point) {\n    if (node_contains_(root, point)) {  // FORBIDDEN - private function!\n        // ...\n    }\n}\n\n// ❌ WRONG - Calling functions with underscores (typically private)\nint helper_find_quadrant(struct node* root, Point point) {\n    return get_quadrant_(root, point);  // FORBIDDEN - private function!\n}\n```\n\n## CORRECT PATTERNS:\n```c\n// ✅ RIGHT - Unique name, parameterized, provides NEW functionality with COMPLETE CODE\nstruct node* helper_build_tree(int *values, int size) {\n    struct node* root = NULL;\n    for (int i = 0; i < size; i++) {\n        root = insert(root, values[i]);\n    }\n    return root;\n}\n\n// ✅ RIGHT - Basic assertion helper that doesn't exist in pool with ACTUAL IMPLEMENTATION\nvoid assert_node_count(struct node* root, int expected_count) {\n    int actual_count = 0;\n    // Count nodes using recursive traversal\n    if (root != NULL) {\n        actual_count = 1 + count_subtree(root->left) + count_subtree(root->right);\n    }\n    assert(actual_count == expected_count);\n}\n\n// ✅ RIGHT - Basic utility helper for specific data preparation with WORKING CODE\nint* create_test_array(int size, int start_value) {\n    int* arr = malloc(size * sizeof(int));\n    for (int i = 0; i < size; i++) {\n        arr[i] = start_value + i;\n    }\n    return arr;\n}\n\n// ✅ RIGHT - Tree structure verification with COMPLETE FUNCTIONAL IMPLEMENTATION\nvoid assert_tree_structure(struct node *actual_tree, int *expected_array, int size) {\n    int *actual_array = malloc(size * sizeof(int));\n    int index = 0;\n    \n    // Perform inorder traversal to fill actual_array\n    inorder_to_array(actual_tree, actual_array, &index);\n    \n    // Compare arrays\n    for (int i = 0; i < size; i++) {\n        assert(actual_array[i] == expected_array[i]);\n    }\n    \n    free(actual_array);\n}\n\n// Helper function for inorder traversal\nvoid inorder_to_array(struct node* root, int* arr, int* index) {\n    if (root != NULL) {\n        inorder_to_array(root->left, arr, index);\n        arr[(*index)++] = root->data;\n        inorder_to_array(root->right, arr, index);\n    }\n}\n\n// ✅ RIGHT - Only calling public functions from header file\nvoid helper_validate_tree(struct node* root, Point point) {\n    // Only call functions declared in the header file\n    struct node* result = insert(root, point);  // OK if insert() is in header\n    // Never call node_contains_() or get_quadrant_() - they're private!\n}\n\n"
+      },
+      {
+        "role": "user",
+        "content": "\nYou are creating an **operation map** for C unit tests.\n\nBelow is the C source file to be tested:\n/**\n * @file\n *\n * @brief\n * Dynamic [Stack](https://en.wikipedia.org/wiki/Stack_(abstract_data_type)),\n * just like Dynamic Array, is a stack data structure whose the length or\n * capacity (maximum number of elements that can be stored) increases or\n * decreases in real time based on the operations (like insertion or deletion)\n * performed on it.\n *\n * In this implementation, functions such as PUSH, POP, PEEK, show_capacity,\n * isempty, and stack_size are coded to implement dynamic stack.\n *\n * @author [SahilK-027](https://github.com/SahilK-027)\n *\n */\n#include <stdio.h>     /// for IO operations\n#include <stdlib.h>  /// for including functions involving memory allocation such as `malloc`\n#include <string.h>  /// for string operations\n/**\n * @brief DArrayStack Structure of stack.\n */\ntypedef struct DArrayStack\n{\n    int capacity, top;  ///< to store capacity and top of the stack\n    int *arrPtr;        ///< array pointer\n} DArrayStack;\n\n/**\n * @brief Create a Stack object\n *\n * @param cap Capacity of stack (must be > 0)\n * @return DArrayStack* Newly created stack object pointer, or NULL on failure\n */\nDArrayStack *create_stack(int cap)\n{\n    if (cap <= 0)\n    {\n        return NULL;\n    }\n    DArrayStack *ptr;\n    ptr = (DArrayStack *)malloc(sizeof(DArrayStack));\n    if (ptr == NULL)\n    {\n        return NULL;\n    }\n    ptr->arrPtr = (int *)malloc(sizeof(int) * cap);\n    if (ptr->arrPtr == NULL)\n    {\n        free(ptr);\n        return NULL;\n    }\n    ptr->capacity = cap;\n    ptr->top = -1;\n    return (ptr);\n}\n\n/**\n * @brief As this is stack implementation using dynamic array this function will\n * expand the size of the stack by twice as soon as the stack is full.\n *\n * @param ptr Stack pointer\n * @param cap Capacity of stack\n * @return DArrayStack*: Modified stack, or NULL on failure\n */\nDArrayStack *double_array(DArrayStack *ptr, int cap)\n{\n    if (ptr == NULL || cap <= 0)\n    {\n        return NULL;\n    }\n    int newCap = 2 * cap;\n    int *temp;\n    temp = (int *)malloc(sizeof(int) * newCap);\n    if (temp == NULL)\n    {\n        return NULL;\n    }\n    for (int i = 0; i < (ptr->top) + 1; i++)\n    {\n        temp[i] = ptr->arrPtr[i];\n    }\n    free(ptr->arrPtr);\n    ptr->arrPtr = temp;\n    ptr->capacity = newCap;\n    return ptr;\n}\n\n/**\n * @brief As this is stack implementation using dynamic array this function will\n * shrink the size of stack by twice as soon as the stack's capacity and size\n * has significant difference.\n *\n * @param ptr Stack pointer\n * @param cap Capacity of stack\n * @return DArrayStack*: Modified stack, or NULL on failure\n */\nDArrayStack *shrink_array(DArrayStack *ptr, int cap)\n{\n    if (ptr == NULL || cap < 2)\n    {\n        return NULL;\n    }\n    int newCap = cap / 2;\n    if (newCap <= 0)\n    {\n        newCap = 1;\n    }\n    int *temp;\n    temp = (int *)malloc(sizeof(int) * newCap);\n    if (temp == NULL)\n    {\n        return NULL;\n    }\n    for (int i = 0; i < (ptr->top) + 1; i++)\n    {\n        temp[i] = ptr->arrPtr[i];\n    }\n    free(ptr->arrPtr);\n    ptr->arrPtr = temp;\n    ptr->capacity = newCap;\n    return ptr;\n}\n\n/**\n * @brief The push function pushes the element onto the stack.\n *\n * @param ptr Stack pointer\n * @param data Value to be pushed onto stack\n * @return int Position of top pointer, or -1 on failure\n */\nint push(DArrayStack *ptr, int data)\n{\n    if (ptr == NULL)\n    {\n        return -1;\n    }\n    if (ptr->top == (ptr->capacity) - 1)\n    {\n        DArrayStack *result = double_array(ptr, ptr->capacity);\n        if (result == NULL)\n        {\n            return -1;\n        }\n        ptr->top++;\n        ptr->arrPtr[ptr->top] = data;\n    }\n    else\n    {\n        ptr->top++;\n        ptr->arrPtr[ptr->top] = data;\n    }\n    return ptr->top;\n}\n\n/**\n * @brief The pop function to pop an element from the stack.\n *\n * @param ptr Stack pointer\n * @param success Pointer to store success status (1 = success, 0 = failure), can be NULL\n * @return int Popped value, or 0 on failure (check success flag)\n */\nint pop(DArrayStack *ptr, int *success)\n{\n    if (ptr == NULL)\n    {\n        if (success) *success = 0;\n        return 0;\n    }\n    if (ptr->top == -1)\n    {\n        if (success) *success = 0;\n        return 0;\n    }\n    if (success) *success = 1;\n    int ele = ptr->arrPtr[ptr->top];\n    ptr->arrPtr[ptr->top] = 0;\n    ptr->top = (ptr->top - 1);\n    if ((ptr->capacity) % 2 == 0 && ptr->capacity >= 2)\n    {\n        if (ptr->top <= (ptr->capacity / 2) - 1)\n        {\n            shrink_array(ptr, ptr->capacity);\n        }\n    }\n    return ele;\n}\n\n/**\n * @brief To retrieve or fetch the first element of the Stack or the element\n * present at the top of the Stack.\n *\n * @param ptr Stack pointer\n * @param success Pointer to store success status (1 = success, 0 = failure), can be NULL\n * @return int Top of the stack, or 0 on failure (check success flag)\n */\nint peek(DArrayStack *ptr, int *success)\n{\n    if (ptr == NULL || ptr->top == -1)\n    {\n        if (success) *success = 0;\n        return 0;\n    }\n    if (success) *success = 1;\n    return ptr->arrPtr[ptr->top];\n}\n\n/**\n * @brief To display the current capacity of the stack.\n *\n * @param ptr Stack pointer\n * @return int Current capacity of the stack, or -1 if ptr is NULL\n */\nint show_capacity(DArrayStack *ptr)\n{\n    if (ptr == NULL)\n    {\n        return -1;\n    }\n    return ptr->capacity;\n}\n\n/**\n * @brief The function is used to check whether the stack is empty or not and\n * return true or false accordingly.\n *\n * @param ptr Stack pointer\n * @return int returns 1 -> true (empty or NULL), returns 0 -> false (not empty)\n */\nint isempty(DArrayStack *ptr)\n{\n    if (ptr == NULL || ptr->top == -1)\n    {\n        return 1;\n    }\n    return 0;\n}\n\n/**\n * @brief Used to get the size of the Stack or the number of elements present in\n * the Stack.\n *\n * @param ptr Stack pointer\n * @return int size of stack, or 0 if ptr is NULL\n */\nint stack_size(DArrayStack *ptr)\n{\n    if (ptr == NULL)\n    {\n        return 0;\n    }\n    return ptr->top + 1;\n}\n\n/**\n * @brief Free the entire stack and its internal array.\n *\n * @param ptr Stack pointer\n */\nvoid free_stack(DArrayStack *ptr)\n{\n    if (ptr == NULL)\n    {\n        return;\n    }\n    if (ptr->arrPtr != NULL)\n    {\n        free(ptr->arrPtr);\n    }\n    free(ptr);\n}\n\n/**\n * @brief Get the element at a specific index in the stack (0 = bottom).\n *\n * @param ptr Stack pointer\n * @param index Index from bottom of stack\n * @param success Pointer to store success status (1 = success, 0 = failure), can be NULL\n * @return int Element at index, or 0 on failure\n */\nint get_element_at(DArrayStack *ptr, int index, int *success)\n{\n    if (ptr == NULL || index < 0 || index > ptr->top)\n    {\n        if (success) *success = 0;\n        return 0;\n    }\n    if (success) *success = 1;\n    return ptr->arrPtr[index];\n}\n\n/**\n * @brief Check if a value exists in the stack.\n *\n * @param ptr Stack pointer\n * @param value Value to search for\n * @return int 1 if found, 0 if not found or stack is NULL/empty\n */\nint stack_contains(DArrayStack *ptr, int value)\n{\n    if (ptr == NULL)\n    {\n        return 0;\n    }\n    for (int i = 0; i <= ptr->top; i++)\n    {\n        if (ptr->arrPtr[i] == value)\n        {\n            return 1;\n        }\n    }\n    return 0;\n}\n\n/**\n * @brief Clear all elements from the stack without freeing it.\n *\n * @param ptr Stack pointer\n */\nvoid clear_stack(DArrayStack *ptr)\n{\n    if (ptr == NULL)\n    {\n        return;\n    }\n    for (int i = 0; i <= ptr->top; i++)\n    {\n        ptr->arrPtr[i] = 0;\n    }\n    ptr->top = -1;\n}\n\n/**\n * @brief Convert stack contents to a string representation.\n *\n * @param ptr Stack pointer\n * @param buffer Output buffer for the string\n * @param buffer_size Size of the output buffer\n * @return int Number of characters written (excluding null terminator), or -1 on error\n */\nint stack_to_string(DArrayStack *ptr, char *buffer, int buffer_size)\n{\n    if (buffer == NULL || buffer_size <= 0)\n    {\n        return -1;\n    }\n    if (ptr == NULL || ptr->top == -1)\n    {\n        if (buffer_size >= 3)\n        {\n            strcpy(buffer, \"[]\");\n            return 2;\n        }\n        return -1;\n    }\n\n    int written = 0;\n    int remaining = buffer_size - 1;\n\n    buffer[written++] = '[';\n    remaining--;\n\n    for (int i = 0; i <= ptr->top && remaining > 0; i++)\n    {\n        char num_buf[32];\n        int num_len = snprintf(num_buf, sizeof(num_buf), \"%d\", ptr->arrPtr[i]);\n\n        if (i > 0)\n        {\n            if (remaining < 2)\n            {\n                break;\n            }\n            buffer[written++] = ',';\n            buffer[written++] = ' ';\n            remaining -= 2;\n        }\n\n        if (num_len > remaining)\n        {\n            break;\n        }\n\n        memcpy(buffer + written, num_buf, num_len);\n        written += num_len;\n        remaining -= num_len;\n    }\n\n    if (remaining >= 1)\n    {\n        buffer[written++] = ']';\n    }\n    buffer[written] = '\\0';\n\n    return written;\n}\n\n/**\n * @brief Check if two stacks have equal contents.\n *\n * @param stack1 First stack pointer\n * @param stack2 Second stack pointer\n * @return int 1 if equal, 0 if not equal\n */\nint stacks_equal(DArrayStack *stack1, DArrayStack *stack2)\n{\n    if (stack1 == NULL && stack2 == NULL)\n    {\n        return 1;\n    }\n    if (stack1 == NULL || stack2 == NULL)\n    {\n        return 0;\n    }\n    if (stack1->top != stack2->top)\n    {\n        return 0;\n    }\n    for (int i = 0; i <= stack1->top; i++)\n    {\n        if (stack1->arrPtr[i] != stack2->arrPtr[i])\n        {\n            return 0;\n        }\n    }\n    return 1;\n}\n\n/**\n * @brief Copy a stack to a new stack.\n *\n * @param src Source stack pointer\n * @return DArrayStack* New stack with copied contents, or NULL on failure\n */\nDArrayStack *copy_stack(DArrayStack *src)\n{\n    if (src == NULL)\n    {\n        return NULL;\n    }\n    DArrayStack *dest = create_stack(src->capacity);\n    if (dest == NULL)\n    {\n        return NULL;\n    }\n    for (int i = 0; i <= src->top; i++)\n    {\n        dest->arrPtr[i] = src->arrPtr[i];\n    }\n    dest->top = src->top;\n    return dest;\n}\n\n\nBelow is the header file with public function declarations:\n#ifndef HEADER_H\n#define HEADER_H\n\n// Includes from source file\n#include <stdio.h>\n#include <stdlib.h>\n#include <string.h>\n\n\n// Struct definitions\ntypedef struct DArrayStack {\n    int capacity;\n    int top;\n    int * arrPtr;\n} DArrayStack;\n\n// Function declarations\nDArrayStack * create_stack(int cap);\nDArrayStack * double_array(DArrayStack * ptr, int cap);\nDArrayStack * shrink_array(DArrayStack * ptr, int cap);\nint push(DArrayStack * ptr, int data);\nint pop(DArrayStack * ptr, int * success);\nint peek(DArrayStack * ptr, int * success);\nint show_capacity(DArrayStack * ptr);\nint isempty(DArrayStack * ptr);\nint stack_size(DArrayStack * ptr);\nvoid free_stack(DArrayStack * ptr);\nint get_element_at(DArrayStack * ptr, int index, int * success);\nint stack_contains(DArrayStack * ptr, int value);\nvoid clear_stack(DArrayStack * ptr);\nint stack_to_string(DArrayStack * ptr, char * buffer, int buffer_size);\nint stacks_equal(DArrayStack * stack1, DArrayStack * stack2);\nDArrayStack * copy_stack(DArrayStack * src);\n\n#endif\n\n\nBelow is a list of available helper functions retrieved from the helper pool:\nHere are all 5 available helper functions you can use:\\n\\n1. capture_stdout_start\\n   Description: Create a pipe\\n   Returns: stdout_capture_t *\\n\\n2. capture_stdout_stop\\n   Description: Flush stdout to ensure all output is written to pipe\\n   Returns: char *\\n   Parameters: stdout_capture_t * cap\\n\\n3. assert_stdout_equals\\n   Returns: void\\n   Parameters: stdout_capture_t * cap, const char * expected\\n\\n4. assert_stdout_contains\\n   Returns: void\\n   Parameters: stdout_capture_t * cap, const char * expected_substring\\n\\n5. assert_stdout_not_empty\\n   Returns: void\\n   Parameters: stdout_capture_t * cap\\n\\n\n\nYou task:\n1. Identify public header functions (Note: source function names will be loaded from source_functions.json).\n2. Classify helpers into 'assertion_operations' and 'utility_operations'.\n3. Create new helpers in 'created' only if no existing helper covers the functionality.\n4. Fill 'searched_from_pool' with relevant helpers (verify no conflicts with source code names).\n5. Track dependencies in 'dependency_analysis' (planned_created_functions and required_from_pool only).\n6. Ensure output JSON strictly follows the format with all created and searched helpers.    \n\n## OUTPUT FORMAT:\n**REQUIRED JSON structure with dependency_analysis:**\n```json\n{\n  \"dependency_analysis\": {\n    \"planned_created_functions\": [\n      {\"name\": \"helper_build_tree\", \"calls\": [\"insert\", \"malloc\", \"free\"]},\n      {\"name\": \"verify_tree_structure\", \"calls\": [\"assert_array_equal\", \"printf\"]}\n    ],\n    \"required_from_pool\": [\"assert_array_equal\"]\n  },\n  \"assertion_operations\": {\n    \"searched_from_pool\": [\"assert_array_equal\"],\n    \"created\": [\n      {\n        \"name\": \"verify_tree_structure\",\n        \"description\": \"Verifies tree structure matches expected\",\n        \"return_type\": \"void\",\n        \"parameters\": [{\"name\": \"root\", \"type\": \"struct node *\"}],\n        \"code_block\": \"#include <stdio.h>\nvoid verify_tree_structure(struct node *root) {\n  // calls assert_array_equal\n}\"\n      }\n    ]\n  },\n  \"utility_operations\": {\n    \"searched_from_pool\": [\"init_test_root\", \"cleanup_test_tree\", \"reset_test_root\"],\n    \"created\": [\n      {\n        \"name\": \"helper_build_tree\", \n        \"description\": \"Builds tree from array of values\",\n        \"return_type\": \"struct node *\",\n        \"parameters\": [{\"name\": \"values\", \"type\": \"int *\"}, {\"name\": \"size\", \"type\": \"int\"}],\n        \"code_block\": \"#include <stdlib.h>\nstruct node* helper_build_tree(int *values, int size) {\n  // calls insert, malloc, free\n}\"\n      }\n    ]\n  }\n}\n```\n\n**VALIDATION**: Ensure \"required_from_pool\" functions appear in \"searched_from_pool\" sections! \n**HEADER VALIDATION**: Ensure all source code function calls are declared in the header file!\n**NOTE**: \"searched_from_pool\" may include additional relevant functions beyond just \"required_from_pool\"!\n"
+      }
+    ],
+    "model": "deepseek-chat",
+    "provider": "deepseek",
+    "temperature": 0,
+    "response_model": "<class 'apis.formats.response_format.OperationMap'>",
+    "max_tokens": 8192,
+    "input_tokens": 6690
+  },
+  "response": {
+    "parsed_content": {
+      "dependency_analysis": {
+        "planned_created_functions": [
+          {
+            "name": "helper_assert_stack_equal",
+            "calls": [
+              "stacks_equal",
+              "assert"
+            ]
+          },
+          {
+            "name": "helper_assert_stack_capacity",
+            "calls": [
+              "show_capacity",
+              "assert"
+            ]
+          },
+          {
+            "name": "helper_assert_stack_size",
+            "calls": [
+              "stack_size",
+              "assert"
+            ]
+          },
+          {
+            "name": "helper_assert_stack_empty",
+            "calls": [
+              "isempty",
+              "assert"
+            ]
+          },
+          {
+            "name": "helper_assert_stack_contains",
+            "calls": [
+              "stack_contains",
+              "assert"
+            ]
+          },
+          {
+            "name": "helper_assert_stack_peek",
+            "calls": [
+              "peek",
+              "assert"
+            ]
+          },
+          {
+            "name": "helper_assert_stack_pop",
+            "calls": [
+              "pop",
+              "assert"
+            ]
+          },
+          {
+            "name": "helper_assert_stack_to_string",
+            "calls": [
+              "stack_to_string",
+              "assert",
+              "strcmp"
+            ]
+          },
+          {
+            "name": "helper_create_stack_with_values",
+            "calls": [
+              "create_stack",
+              "push",
+              "malloc"
+            ]
+          },
+          {
+            "name": "helper_create_random_stack",
+            "calls": [
+              "create_stack",
+              "push",
+              "malloc",
+              "rand"
+            ]
+          },
+          {
+            "name": "helper_clone_stack",
+            "calls": [
+              "copy_stack",
+              "malloc"
+            ]
+          },
+          {
+            "name": "helper_reset_stack",
+            "calls": [
+              "clear_stack"
+            ]
+          },
+          {
+            "name": "helper_verify_stack_integrity",
+            "calls": [
+              "stack_size",
+              "show_capacity",
+              "assert"
+            ]
+          }
+        ],
+        "required_from_pool": []
+      },
+      "assertion_operations": {
+        "searched_from_pool": [],
+        "created": [
+          {
+            "name": "helper_assert_stack_equal",
+            "description": "Asserts that two stacks have equal contents using stacks_equal function",
+            "return_type": "void",
+            "parameters": [
+              {
+                "name": "stack1",
+                "type": "DArrayStack *"
+              },
+              {
+                "name": "stack2",
+                "type": "DArrayStack *"
+              }
+            ],
+            "code_block": "#include <assert.h>\nvoid helper_assert_stack_equal(DArrayStack *stack1, DArrayStack *stack2) {\n    int result = stacks_equal(stack1, stack2);\n    assert(result == 1);\n}"
+          },
+          {
+            "name": "helper_assert_stack_capacity",
+            "description": "Asserts that a stack has the expected capacity",
+            "return_type": "void",
+            "parameters": [
+              {
+                "name": "stack",
+                "type": "DArrayStack *"
+              },
+              {
+                "name": "expected_capacity",
+                "type": "int"
+              }
+            ],
+            "code_block": "#include <assert.h>\nvoid helper_assert_stack_capacity(DArrayStack *stack, int expected_capacity) {\n    int actual_capacity = show_capacity(stack);\n    assert(actual_capacity == expected_capacity);\n}"
+          },
+          {
+            "name": "helper_assert_stack_size",
+            "description": "Asserts that a stack has the expected number of elements",
+            "return_type": "void",
+            "parameters": [
+              {
+                "name": "stack",
+                "type": "DArrayStack *"
+              },
+              {
+                "name": "expected_size",
+                "type": "int"
+              }
+            ],
+            "code_block": "#include <assert.h>\nvoid helper_assert_stack_size(DArrayStack *stack, int expected_size) {\n    int actual_size = stack_size(stack);\n    assert(actual_size == expected_size);\n}"
+          },
+          {
+            "name": "helper_assert_stack_empty",
+            "description": "Asserts that a stack is empty (or NULL)",
+            "return_type": "void",
+            "parameters": [
+              {
+                "name": "stack",
+                "type": "DArrayStack *"
+              }
+            ],
+            "code_block": "#include <assert.h>\nvoid helper_assert_stack_empty(DArrayStack *stack) {\n    int empty = isempty(stack);\n    assert(empty == 1);\n}"
+          },
+          {
+            "name": "helper_assert_stack_contains",
+            "description": "Asserts that a stack contains a specific value",
+            "return_type": "void",
+            "parameters": [
+              {
+                "name": "stack",
+                "type": "DArrayStack *"
+              },
+              {
+                "name": "value",
+                "type": "int"
+              }
+            ],
+            "code_block": "#include <assert.h>\nvoid helper_assert_stack_contains(DArrayStack *stack, int value) {\n    int contains = stack_contains(stack, value);\n    assert(contains == 1);\n}"
+          },
+          {
+            "name": "helper_assert_stack_peek",
+            "description": "Asserts that the top element of a stack matches the expected value",
+            "return_type": "void",
+            "parameters": [
+              {
+                "name": "stack",
+                "type": "DArrayStack *"
+              },
+              {
+                "name": "expected_value",
+                "type": "int"
+              }
+            ],
+            "code_block": "#include <assert.h>\nvoid helper_assert_stack_peek(DArrayStack *stack, int expected_value) {\n    int success = 0;\n    int top_value = peek(stack, &success);\n    assert(success == 1);\n    assert(top_value == expected_value);\n}"
+          },
+          {
+            "name": "helper_assert_stack_pop",
+            "description": "Asserts that popping from a stack returns the expected value and updates stack correctly",
+            "return_type": "void",
+            "parameters": [
+              {
+                "name": "stack",
+                "type": "DArrayStack *"
+              },
+              {
+                "name": "expected_value",
+                "type": "int"
+              }
+            ],
+            "code_block": "#include <assert.h>\nvoid helper_assert_stack_pop(DArrayStack *stack, int expected_value) {\n    int success = 0;\n    int popped_value = pop(stack, &success);\n    assert(success == 1);\n    assert(popped_value == expected_value);\n}"
+          },
+          {
+            "name": "helper_assert_stack_to_string",
+            "description": "Asserts that the string representation of a stack matches the expected string",
+            "return_type": "void",
+            "parameters": [
+              {
+                "name": "stack",
+                "type": "DArrayStack *"
+              },
+              {
+                "name": "expected_string",
+                "type": "const char *"
+              }
+            ],
+            "code_block": "#include <assert.h>\n#include <string.h>\n#include <stdlib.h>\nvoid helper_assert_stack_to_string(DArrayStack *stack, const char *expected_string) {\n    int buffer_size = 256;\n    char *buffer = malloc(buffer_size * sizeof(char));\n    int result = stack_to_string(stack, buffer, buffer_size);\n    assert(result != -1);\n    assert(strcmp(buffer, expected_string) == 0);\n    free(buffer);\n}"
+          }
+        ]
+      },
+      "utility_operations": {
+        "searched_from_pool": [
+          "capture_stdout_start",
+          "capture_stdout_stop",
+          "assert_stdout_equals",
+          "assert_stdout_contains",
+          "assert_stdout_not_empty"
+        ],
+        "created": [
+          {
+            "name": "helper_create_stack_with_values",
+            "description": "Creates a stack and pushes an array of values onto it",
+            "return_type": "DArrayStack *",
+            "parameters": [
+              {
+                "name": "values",
+                "type": "int *"
+              },
+              {
+                "name": "size",
+                "type": "int"
+              },
+              {
+                "name": "initial_capacity",
+                "type": "int"
+              }
+            ],
+            "code_block": "#include <stdlib.h>\nDArrayStack *helper_create_stack_with_values(int *values, int size, int initial_capacity) {\n    DArrayStack *stack = create_stack(initial_capacity);\n    if (stack == NULL) {\n        return NULL;\n    }\n    for (int i = 0; i < size; i++) {\n        push(stack, values[i]);\n    }\n    return stack;\n}"
+          },
+          {
+            "name": "helper_create_random_stack",
+            "description": "Creates a stack with random integer values",
+            "return_type": "DArrayStack *",
+            "parameters": [
+              {
+                "name": "size",
+                "type": "int"
+              },
+              {
+                "name": "initial_capacity",
+                "type": "int"
+              },
+              {
+                "name": "min_value",
+                "type": "int"
+              },
+              {
+                "name": "max_value",
+                "type": "int"
+              }
+            ],
+            "code_block": "#include <stdlib.h>\n#include <time.h>\nDArrayStack *helper_create_random_stack(int size, int initial_capacity, int min_value, int max_value) {\n    srand(time(NULL));\n    DArrayStack *stack = create_stack(initial_capacity);\n    if (stack == NULL) {\n        return NULL;\n    }\n    for (int i = 0; i < size; i++) {\n        int value = min_value + rand() % (max_value - min_value + 1);\n        push(stack, value);\n    }\n    return stack;\n}"
+          },
+          {
+            "name": "helper_clone_stack",
+            "description": "Creates a deep copy of a stack using copy_stack function",
+            "return_type": "DArrayStack *",
+            "parameters": [
+              {
+                "name": "src",
+                "type": "DArrayStack *"
+              }
+            ],
+            "code_block": "#include <stdlib.h>\nDArrayStack *helper_clone_stack(DArrayStack *src) {\n    return copy_stack(src);\n}"
+          },
+          {
+            "name": "helper_reset_stack",
+            "description": "Clears all elements from a stack without freeing it",
+            "return_type": "void",
+            "parameters": [
+              {
+                "name": "stack",
+                "type": "DArrayStack *"
+              }
+            ],
+            "code_block": "void helper_reset_stack(DArrayStack *stack) {\n    clear_stack(stack);\n}"
+          },
+          {
+            "name": "helper_verify_stack_integrity",
+            "description": "Verifies basic stack integrity by checking size <= capacity",
+            "return_type": "void",
+            "parameters": [
+              {
+                "name": "stack",
+                "type": "DArrayStack *"
+              }
+            ],
+            "code_block": "#include <assert.h>\nvoid helper_verify_stack_integrity(DArrayStack *stack) {\n    if (stack == NULL) {\n        return;\n    }\n    int size = stack_size(stack);\n    int capacity = show_capacity(stack);\n    assert(size <= capacity);\n}"
+          }
+        ]
+      }
+    },
+    "validated_content": {
+      "dependency_analysis": {
+        "source_functions": null,
+        "planned_created_functions": [
+          {
+            "name": "helper_assert_stack_equal",
+            "calls": [
+              "stacks_equal",
+              "assert"
+            ]
+          },
+          {
+            "name": "helper_assert_stack_capacity",
+            "calls": [
+              "show_capacity",
+              "assert"
+            ]
+          },
+          {
+            "name": "helper_assert_stack_size",
+            "calls": [
+              "stack_size",
+              "assert"
+            ]
+          },
+          {
+            "name": "helper_assert_stack_empty",
+            "calls": [
+              "isempty",
+              "assert"
+            ]
+          },
+          {
+            "name": "helper_assert_stack_contains",
+            "calls": [
+              "stack_contains",
+              "assert"
+            ]
+          },
+          {
+            "name": "helper_assert_stack_peek",
+            "calls": [
+              "peek",
+              "assert"
+            ]
+          },
+          {
+            "name": "helper_assert_stack_pop",
+            "calls": [
+              "pop",
+              "assert"
+            ]
+          },
+          {
+            "name": "helper_assert_stack_to_string",
+            "calls": [
+              "stack_to_string",
+              "assert",
+              "strcmp"
+            ]
+          },
+          {
+            "name": "helper_create_stack_with_values",
+            "calls": [
+              "create_stack",
+              "push",
+              "malloc"
+            ]
+          },
+          {
+            "name": "helper_create_random_stack",
+            "calls": [
+              "create_stack",
+              "push",
+              "malloc",
+              "rand"
+            ]
+          },
+          {
+            "name": "helper_clone_stack",
+            "calls": [
+              "copy_stack",
+              "malloc"
+            ]
+          },
+          {
+            "name": "helper_reset_stack",
+            "calls": [
+              "clear_stack"
+            ]
+          },
+          {
+            "name": "helper_verify_stack_integrity",
+            "calls": [
+              "stack_size",
+              "show_capacity",
+              "assert"
+            ]
+          }
+        ],
+        "required_from_pool": []
+      },
+      "assertion_operations": {
+        "searched_from_pool": [],
+        "created": [
+          {
+            "name": "helper_assert_stack_equal",
+            "description": "Asserts that two stacks have equal contents using stacks_equal function",
+            "return_type": "void",
+            "parameters": [
+              {
+                "name": "stack1",
+                "type": "DArrayStack *"
+              },
+              {
+                "name": "stack2",
+                "type": "DArrayStack *"
+              }
+            ],
+            "code_block": "#include <assert.h>\nvoid helper_assert_stack_equal(DArrayStack *stack1, DArrayStack *stack2) {\n    int result = stacks_equal(stack1, stack2);\n    assert(result == 1);\n}"
+          },
+          {
+            "name": "helper_assert_stack_capacity",
+            "description": "Asserts that a stack has the expected capacity",
+            "return_type": "void",
+            "parameters": [
+              {
+                "name": "stack",
+                "type": "DArrayStack *"
+              },
+              {
+                "name": "expected_capacity",
+                "type": "int"
+              }
+            ],
+            "code_block": "#include <assert.h>\nvoid helper_assert_stack_capacity(DArrayStack *stack, int expected_capacity) {\n    int actual_capacity = show_capacity(stack);\n    assert(actual_capacity == expected_capacity);\n}"
+          },
+          {
+            "name": "helper_assert_stack_size",
+            "description": "Asserts that a stack has the expected number of elements",
+            "return_type": "void",
+            "parameters": [
+              {
+                "name": "stack",
+                "type": "DArrayStack *"
+              },
+              {
+                "name": "expected_size",
+                "type": "int"
+              }
+            ],
+            "code_block": "#include <assert.h>\nvoid helper_assert_stack_size(DArrayStack *stack, int expected_size) {\n    int actual_size = stack_size(stack);\n    assert(actual_size == expected_size);\n}"
+          },
+          {
+            "name": "helper_assert_stack_empty",
+            "description": "Asserts that a stack is empty (or NULL)",
+            "return_type": "void",
+            "parameters": [
+              {
+                "name": "stack",
+                "type": "DArrayStack *"
+              }
+            ],
+            "code_block": "#include <assert.h>\nvoid helper_assert_stack_empty(DArrayStack *stack) {\n    int empty = isempty(stack);\n    assert(empty == 1);\n}"
+          },
+          {
+            "name": "helper_assert_stack_contains",
+            "description": "Asserts that a stack contains a specific value",
+            "return_type": "void",
+            "parameters": [
+              {
+                "name": "stack",
+                "type": "DArrayStack *"
+              },
+              {
+                "name": "value",
+                "type": "int"
+              }
+            ],
+            "code_block": "#include <assert.h>\nvoid helper_assert_stack_contains(DArrayStack *stack, int value) {\n    int contains = stack_contains(stack, value);\n    assert(contains == 1);\n}"
+          },
+          {
+            "name": "helper_assert_stack_peek",
+            "description": "Asserts that the top element of a stack matches the expected value",
+            "return_type": "void",
+            "parameters": [
+              {
+                "name": "stack",
+                "type": "DArrayStack *"
+              },
+              {
+                "name": "expected_value",
+                "type": "int"
+              }
+            ],
+            "code_block": "#include <assert.h>\nvoid helper_assert_stack_peek(DArrayStack *stack, int expected_value) {\n    int success = 0;\n    int top_value = peek(stack, &success);\n    assert(success == 1);\n    assert(top_value == expected_value);\n}"
+          },
+          {
+            "name": "helper_assert_stack_pop",
+            "description": "Asserts that popping from a stack returns the expected value and updates stack correctly",
+            "return_type": "void",
+            "parameters": [
+              {
+                "name": "stack",
+                "type": "DArrayStack *"
+              },
+              {
+                "name": "expected_value",
+                "type": "int"
+              }
+            ],
+            "code_block": "#include <assert.h>\nvoid helper_assert_stack_pop(DArrayStack *stack, int expected_value) {\n    int success = 0;\n    int popped_value = pop(stack, &success);\n    assert(success == 1);\n    assert(popped_value == expected_value);\n}"
+          },
+          {
+            "name": "helper_assert_stack_to_string",
+            "description": "Asserts that the string representation of a stack matches the expected string",
+            "return_type": "void",
+            "parameters": [
+              {
+                "name": "stack",
+                "type": "DArrayStack *"
+              },
+              {
+                "name": "expected_string",
+                "type": "const char *"
+              }
+            ],
+            "code_block": "#include <assert.h>\n#include <string.h>\n#include <stdlib.h>\nvoid helper_assert_stack_to_string(DArrayStack *stack, const char *expected_string) {\n    int buffer_size = 256;\n    char *buffer = malloc(buffer_size * sizeof(char));\n    int result = stack_to_string(stack, buffer, buffer_size);\n    assert(result != -1);\n    assert(strcmp(buffer, expected_string) == 0);\n    free(buffer);\n}"
+          }
+        ]
+      },
+      "utility_operations": {
+        "searched_from_pool": [
+          "capture_stdout_start",
+          "capture_stdout_stop",
+          "assert_stdout_equals",
+          "assert_stdout_contains",
+          "assert_stdout_not_empty"
+        ],
+        "created": [
+          {
+            "name": "helper_create_stack_with_values",
+            "description": "Creates a stack and pushes an array of values onto it",
+            "return_type": "DArrayStack *",
+            "parameters": [
+              {
+                "name": "values",
+                "type": "int *"
+              },
+              {
+                "name": "size",
+                "type": "int"
+              },
+              {
+                "name": "initial_capacity",
+                "type": "int"
+              }
+            ],
+            "code_block": "#include <stdlib.h>\nDArrayStack *helper_create_stack_with_values(int *values, int size, int initial_capacity) {\n    DArrayStack *stack = create_stack(initial_capacity);\n    if (stack == NULL) {\n        return NULL;\n    }\n    for (int i = 0; i < size; i++) {\n        push(stack, values[i]);\n    }\n    return stack;\n}"
+          },
+          {
+            "name": "helper_create_random_stack",
+            "description": "Creates a stack with random integer values",
+            "return_type": "DArrayStack *",
+            "parameters": [
+              {
+                "name": "size",
+                "type": "int"
+              },
+              {
+                "name": "initial_capacity",
+                "type": "int"
+              },
+              {
+                "name": "min_value",
+                "type": "int"
+              },
+              {
+                "name": "max_value",
+                "type": "int"
+              }
+            ],
+            "code_block": "#include <stdlib.h>\n#include <time.h>\nDArrayStack *helper_create_random_stack(int size, int initial_capacity, int min_value, int max_value) {\n    srand(time(NULL));\n    DArrayStack *stack = create_stack(initial_capacity);\n    if (stack == NULL) {\n        return NULL;\n    }\n    for (int i = 0; i < size; i++) {\n        int value = min_value + rand() % (max_value - min_value + 1);\n        push(stack, value);\n    }\n    return stack;\n}"
+          },
+          {
+            "name": "helper_clone_stack",
+            "description": "Creates a deep copy of a stack using copy_stack function",
+            "return_type": "DArrayStack *",
+            "parameters": [
+              {
+                "name": "src",
+                "type": "DArrayStack *"
+              }
+            ],
+            "code_block": "#include <stdlib.h>\nDArrayStack *helper_clone_stack(DArrayStack *src) {\n    return copy_stack(src);\n}"
+          },
+          {
+            "name": "helper_reset_stack",
+            "description": "Clears all elements from a stack without freeing it",
+            "return_type": "void",
+            "parameters": [
+              {
+                "name": "stack",
+                "type": "DArrayStack *"
+              }
+            ],
+            "code_block": "void helper_reset_stack(DArrayStack *stack) {\n    clear_stack(stack);\n}"
+          },
+          {
+            "name": "helper_verify_stack_integrity",
+            "description": "Verifies basic stack integrity by checking size <= capacity",
+            "return_type": "void",
+            "parameters": [
+              {
+                "name": "stack",
+                "type": "DArrayStack *"
+              }
+            ],
+            "code_block": "#include <assert.h>\nvoid helper_verify_stack_integrity(DArrayStack *stack) {\n    if (stack == NULL) {\n        return;\n    }\n    int size = stack_size(stack);\n    int capacity = show_capacity(stack);\n    assert(size <= capacity);\n}"
+          }
+        ]
+      }
+    },
+    "raw_content": "{\n    \"dependency_analysis\": {\n        \"planned_created_functions\": [\n            {\n                \"name\": \"helper_assert_stack_equal\",\n                \"calls\": [\"stacks_equal\", \"assert\"]\n            },\n            {\n                \"name\": \"helper_assert_stack_capacity\",\n                \"calls\": [\"show_capacity\", \"assert\"]\n            },\n            {\n                \"name\": \"helper_assert_stack_size\",\n                \"calls\": [\"stack_size\", \"assert\"]\n            },\n            {\n                \"name\": \"helper_assert_stack_empty\",\n                \"calls\": [\"isempty\", \"assert\"]\n            },\n            {\n                \"name\": \"helper_assert_stack_contains\",\n                \"calls\": [\"stack_contains\", \"assert\"]\n            },\n            {\n                \"name\": \"helper_assert_stack_peek\",\n                \"calls\": [\"peek\", \"assert\"]\n            },\n            {\n                \"name\": \"helper_assert_stack_pop\",\n                \"calls\": [\"pop\", \"assert\"]\n            },\n            {\n                \"name\": \"helper_assert_stack_to_string\",\n                \"calls\": [\"stack_to_string\", \"assert\", \"strcmp\"]\n            },\n            {\n                \"name\": \"helper_create_stack_with_values\",\n                \"calls\": [\"create_stack\", \"push\", \"malloc\"]\n            },\n            {\n                \"name\": \"helper_create_random_stack\",\n                \"calls\": [\"create_stack\", \"push\", \"malloc\", \"rand\"]\n            },\n            {\n                \"name\": \"helper_clone_stack\",\n                \"calls\": [\"copy_stack\", \"malloc\"]\n            },\n            {\n                \"name\": \"helper_reset_stack\",\n                \"calls\": [\"clear_stack\"]\n            },\n            {\n                \"name\": \"helper_verify_stack_integrity\",\n                \"calls\": [\"stack_size\", \"show_capacity\", \"assert\"]\n            }\n        ],\n        \"required_from_pool\": []\n    },\n    \"assertion_operations\": {\n        \"searched_from_pool\": [],\n        \"created\": [\n            {\n                \"name\": \"helper_assert_stack_equal\",\n                \"description\": \"Asserts that two stacks have equal contents using stacks_equal function\",\n                \"return_type\": \"void\",\n                \"parameters\": [\n                    {\n                        \"name\": \"stack1\",\n                        \"type\": \"DArrayStack *\"\n                    },\n                    {\n                        \"name\": \"stack2\",\n                        \"type\": \"DArrayStack *\"\n                    }\n                ],\n                \"code_block\": \"#include <assert.h>\\nvoid helper_assert_stack_equal(DArrayStack *stack1, DArrayStack *stack2) {\\n    int result = stacks_equal(stack1, stack2);\\n    assert(result == 1);\\n}\"\n            },\n            {\n                \"name\": \"helper_assert_stack_capacity\",\n                \"description\": \"Asserts that a stack has the expected capacity\",\n                \"return_type\": \"void\",\n                \"parameters\": [\n                    {\n                        \"name\": \"stack\",\n                        \"type\": \"DArrayStack *\"\n                    },\n                    {\n                        \"name\": \"expected_capacity\",\n                        \"type\": \"int\"\n                    }\n                ],\n                \"code_block\": \"#include <assert.h>\\nvoid helper_assert_stack_capacity(DArrayStack *stack, int expected_capacity) {\\n    int actual_capacity = show_capacity(stack);\\n    assert(actual_capacity == expected_capacity);\\n}\"\n            },\n            {\n                \"name\": \"helper_assert_stack_size\",\n                \"description\": \"Asserts that a stack has the expected number of elements\",\n                \"return_type\": \"void\",\n                \"parameters\": [\n                    {\n                        \"name\": \"stack\",\n                        \"type\": \"DArrayStack *\"\n                    },\n                    {\n                        \"name\": \"expected_size\",\n                        \"type\": \"int\"\n                    }\n                ],\n                \"code_block\": \"#include <assert.h>\\nvoid helper_assert_stack_size(DArrayStack *stack, int expected_size) {\\n    int actual_size = stack_size(stack);\\n    assert(actual_size == expected_size);\\n}\"\n            },\n            {\n                \"name\": \"helper_assert_stack_empty\",\n                \"description\": \"Asserts that a stack is empty (or NULL)\",\n                \"return_type\": \"void\",\n                \"parameters\": [\n                    {\n                        \"name\": \"stack\",\n                        \"type\": \"DArrayStack *\"\n                    }\n                ],\n                \"code_block\": \"#include <assert.h>\\nvoid helper_assert_stack_empty(DArrayStack *stack) {\\n    int empty = isempty(stack);\\n    assert(empty == 1);\\n}\"\n            },\n            {\n                \"name\": \"helper_assert_stack_contains\",\n                \"description\": \"Asserts that a stack contains a specific value\",\n                \"return_type\": \"void\",\n                \"parameters\": [\n                    {\n                        \"name\": \"stack\",\n                        \"type\": \"DArrayStack *\"\n                    },\n                    {\n                        \"name\": \"value\",\n                        \"type\": \"int\"\n                    }\n                ],\n                \"code_block\": \"#include <assert.h>\\nvoid helper_assert_stack_contains(DArrayStack *stack, int value) {\\n    int contains = stack_contains(stack, value);\\n    assert(contains == 1);\\n}\"\n            },\n            {\n                \"name\": \"helper_assert_stack_peek\",\n                \"description\": \"Asserts that the top element of a stack matches the expected value\",\n                \"return_type\": \"void\",\n                \"parameters\": [\n                    {\n                        \"name\": \"stack\",\n                        \"type\": \"DArrayStack *\"\n                    },\n                    {\n                        \"name\": \"expected_value\",\n                        \"type\": \"int\"\n                    }\n                ],\n                \"code_block\": \"#include <assert.h>\\nvoid helper_assert_stack_peek(DArrayStack *stack, int expected_value) {\\n    int success = 0;\\n    int top_value = peek(stack, &success);\\n    assert(success == 1);\\n    assert(top_value == expected_value);\\n}\"\n            },\n            {\n                \"name\": \"helper_assert_stack_pop\",\n                \"description\": \"Asserts that popping from a stack returns the expected value and updates stack correctly\",\n                \"return_type\": \"void\",\n                \"parameters\": [\n                    {\n                        \"name\": \"stack\",\n                        \"type\": \"DArrayStack *\"\n                    },\n                    {\n                        \"name\": \"expected_value\",\n                        \"type\": \"int\"\n                    }\n                ],\n                \"code_block\": \"#include <assert.h>\\nvoid helper_assert_stack_pop(DArrayStack *stack, int expected_value) {\\n    int success = 0;\\n    int popped_value = pop(stack, &success);\\n    assert(success == 1);\\n    assert(popped_value == expected_value);\\n}\"\n            },\n            {\n                \"name\": \"helper_assert_stack_to_string\",\n                \"description\": \"Asserts that the string representation of a stack matches the expected string\",\n                \"return_type\": \"void\",\n                \"parameters\": [\n                    {\n                        \"name\": \"stack\",\n                        \"type\": \"DArrayStack *\"\n                    },\n                    {\n                        \"name\": \"expected_string\",\n                        \"type\": \"const char *\"\n                    }\n                ],\n                \"code_block\": \"#include <assert.h>\\n#include <string.h>\\n#include <stdlib.h>\\nvoid helper_assert_stack_to_string(DArrayStack *stack, const char *expected_string) {\\n    int buffer_size = 256;\\n    char *buffer = malloc(buffer_size * sizeof(char));\\n    int result = stack_to_string(stack, buffer, buffer_size);\\n    assert(result != -1);\\n    assert(strcmp(buffer, expected_string) == 0);\\n    free(buffer);\\n}\"\n            }\n        ]\n    },\n    \"utility_operations\": {\n        \"searched_from_pool\": [\"capture_stdout_start\", \"capture_stdout_stop\", \"assert_stdout_equals\", \"assert_stdout_contains\", \"assert_stdout_not_empty\"],\n        \"created\": [\n            {\n                \"name\": \"helper_create_stack_with_values\",\n                \"description\": \"Creates a stack and pushes an array of values onto it\",\n                \"return_type\": \"DArrayStack *\",\n                \"parameters\": [\n                    {\n                        \"name\": \"values\",\n                        \"type\": \"int *\"\n                    },\n                    {\n                        \"name\": \"size\",\n                        \"type\": \"int\"\n                    },\n                    {\n                        \"name\": \"initial_capacity\",\n                        \"type\": \"int\"\n                    }\n                ],\n                \"code_block\": \"#include <stdlib.h>\\nDArrayStack *helper_create_stack_with_values(int *values, int size, int initial_capacity) {\\n    DArrayStack *stack = create_stack(initial_capacity);\\n    if (stack == NULL) {\\n        return NULL;\\n    }\\n    for (int i = 0; i < size; i++) {\\n        push(stack, values[i]);\\n    }\\n    return stack;\\n}\"\n            },\n            {\n                \"name\": \"helper_create_random_stack\",\n                \"description\": \"Creates a stack with random integer values\",\n                \"return_type\": \"DArrayStack *\",\n                \"parameters\": [\n                    {\n                        \"name\": \"size\",\n                        \"type\": \"int\"\n                    },\n                    {\n                        \"name\": \"initial_capacity\",\n                        \"type\": \"int\"\n                    },\n                    {\n                        \"name\": \"min_value\",\n                        \"type\": \"int\"\n                    },\n                    {\n                        \"name\": \"max_value\",\n                        \"type\": \"int\"\n                    }\n                ],\n                \"code_block\": \"#include <stdlib.h>\\n#include <time.h>\\nDArrayStack *helper_create_random_stack(int size, int initial_capacity, int min_value, int max_value) {\\n    srand(time(NULL));\\n    DArrayStack *stack = create_stack(initial_capacity);\\n    if (stack == NULL) {\\n        return NULL;\\n    }\\n    for (int i = 0; i < size; i++) {\\n        int value = min_value + rand() % (max_value - min_value + 1);\\n        push(stack, value);\\n    }\\n    return stack;\\n}\"\n            },\n            {\n                \"name\": \"helper_clone_stack\",\n                \"description\": \"Creates a deep copy of a stack using copy_stack function\",\n                \"return_type\": \"DArrayStack *\",\n                \"parameters\": [\n                    {\n                        \"name\": \"src\",\n                        \"type\": \"DArrayStack *\"\n                    }\n                ],\n                \"code_block\": \"#include <stdlib.h>\\nDArrayStack *helper_clone_stack(DArrayStack *src) {\\n    return copy_stack(src);\\n}\"\n            },\n            {\n                \"name\": \"helper_reset_stack\",\n                \"description\": \"Clears all elements from a stack without freeing it\",\n                \"return_type\": \"void\",\n                \"parameters\": [\n                    {\n                        \"name\": \"stack\",\n                        \"type\": \"DArrayStack *\"\n                    }\n                ],\n                \"code_block\": \"void helper_reset_stack(DArrayStack *stack) {\\n    clear_stack(stack);\\n}\"\n            },\n            {\n                \"name\": \"helper_verify_stack_integrity\",\n                \"description\": \"Verifies basic stack integrity by checking size <= capacity\",\n                \"return_type\": \"void\",\n                \"parameters\": [\n                    {\n                        \"name\": \"stack\",\n                        \"type\": \"DArrayStack *\"\n                    }\n                ],\n                \"code_block\": \"#include <assert.h>\\nvoid helper_verify_stack_integrity(DArrayStack *stack) {\\n    if (stack == NULL) {\\n        return;\\n    }\\n    int size = stack_size(stack);\\n    int capacity = show_capacity(stack);\\n    assert(size <= capacity);\\n}\"\n            }\n        ]\n    }\n}",
+    "finish_reason": "stop",
+    "usage": {
+      "completion_tokens": 2545,
+      "prompt_tokens": 7215,
+      "total_tokens": 9760,
+      "completion_tokens_details": null,
+      "prompt_tokens_details": {
+        "audio_tokens": null,
+        "cached_tokens": 3328
+      },
+      "prompt_cache_hit_tokens": 3328,
+      "prompt_cache_miss_tokens": 3887
+    },
+    "response_id": "ae56216a-3658-4305-9508-4fe6f6c5a03b",
+    "created": 1768425539,
+    "attempt": 1,
+    "validation_error": null
+  }
+}

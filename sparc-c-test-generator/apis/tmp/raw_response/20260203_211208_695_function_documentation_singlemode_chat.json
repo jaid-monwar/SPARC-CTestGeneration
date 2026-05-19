@@ -1,0 +1,45 @@
+{
+  "timestamp": "2026-02-03T21:12:08.695022",
+  "context": "function_documentation_singlemode",
+  "model_type": "chat",
+  "model": "gpt-4.1-2025-04-14",
+  "request": {
+    "messages": [
+      {
+        "role": "system",
+        "content": "\nYou are a technical writer creating professional C function documentation. Write clear, concise documentation like high-quality open source projects (glibc, libcurl, Python stdlib).\n\n## FORMAT\n\n```c\n/**\n * @brief One-line description of what the function does.\n *\n * Detailed description (2-3 sentences max) explaining the function's purpose\n * and key behavior. Mention important edge cases or special handling.\n *\n * @param param_name Description of parameter, its valid values, and constraints.\n *                   Note if NULL is valid or if the parameter is modified.\n *\n * @return What the function returns. Specify success/failure values.\n *         Example: \"Pointer to new node on success, NULL on allocation failure.\"\n *\n * @note Memory: Caller must free returned pointer / Function allocates internally\n * @note Error: How errors are signaled (return value, errno, etc.)\n *\n * @see related_function, another_function\n */\n```\n\n## GUIDELINES\n\n**Be concise**: One line for @brief. 2-3 sentences max for detailed description.\n\n**Parameters**: Type is in code, so describe purpose and constraints:\n- Valid ranges: \"Must be positive\", \"Valid pointer or NULL\"\n- Modifications: \"Modified to contain result\", \"Contents are sorted in-place\"\n- Ownership: \"Caller retains ownership\", \"Function takes ownership\"\n\n**Return values**: Be specific about success/failure:\n- \"Returns 0 on success, -1 on error\"\n- \"Returns pointer to node, or NULL if not found\"\n\n**@note for important details** (only include if relevant):\n- Memory allocation/deallocation responsibility\n- Side effects that modify input or global state\n- Error handling mechanism\n\n**Omit @note/@see if not applicable.**\n\n## STYLE\n\n- Write naturally, not in bullet points or key-value format\n- Use present tense: \"Inserts a node\" not \"Will insert a node\"\n- Be precise: \"non-negative integer\" not \"valid number\"\n- Avoid redundancy: Don't repeat the function name in @brief\n\n## EXAMPLES\n\n```c\n/**\n * @brief Insert a key into a binary search tree.\n *\n * Creates a new node with the given key and inserts it at the correct\n * position to maintain BST ordering. If the tree is empty (node is NULL),\n * returns a new root node.\n *\n * @param node Root of the tree, or NULL for empty tree.\n * @param key Value to insert.\n *\n * @return Root of the modified tree. Returns newly allocated node if\n *         tree was empty, or existing root with new node inserted.\n *\n * @note Caller must free the returned tree.\n */\n```\n\n```c\n/**\n * @brief Partition array around a pivot for quicksort.\n *\n * Rearranges elements so values less than pivot come before it,\n * and values greater come after. Modifies array in-place.\n *\n * @param arr Array to partition. Must not be NULL.\n * @param low Starting index (inclusive).\n * @param high Ending index (inclusive). Must be >= low.\n *\n * @return Index of the pivot after partitioning.\n */\n```\n\nGenerate ONLY the documentation block. Start with /** and end with */.\n"
+      },
+      {
+        "role": "user",
+        "content": "\nGenerate documentation for this C function:\n\n**Function**: singlemode\n\n```c\n// C program for the function called singlemode\n// Contains target function implementation and dependency signatures\n\n#include <stdio.h>\n#include <stdlib.h>\n#include <time.h>\n#include <string.h>\n\n// Forward declarations for dependency functions\n\nt check_placex();\nid placex(int m);\nid place();\n\n// Target function implementation\nid singlemode()\n{\n    int m;\n    int k = 0;\n    int table_fill_count=0;\n\n    for (int i = 0; i < 3; i++)\n    {\n        for (int j = 0; j < 3; j++)\n        {\n            printf(\"%c \", game_table[k]);\n            k++;\n        }\n\n        printf(\"\\n\");\n    }\n\n    for (int x = 1; x < 10; x++)\n    {\n        k = 0;\n\n        printf(\"Where would you like to place 'x' \");\n        scanf(\"%d\", &m);\n\n        placex(m);\n        if(table_fill_count<4)\n        {\n          place();\n        }\n\n        for (int i = 0; i < 3; i++)\n        {\n            for (int j = 0; j < 3; j++)\n            {\n                printf(\"%c \", game_table[k]);\n                k++;\n\n            }\n\n            printf(\"\\n\");\n        }\n        table_fill_count++;\n        int o = checkwin();\n\n        if (o == -1 || o == -2)\n        {\n            if (o == -1)\n            {\n                printf(\"YOU WIN\\n\");\n            }\n            if (o == -2)\n            {\n                printf(\"YOU LOSE\\n\");\n            }\n\n            break;\n        }\n\n        if (table_fill_count==4)\n        {\n            printf(\"\\nDRAW \");\n            break;\n        }\n    }\n}\n\n\n\n```\n\n**Dependencies**: checkwin, place, placex\n\nWrite clear, concise documentation following the system prompt format.\nOutput only the /** ... */ block.\n"
+      }
+    ],
+    "model": "gpt-4.1-2025-04-14",
+    "provider": "gpt",
+    "temperature": 0.0,
+    "response_model": null,
+    "max_tokens": 8192,
+    "input_tokens": 1089
+  },
+  "response": {
+    "content": "/**\n * @brief Runs a single-player game loop for tic-tac-toe.\n *\n * Displays the current game board, prompts the user to place their move,\n * and alternates turns with the computer until the game ends. Handles win,\n * lose, and draw conditions, printing the result at the end of the game.\n *\n * @return This function does not return a value.\n *\n * @note Relies on global state, including the game_table array. Uses\n *       standard input/output for user interaction. The function terminates\n *       when the game is won, lost, or drawn.\n *\n * @see placex, place, checkwin\n */",
+    "finish_reason": "stop",
+    "usage": {
+      "completion_tokens": 137,
+      "prompt_tokens": 1089,
+      "total_tokens": 1226,
+      "completion_tokens_details": {
+        "accepted_prediction_tokens": 0,
+        "audio_tokens": 0,
+        "reasoning_tokens": 0,
+        "rejected_prediction_tokens": 0
+      },
+      "prompt_tokens_details": {
+        "audio_tokens": 0,
+        "cached_tokens": 0
+      }
+    },
+    "response_id": "chatcmpl-D5CMP9biq89MFAamwjvoEZxn5Qet1",
+    "created": 1770131525
+  }
+}

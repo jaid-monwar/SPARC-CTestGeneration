@@ -1,0 +1,45 @@
+{
+  "timestamp": "2026-02-03T21:14:29.086268",
+  "context": "function_documentation_main",
+  "model_type": "chat",
+  "model": "gpt-4.1-2025-04-14",
+  "request": {
+    "messages": [
+      {
+        "role": "system",
+        "content": "\nYou are a technical writer creating professional C function documentation. Write clear, concise documentation like high-quality open source projects (glibc, libcurl, Python stdlib).\n\n## FORMAT\n\n```c\n/**\n * @brief One-line description of what the function does.\n *\n * Detailed description (2-3 sentences max) explaining the function's purpose\n * and key behavior. Mention important edge cases or special handling.\n *\n * @param param_name Description of parameter, its valid values, and constraints.\n *                   Note if NULL is valid or if the parameter is modified.\n *\n * @return What the function returns. Specify success/failure values.\n *         Example: \"Pointer to new node on success, NULL on allocation failure.\"\n *\n * @note Memory: Caller must free returned pointer / Function allocates internally\n * @note Error: How errors are signaled (return value, errno, etc.)\n *\n * @see related_function, another_function\n */\n```\n\n## GUIDELINES\n\n**Be concise**: One line for @brief. 2-3 sentences max for detailed description.\n\n**Parameters**: Type is in code, so describe purpose and constraints:\n- Valid ranges: \"Must be positive\", \"Valid pointer or NULL\"\n- Modifications: \"Modified to contain result\", \"Contents are sorted in-place\"\n- Ownership: \"Caller retains ownership\", \"Function takes ownership\"\n\n**Return values**: Be specific about success/failure:\n- \"Returns 0 on success, -1 on error\"\n- \"Returns pointer to node, or NULL if not found\"\n\n**@note for important details** (only include if relevant):\n- Memory allocation/deallocation responsibility\n- Side effects that modify input or global state\n- Error handling mechanism\n\n**Omit @note/@see if not applicable.**\n\n## STYLE\n\n- Write naturally, not in bullet points or key-value format\n- Use present tense: \"Inserts a node\" not \"Will insert a node\"\n- Be precise: \"non-negative integer\" not \"valid number\"\n- Avoid redundancy: Don't repeat the function name in @brief\n\n## EXAMPLES\n\n```c\n/**\n * @brief Insert a key into a binary search tree.\n *\n * Creates a new node with the given key and inserts it at the correct\n * position to maintain BST ordering. If the tree is empty (node is NULL),\n * returns a new root node.\n *\n * @param node Root of the tree, or NULL for empty tree.\n * @param key Value to insert.\n *\n * @return Root of the modified tree. Returns newly allocated node if\n *         tree was empty, or existing root with new node inserted.\n *\n * @note Caller must free the returned tree.\n */\n```\n\n```c\n/**\n * @brief Partition array around a pivot for quicksort.\n *\n * Rearranges elements so values less than pivot come before it,\n * and values greater come after. Modifies array in-place.\n *\n * @param arr Array to partition. Must not be NULL.\n * @param low Starting index (inclusive).\n * @param high Ending index (inclusive). Must be >= low.\n *\n * @return Index of the pivot after partitioning.\n */\n```\n\nGenerate ONLY the documentation block. Start with /** and end with */.\n"
+      },
+      {
+        "role": "user",
+        "content": "\nGenerate documentation for this C function:\n\n**Function**: main\n\n```c\n// C program for the function called main\n// Contains target function implementation and dependency signatures\n\n#include <math.h>\n#include <stdio.h>\n#include <stdlib.h>\n#include <time.h>\n\n// Forward declarations for dependency functions\ndouble midpoint_euler(double dx, double x0, double x_max, double *y,\n                      char save_to_file);\nvoid exact_solution(const double *x, double *y);\nvoid midpoint_euler_step(double dx, double *x, double *y, double *dy);\nvoid problem(const double *x, double *y, double *dy);\n\n// Target function implementation\nint main(int argc, char *argv[])\n{\n    double X0 = 0.f;          /* initial value of x0 */\n    double X_MAX = 10.F;      /* upper limit of integration */\n    double Y0[] = {1.f, 0.f}; /* initial value Y = y(x = x_0) */\n    double step_size;\n\n    if (argc == 1)\n    {\n        printf(\"\\nEnter the step size: \");\n        scanf(\"%lg\", &step_size);\n    }\n    else\n        // use commandline argument as independent variable step size\n        step_size = atof(argv[1]);\n\n    // get approximate solution\n    double total_time = midpoint_euler(step_size, X0, X_MAX, Y0, 1);\n    printf(\"\\tTime = %.6g ms\\n\", total_time);\n\n    /* compute exact solution for comparion */\n    FILE *fp = fopen(\"exact.csv\", \"w+\");\n    if (fp == NULL)\n    {\n        perror(\"Error! \");\n        return -1;\n    }\n    double x = X0;\n    double *y = &(Y0[0]);\n    printf(\"Finding exact solution\\n\");\n    clock_t t1 = clock();\n\n    do\n    {\n        fprintf(fp, \"%.4g,%.4g,%.4g\\n\", x, y[0], y[1]);  // write to file\n        exact_solution(&x, y);\n        x += step_size;\n    } while (x <= X_MAX);\n\n    clock_t t2 = clock();\n    total_time = (t2 - t1) / CLOCKS_PER_SEC;\n    printf(\"\\tTime = %.6g ms\\n\", total_time);\n    fclose(fp);\n\n    return 0;\n}\n\n```\n\n**Dependencies**: exact_solution, midpoint_euler\n\nWrite clear, concise documentation following the system prompt format.\nOutput only the /** ... */ block.\n"
+      }
+    ],
+    "model": "gpt-4.1-2025-04-14",
+    "provider": "gpt",
+    "temperature": 0.0,
+    "response_model": null,
+    "max_tokens": 8192,
+    "input_tokens": 1208
+  },
+  "response": {
+    "content": "/**\n * @brief Entry point for solving and comparing ODE solutions using the midpoint Euler method.\n *\n * Prompts the user for a step size (or reads it from the command line), computes an approximate\n * solution to an ODE using the midpoint Euler method, and writes the results to a file. Then,\n * computes the exact solution at the same points and saves it to \"exact.csv\" for comparison.\n *\n * @param argc Number of command-line arguments. If 1, prompts user for step size; if >1, uses argv[1].\n * @param argv Array of command-line arguments. argv[1] may specify the step size as a string.\n *\n * @return Returns 0 on success, or -1 if file operations fail.\n *\n * @note Error: Prints error message and returns -1 if \"exact.csv\" cannot be opened.\n */",
+    "finish_reason": "stop",
+    "usage": {
+      "completion_tokens": 179,
+      "prompt_tokens": 1208,
+      "total_tokens": 1387,
+      "completion_tokens_details": {
+        "accepted_prediction_tokens": 0,
+        "audio_tokens": 0,
+        "reasoning_tokens": 0,
+        "rejected_prediction_tokens": 0
+      },
+      "prompt_tokens_details": {
+        "audio_tokens": 0,
+        "cached_tokens": 0
+      }
+    },
+    "response_id": "chatcmpl-D5COgoCW0Y8TOmzowu8fClzVG3wiz",
+    "created": 1770131666
+  }
+}

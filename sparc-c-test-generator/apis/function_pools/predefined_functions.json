@@ -1,0 +1,96 @@
+{
+  "summary": {
+    "total_files": 1,
+    "total_functions": 5,
+    "files_with_functions": 1
+  },
+  "files": {
+    "test/helper/functions/utility_helper_stdout.c": {
+      "function_count": 5,
+      "functions": [
+        "capture_stdout_start",
+        "capture_stdout_stop",
+        "assert_stdout_equals",
+        "assert_stdout_contains",
+        "assert_stdout_not_empty"
+      ],
+      "headers_processed": [],
+      "implementation_files": []
+    }
+  },
+  "all_functions": [
+    {
+      "name": "capture_stdout_start",
+      "return_type": "stdout_capture_t *",
+      "parameters": [],
+      "location": "test/helper/functions/utility_helper_stdout.c:40",
+      "source_file": "utility_helper_stdout.c",
+      "description": "Create a pipe",
+      "source_file_path": "test/helper/functions/utility_helper_stdout.c"
+    },
+    {
+      "name": "capture_stdout_stop",
+      "return_type": "char *",
+      "parameters": [
+        {
+          "name": "cap",
+          "type": "stdout_capture_t *"
+        }
+      ],
+      "location": "test/helper/functions/utility_helper_stdout.c:84",
+      "source_file": "utility_helper_stdout.c",
+      "description": "Flush stdout to ensure all output is written to pipe",
+      "source_file_path": "test/helper/functions/utility_helper_stdout.c"
+    },
+    {
+      "name": "assert_stdout_equals",
+      "return_type": "void",
+      "parameters": [
+        {
+          "name": "cap",
+          "type": "stdout_capture_t *"
+        },
+        {
+          "name": "expected",
+          "type": "const char *"
+        }
+      ],
+      "location": "test/helper/functions/utility_helper_stdout.c:141",
+      "source_file": "utility_helper_stdout.c",
+      "description": "",
+      "source_file_path": "test/helper/functions/utility_helper_stdout.c"
+    },
+    {
+      "name": "assert_stdout_contains",
+      "return_type": "void",
+      "parameters": [
+        {
+          "name": "cap",
+          "type": "stdout_capture_t *"
+        },
+        {
+          "name": "expected_substring",
+          "type": "const char *"
+        }
+      ],
+      "location": "test/helper/functions/utility_helper_stdout.c:165",
+      "source_file": "utility_helper_stdout.c",
+      "description": "",
+      "source_file_path": "test/helper/functions/utility_helper_stdout.c"
+    },
+    {
+      "name": "assert_stdout_not_empty",
+      "return_type": "void",
+      "parameters": [
+        {
+          "name": "cap",
+          "type": "stdout_capture_t *"
+        }
+      ],
+      "location": "test/helper/functions/utility_helper_stdout.c:190",
+      "source_file": "utility_helper_stdout.c",
+      "description": "",
+      "source_file_path": "test/helper/functions/utility_helper_stdout.c"
+    }
+  ]
+}

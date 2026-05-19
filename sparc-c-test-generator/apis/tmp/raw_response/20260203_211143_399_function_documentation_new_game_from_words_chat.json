@@ -1,0 +1,45 @@
+{
+  "timestamp": "2026-02-03T21:11:43.399698",
+  "context": "function_documentation_new_game_from_words",
+  "model_type": "chat",
+  "model": "gpt-4.1-2025-04-14",
+  "request": {
+    "messages": [
+      {
+        "role": "system",
+        "content": "\nYou are a technical writer creating professional C function documentation. Write clear, concise documentation like high-quality open source projects (glibc, libcurl, Python stdlib).\n\n## FORMAT\n\n```c\n/**\n * @brief One-line description of what the function does.\n *\n * Detailed description (2-3 sentences max) explaining the function's purpose\n * and key behavior. Mention important edge cases or special handling.\n *\n * @param param_name Description of parameter, its valid values, and constraints.\n *                   Note if NULL is valid or if the parameter is modified.\n *\n * @return What the function returns. Specify success/failure values.\n *         Example: \"Pointer to new node on success, NULL on allocation failure.\"\n *\n * @note Memory: Caller must free returned pointer / Function allocates internally\n * @note Error: How errors are signaled (return value, errno, etc.)\n *\n * @see related_function, another_function\n */\n```\n\n## GUIDELINES\n\n**Be concise**: One line for @brief. 2-3 sentences max for detailed description.\n\n**Parameters**: Type is in code, so describe purpose and constraints:\n- Valid ranges: \"Must be positive\", \"Valid pointer or NULL\"\n- Modifications: \"Modified to contain result\", \"Contents are sorted in-place\"\n- Ownership: \"Caller retains ownership\", \"Function takes ownership\"\n\n**Return values**: Be specific about success/failure:\n- \"Returns 0 on success, -1 on error\"\n- \"Returns pointer to node, or NULL if not found\"\n\n**@note for important details** (only include if relevant):\n- Memory allocation/deallocation responsibility\n- Side effects that modify input or global state\n- Error handling mechanism\n\n**Omit @note/@see if not applicable.**\n\n## STYLE\n\n- Write naturally, not in bullet points or key-value format\n- Use present tense: \"Inserts a node\" not \"Will insert a node\"\n- Be precise: \"non-negative integer\" not \"valid number\"\n- Avoid redundancy: Don't repeat the function name in @brief\n\n## EXAMPLES\n\n```c\n/**\n * @brief Insert a key into a binary search tree.\n *\n * Creates a new node with the given key and inserts it at the correct\n * position to maintain BST ordering. If the tree is empty (node is NULL),\n * returns a new root node.\n *\n * @param node Root of the tree, or NULL for empty tree.\n * @param key Value to insert.\n *\n * @return Root of the modified tree. Returns newly allocated node if\n *         tree was empty, or existing root with new node inserted.\n *\n * @note Caller must free the returned tree.\n */\n```\n\n```c\n/**\n * @brief Partition array around a pivot for quicksort.\n *\n * Rearranges elements so values less than pivot come before it,\n * and values greater come after. Modifies array in-place.\n *\n * @param arr Array to partition. Must not be NULL.\n * @param low Starting index (inclusive).\n * @param high Ending index (inclusive). Must be >= low.\n *\n * @return Index of the pivot after partitioning.\n */\n```\n\nGenerate ONLY the documentation block. Start with /** and end with */.\n"
+      },
+      {
+        "role": "user",
+        "content": "\nGenerate documentation for this C function:\n\n**Function**: new_game_from_words\n\n```c\n// C program for the function called new_game_from_words\n// Contains target function implementation and dependency signatures\n\n#include <ctype.h> /// for tolower()\n#include <stdio.h> /// for I/O operations\n#include <stdlib.h> /// for exit(), rand() and memory functions\n#include <string.h> /// for string operations strlen, strchr, strcpy\n#include <time.h> /// for srand()\n#include \"header.h\"\n\n// Forward declarations for dependency functions\nvoid init_game_instance(struct game_instance *game, const char *word);\n\n// Target function implementation\nstruct game_instance new_game_from_words(const char *words[], int num_words) {\n    struct game_instance game;\n\n    if (words == NULL || num_words <= 0) {\n        memset(&game, 0, sizeof(game));\n        return game;\n    }\n\n    // Select random word\n    int random_idx = rand() % num_words;\n    const char *selected_word = words[random_idx];\n\n    if (selected_word == NULL) {\n        memset(&game, 0, sizeof(game));\n        return game;\n    }\n\n    init_game_instance(&game, selected_word);\n    return game;\n}\n\n```\n\n**Dependencies**: init_game_instance\n\nWrite clear, concise documentation following the system prompt format.\nOutput only the /** ... */ block.\n"
+      }
+    ],
+    "model": "gpt-4.1-2025-04-14",
+    "provider": "gpt",
+    "temperature": 0.0,
+    "response_model": null,
+    "max_tokens": 8192,
+    "input_tokens": 958
+  },
+  "response": {
+    "content": "/**\n * @brief Create a new game instance using a random word from a list.\n *\n * Selects a random word from the provided array and initializes a\n * game_instance struct with it. If the input array is NULL, empty,\n * or the selected word is NULL, returns a zero-initialized struct.\n *\n * @param words Array of pointers to NUL-terminated strings. Must not be NULL unless num_words is 0.\n * @param num_words Number of words in the array. Must be positive.\n *\n * @return Initialized game_instance struct. Returns a zeroed struct if input is invalid or selection fails.\n *\n * @see init_game_instance\n */",
+    "finish_reason": "stop",
+    "usage": {
+      "completion_tokens": 138,
+      "prompt_tokens": 958,
+      "total_tokens": 1096,
+      "completion_tokens_details": {
+        "accepted_prediction_tokens": 0,
+        "audio_tokens": 0,
+        "reasoning_tokens": 0,
+        "rejected_prediction_tokens": 0
+      },
+      "prompt_tokens_details": {
+        "audio_tokens": 0,
+        "cached_tokens": 0
+      }
+    },
+    "response_id": "chatcmpl-D5CM1yUFp8rdp1lCp6Nw8CtpaYXIf",
+    "created": 1770131501
+  }
+}

@@ -1,0 +1,42 @@
+{
+  "timestamp": "2026-01-14T22:43:51.472786",
+  "context": "function_documentation_trie_collect_words",
+  "model_type": "chat_deepseek",
+  "model": "deepseek-chat",
+  "request": {
+    "messages": [
+      {
+        "role": "system",
+        "content": "\nYou are a technical writer creating professional C function documentation. Write clear, concise documentation like high-quality open source projects (glibc, libcurl, Python stdlib).\n\n## FORMAT\n\n```c\n/**\n * @brief One-line description of what the function does.\n *\n * Detailed description (2-3 sentences max) explaining the function's purpose\n * and key behavior. Mention important edge cases or special handling.\n *\n * @param param_name Description of parameter, its valid values, and constraints.\n *                   Note if NULL is valid or if the parameter is modified.\n *\n * @return What the function returns. Specify success/failure values.\n *         Example: \"Pointer to new node on success, NULL on allocation failure.\"\n *\n * @note Memory: Caller must free returned pointer / Function allocates internally\n * @note Error: How errors are signaled (return value, errno, etc.)\n *\n * @see related_function, another_function\n */\n```\n\n## GUIDELINES\n\n**Be concise**: One line for @brief. 2-3 sentences max for detailed description.\n\n**Parameters**: Type is in code, so describe purpose and constraints:\n- Valid ranges: \"Must be positive\", \"Valid pointer or NULL\"\n- Modifications: \"Modified to contain result\", \"Contents are sorted in-place\"\n- Ownership: \"Caller retains ownership\", \"Function takes ownership\"\n\n**Return values**: Be specific about success/failure:\n- \"Returns 0 on success, -1 on error\"\n- \"Returns pointer to node, or NULL if not found\"\n\n**@note for important details** (only include if relevant):\n- Memory allocation/deallocation responsibility\n- Side effects that modify input or global state\n- Error handling mechanism\n\n**Omit @note/@see if not applicable.**\n\n## STYLE\n\n- Write naturally, not in bullet points or key-value format\n- Use present tense: \"Inserts a node\" not \"Will insert a node\"\n- Be precise: \"non-negative integer\" not \"valid number\"\n- Avoid redundancy: Don't repeat the function name in @brief\n\n## EXAMPLES\n\n```c\n/**\n * @brief Insert a key into a binary search tree.\n *\n * Creates a new node with the given key and inserts it at the correct\n * position to maintain BST ordering. If the tree is empty (node is NULL),\n * returns a new root node.\n *\n * @param node Root of the tree, or NULL for empty tree.\n * @param key Value to insert.\n *\n * @return Root of the modified tree. Returns newly allocated node if\n *         tree was empty, or existing root with new node inserted.\n *\n * @note Caller must free the returned tree.\n */\n```\n\n```c\n/**\n * @brief Partition array around a pivot for quicksort.\n *\n * Rearranges elements so values less than pivot come before it,\n * and values greater come after. Modifies array in-place.\n *\n * @param arr Array to partition. Must not be NULL.\n * @param low Starting index (inclusive).\n * @param high Ending index (inclusive). Must be >= low.\n *\n * @return Index of the pivot after partitioning.\n */\n```\n\nGenerate ONLY the documentation block. Start with /** and end with */.\n"
+      },
+      {
+        "role": "user",
+        "content": "\nGenerate documentation for this C function:\n\n**Function**: trie_collect_words\n\n```c\n// C program for the function called trie_collect_words\n// Contains target function implementation and dependency signatures\n\n#include <stdbool.h>\n#include <stdio.h>\n#include <stdlib.h>\n#include <string.h>\n\nstruct trie {\n    struct trie *children[ALPHABET_SIZE];\n    bool end_of_word;\n};\n\n// Forward declarations for dependency functions\nstatic void trie_collect_words_helper(\n    struct trie * trie,\n    char prefix[],\n    unsigned prefix_len,\n    char **buffer,\n    int *buffer_index,\n    int max_words\n);\nint trie_search(\n    struct trie * trie,\n    char *word,\n    unsigned word_len,\n    struct trie ** result\n);\n\n// Target function implementation\nint trie_collect_words(\n    struct trie * trie,\n    const char *prefix,\n    char **buffer,\n    int max_words\n)\n{\n    if (NULL == trie || NULL == buffer || max_words <= 0) {\n        return 0;\n    }\n\n    struct trie * start_node = trie;\n    char word_buffer[100] = {0};\n    unsigned prefix_len = 0;\n\n    // If prefix is provided, navigate to that node first\n    if (NULL != prefix && prefix[0] != '\\0') {\n        prefix_len = strnlen(prefix, 100);\n        struct trie * result = NULL;\n        int ret = trie_search(trie, (char *)prefix, prefix_len, &result);\n        if (-1 == ret || NULL == result) {\n            return 0;  // Prefix not found\n        }\n        start_node = result;\n        memcpy(word_buffer, prefix, prefix_len);\n    }\n\n    int buffer_index = 0;\n    trie_collect_words_helper(start_node, word_buffer, prefix_len,\n                               buffer, &buffer_index, max_words);\n    return buffer_index;\n}\n\n```\n\n**Dependencies**: trie_collect_words_helper, trie_search\n\nWrite clear, concise documentation following the system prompt format.\nOutput only the /** ... */ block.\n"
+      }
+    ],
+    "model": "deepseek-chat",
+    "provider": "deepseek",
+    "temperature": 0.0,
+    "response_model": null,
+    "max_tokens": 8192,
+    "input_tokens": 1096
+  },
+  "response": {
+    "content": "/**\n * @brief Collect words from a trie that start with a given prefix.\n *\n * Traverses the trie starting from the node matching the prefix and gathers\n * up to max_words complete words into the provided buffer. If no prefix is\n * given, collects words from the entire trie.\n *\n * @param trie Root of the trie. Must not be NULL.\n * @param prefix Prefix to match, or NULL/empty string to collect all words.\n * @param buffer Array of string pointers to store collected words.\n *               Each word is allocated internally and must be freed by the caller.\n * @param max_words Maximum number of words to collect. Must be positive.\n *\n * @return Number of words successfully stored in buffer. Returns 0 if the\n *         prefix is not found, or if input parameters are invalid.\n *\n * @note Memory: The function allocates strings for each word; caller is\n *       responsible for freeing them.\n * @note Error: Invalid parameters or missing prefix result in 0 without\n *       setting errno.\n *\n * @see trie_collect_words_helper, trie_search\n */",
+    "finish_reason": "stop",
+    "usage": {
+      "completion_tokens": 237,
+      "prompt_tokens": 1126,
+      "total_tokens": 1363,
+      "completion_tokens_details": null,
+      "prompt_tokens_details": {
+        "audio_tokens": null,
+        "cached_tokens": 640
+      },
+      "prompt_cache_hit_tokens": 640,
+      "prompt_cache_miss_tokens": 486
+    },
+    "response_id": "516c78fd-340d-469a-959d-59cb1d3c92ee",
+    "created": 1768430623
+  }
+}

@@ -1,0 +1,147 @@
+{
+  "main_file": "subjects/bst/bst.c",
+  "functions": [
+    {
+      "name": "newNode",
+      "return_type": "struct node *",
+      "parameters": [
+        {
+          "name": "item",
+          "type": "int"
+        }
+      ],
+      "location": "subjects/bst/bst.c:13",
+      "source_file": "bst.c"
+    },
+    {
+      "name": "inorder",
+      "return_type": "void",
+      "parameters": [
+        {
+          "name": "root",
+          "type": "struct node *"
+        }
+      ],
+      "location": "subjects/bst/bst.c:24",
+      "source_file": "bst.c"
+    },
+    {
+      "name": "insert",
+      "return_type": "struct node *",
+      "parameters": [
+        {
+          "name": "node",
+          "type": "struct node *"
+        },
+        {
+          "name": "key",
+          "type": "int"
+        }
+      ],
+      "location": "subjects/bst/bst.c:36",
+      "source_file": "bst.c"
+    },
+    {
+      "name": "minValueNode",
+      "return_type": "struct node *",
+      "parameters": [
+        {
+          "name": "node",
+          "type": "struct node *"
+        }
+      ],
+      "location": "subjects/bst/bst.c:57",
+      "source_file": "bst.c"
+    },
+    {
+      "name": "deleteNode",
+      "return_type": "struct node *",
+      "parameters": [
+        {
+          "name": "root",
+          "type": "struct node *"
+        },
+        {
+          "name": "key",
+          "type": "int"
+        }
+      ],
+      "location": "subjects/bst/bst.c:72",
+      "source_file": "bst.c"
+    }
+  ],
+  "source_files": {
+    "subjects/bst/bst.c": [
+      {
+        "name": "newNode",
+        "return_type": "struct node *",
+        "parameters": [
+          {
+            "name": "item",
+            "type": "int"
+          }
+        ],
+        "location": "subjects/bst/bst.c:13",
+        "source_file": "bst.c"
+      },
+      {
+        "name": "inorder",
+        "return_type": "void",
+        "parameters": [
+          {
+            "name": "root",
+            "type": "struct node *"
+          }
+        ],
+        "location": "subjects/bst/bst.c:24",
+        "source_file": "bst.c"
+      },
+      {
+        "name": "insert",
+        "return_type": "struct node *",
+        "parameters": [
+          {
+            "name": "node",
+            "type": "struct node *"
+          },
+          {
+            "name": "key",
+            "type": "int"
+          }
+        ],
+        "location": "subjects/bst/bst.c:36",
+        "source_file": "bst.c"
+      },
+      {
+        "name": "minValueNode",
+        "return_type": "struct node *",
+        "parameters": [
+          {
+            "name": "node",
+            "type": "struct node *"
+          }
+        ],
+        "location": "subjects/bst/bst.c:57",
+        "source_file": "bst.c"
+      },
+      {
+        "name": "deleteNode",
+        "return_type": "struct node *",
+        "parameters": [
+          {
+            "name": "root",
+            "type": "struct node *"
+          },
+          {
+            "name": "key",
+            "type": "int"
+          }
+        ],
+        "location": "subjects/bst/bst.c:72",
+        "source_file": "bst.c"
+      }
+    ]
+  },
+  "headers_processed": [],
+  "implementation_files": []
+}

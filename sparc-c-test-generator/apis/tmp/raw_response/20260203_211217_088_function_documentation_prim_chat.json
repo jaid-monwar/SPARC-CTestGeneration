@@ -1,0 +1,45 @@
+{
+  "timestamp": "2026-02-03T21:12:17.088159",
+  "context": "function_documentation_prim",
+  "model_type": "chat",
+  "model": "gpt-4.1-2025-04-14",
+  "request": {
+    "messages": [
+      {
+        "role": "system",
+        "content": "\nYou are a technical writer creating professional C function documentation. Write clear, concise documentation like high-quality open source projects (glibc, libcurl, Python stdlib).\n\n## FORMAT\n\n```c\n/**\n * @brief One-line description of what the function does.\n *\n * Detailed description (2-3 sentences max) explaining the function's purpose\n * and key behavior. Mention important edge cases or special handling.\n *\n * @param param_name Description of parameter, its valid values, and constraints.\n *                   Note if NULL is valid or if the parameter is modified.\n *\n * @return What the function returns. Specify success/failure values.\n *         Example: \"Pointer to new node on success, NULL on allocation failure.\"\n *\n * @note Memory: Caller must free returned pointer / Function allocates internally\n * @note Error: How errors are signaled (return value, errno, etc.)\n *\n * @see related_function, another_function\n */\n```\n\n## GUIDELINES\n\n**Be concise**: One line for @brief. 2-3 sentences max for detailed description.\n\n**Parameters**: Type is in code, so describe purpose and constraints:\n- Valid ranges: \"Must be positive\", \"Valid pointer or NULL\"\n- Modifications: \"Modified to contain result\", \"Contents are sorted in-place\"\n- Ownership: \"Caller retains ownership\", \"Function takes ownership\"\n\n**Return values**: Be specific about success/failure:\n- \"Returns 0 on success, -1 on error\"\n- \"Returns pointer to node, or NULL if not found\"\n\n**@note for important details** (only include if relevant):\n- Memory allocation/deallocation responsibility\n- Side effects that modify input or global state\n- Error handling mechanism\n\n**Omit @note/@see if not applicable.**\n\n## STYLE\n\n- Write naturally, not in bullet points or key-value format\n- Use present tense: \"Inserts a node\" not \"Will insert a node\"\n- Be precise: \"non-negative integer\" not \"valid number\"\n- Avoid redundancy: Don't repeat the function name in @brief\n\n## EXAMPLES\n\n```c\n/**\n * @brief Insert a key into a binary search tree.\n *\n * Creates a new node with the given key and inserts it at the correct\n * position to maintain BST ordering. If the tree is empty (node is NULL),\n * returns a new root node.\n *\n * @param node Root of the tree, or NULL for empty tree.\n * @param key Value to insert.\n *\n * @return Root of the modified tree. Returns newly allocated node if\n *         tree was empty, or existing root with new node inserted.\n *\n * @note Caller must free the returned tree.\n */\n```\n\n```c\n/**\n * @brief Partition array around a pivot for quicksort.\n *\n * Rearranges elements so values less than pivot come before it,\n * and values greater come after. Modifies array in-place.\n *\n * @param arr Array to partition. Must not be NULL.\n * @param low Starting index (inclusive).\n * @param high Ending index (inclusive). Must be >= low.\n *\n * @return Index of the pivot after partitioning.\n */\n```\n\nGenerate ONLY the documentation block. Start with /** and end with */.\n"
+      },
+      {
+        "role": "user",
+        "content": "\nGenerate documentation for this C function:\n\n**Function**: prim\n\n```c\n// C program for the function called prim\n// Contains target function implementation and dependency signatures\n\n#include <stdio.h>\n#include <stdlib.h>\n#include <string.h>\n#include <inttypes.h>\n\n// Forward declarations for dependency functions\nuint16_t minimum(uint16_t arr[], uint16_t N);\n\n// Target function implementation\nvoid prim(uint16_t G[][MAX], uint16_t MST[][MAX], uint16_t V)\n{\n    uint16_t u, v;\n    uint16_t E_t[MAX], path[MAX];\n    uint16_t V_t[MAX], no_of_edges;\n\n    if (V == 0 || V > MAX)\n    {\n        return;\n    }\n\n    E_t[0] = 0;  // edges for current vertex\n    V_t[0] = 1;  // list of visited vertices\n\n    for (uint16_t i = 1; i < V; i++)\n    {\n        E_t[i] = G[i][0];\n        path[i] = 0;\n        V_t[i] = 0;\n    }\n\n    no_of_edges = V - 1;\n\n    while (no_of_edges > 0)\n    {\n        u = minimum(E_t, V);\n        while (V_t[u] == 1)\n        {\n            E_t[u] = INF;\n            u = minimum(E_t, V);\n        }\n\n        v = path[u];\n        MST[v][u] = E_t[u];\n        MST[u][v] = E_t[u];\n        no_of_edges--;\n        V_t[u] = 1;\n\n        for (uint16_t i = 1; i < V; i++)\n        {\n            if (V_t[i] == 0 && G[u][i] < E_t[i])\n            {\n                E_t[i] = G[u][i];\n                path[i] = u;\n            }\n        }\n    }\n}\n\n```\n\n**Dependencies**: minimum\n\nWrite clear, concise documentation following the system prompt format.\nOutput only the /** ... */ block.\n"
+      }
+    ],
+    "model": "gpt-4.1-2025-04-14",
+    "provider": "gpt",
+    "temperature": 0.0,
+    "response_model": null,
+    "max_tokens": 8192,
+    "input_tokens": 1109
+  },
+  "response": {
+    "content": "/**\n * @brief Compute the Minimum Spanning Tree (MST) of a graph using Prim's algorithm.\n *\n * Constructs the MST of a weighted undirected graph represented by an adjacency matrix.\n * The result is written to the provided MST matrix, which is updated in-place. If the\n * number of vertices V is zero or exceeds MAX, the function returns immediately without modifying MST.\n *\n * @param G Input adjacency matrix of the graph. G[i][j] is the weight between vertices i and j.\n *          Must be a V x V matrix with valid weights; INF should represent no edge.\n * @param MST Output matrix to store the MST. Must be a V x V matrix; contents are overwritten.\n * @param V Number of vertices in the graph. Must be in the range 1 to MAX inclusive.\n *\n * @return None.\n *\n * @note The function modifies MST in-place to contain the MST edges and their weights.\n *       The caller must ensure G and MST are at least V x V in size.\n */",
+    "finish_reason": "stop",
+    "usage": {
+      "completion_tokens": 213,
+      "prompt_tokens": 1109,
+      "total_tokens": 1322,
+      "completion_tokens_details": {
+        "accepted_prediction_tokens": 0,
+        "audio_tokens": 0,
+        "reasoning_tokens": 0,
+        "rejected_prediction_tokens": 0
+      },
+      "prompt_tokens_details": {
+        "audio_tokens": 0,
+        "cached_tokens": 0
+      }
+    },
+    "response_id": "chatcmpl-D5CMVOpZKnAo32MjEAeJkSWmnMPhS",
+    "created": 1770131531
+  }
+}

@@ -1,0 +1,42 @@
+{
+  "timestamp": "2026-01-13T10:48:03.778166",
+  "context": "function_documentation_kohonen_update_weights",
+  "model_type": "chat_deepseek",
+  "model": "deepseek-chat",
+  "request": {
+    "messages": [
+      {
+        "role": "system",
+        "content": "\nYou are a technical writer creating professional C function documentation. Write clear, concise documentation like high-quality open source projects (glibc, libcurl, Python stdlib).\n\n## FORMAT\n\n```c\n/**\n * @brief One-line description of what the function does.\n *\n * Detailed description (2-3 sentences max) explaining the function's purpose\n * and key behavior. Mention important edge cases or special handling.\n *\n * @param param_name Description of parameter, its valid values, and constraints.\n *                   Note if NULL is valid or if the parameter is modified.\n *\n * @return What the function returns. Specify success/failure values.\n *         Example: \"Pointer to new node on success, NULL on allocation failure.\"\n *\n * @note Memory: Caller must free returned pointer / Function allocates internally\n * @note Error: How errors are signaled (return value, errno, etc.)\n *\n * @see related_function, another_function\n */\n```\n\n## GUIDELINES\n\n**Be concise**: One line for @brief. 2-3 sentences max for detailed description.\n\n**Parameters**: Type is in code, so describe purpose and constraints:\n- Valid ranges: \"Must be positive\", \"Valid pointer or NULL\"\n- Modifications: \"Modified to contain result\", \"Contents are sorted in-place\"\n- Ownership: \"Caller retains ownership\", \"Function takes ownership\"\n\n**Return values**: Be specific about success/failure:\n- \"Returns 0 on success, -1 on error\"\n- \"Returns pointer to node, or NULL if not found\"\n\n**@note for important details** (only include if relevant):\n- Memory allocation/deallocation responsibility\n- Side effects that modify input or global state\n- Error handling mechanism\n\n**Omit @note/@see if not applicable.**\n\n## STYLE\n\n- Write naturally, not in bullet points or key-value format\n- Use present tense: \"Inserts a node\" not \"Will insert a node\"\n- Be precise: \"non-negative integer\" not \"valid number\"\n- Avoid redundancy: Don't repeat the function name in @brief\n\n## EXAMPLES\n\n```c\n/**\n * @brief Insert a key into a binary search tree.\n *\n * Creates a new node with the given key and inserts it at the correct\n * position to maintain BST ordering. If the tree is empty (node is NULL),\n * returns a new root node.\n *\n * @param node Root of the tree, or NULL for empty tree.\n * @param key Value to insert.\n *\n * @return Root of the modified tree. Returns newly allocated node if\n *         tree was empty, or existing root with new node inserted.\n *\n * @note Caller must free the returned tree.\n */\n```\n\n```c\n/**\n * @brief Partition array around a pivot for quicksort.\n *\n * Rearranges elements so values less than pivot come before it,\n * and values greater come after. Modifies array in-place.\n *\n * @param arr Array to partition. Must not be NULL.\n * @param low Starting index (inclusive).\n * @param high Ending index (inclusive). Must be >= low.\n *\n * @return Index of the pivot after partitioning.\n */\n```\n\nGenerate ONLY the documentation block. Start with /** and end with */.\n"
+      },
+      {
+        "role": "user",
+        "content": "\nGenerate documentation for this C function:\n\n**Function**: kohonen_update_weights\n\n```c\n// C program for the function called kohonen_update_weights\n// Contains target function implementation and dependency signatures\n\n#include <math.h>\n#include <stdio.h>\n#include <stdlib.h>\n#include <time.h>\n#include <omp.h>\n\nstruct kohonen_array_3d\n{\n    int dim1;     /**< lengths of first dimension */\n    int dim2;     /**< lengths of second dimension */\n    int dim3;     /**< lengths of thirddimension */\n    double *data; /**< pointer to data */\n};\n\n// Forward declarations for dependency functions\nvoid get_min_2d(double **X, int N, double *val, int *x_idx, int *y_idx);\ndouble *kohonen_data_3d(const struct kohonen_array_3d *arr, int x, int y, int z);\n\n// Target function implementation\ndouble kohonen_update_weights(const double *X, struct kohonen_array_3d *W,\n                              double **D, int num_out, int num_features,\n                              double alpha, int R)\n{\n    int x, y, k;\n    double d_min = 0.f;\n\n#ifdef _OPENMP\n#pragma omp for\n#endif\n    // step 1: for each 2D output point\n    for (x = 0; x < num_out; x++)\n    {\n        for (y = 0; y < num_out; y++)\n        {\n            D[x][y] = 0.f;\n            // compute Euclidian distance of each output\n            // point from the current sample\n            for (k = 0; k < num_features; k++)\n            {\n                double *w = kohonen_data_3d(W, x, y, k);\n                D[x][y] += (w[0] - X[k]) * (w[0] - X[k]);\n            }\n            D[x][y] = sqrt(D[x][y]);\n        }\n    }\n\n    // step 2:  get closest node i.e., node with smallest Euclidian distance to\n    // the current pattern\n    int d_min_x, d_min_y;\n    get_min_2d(D, num_out, &d_min, &d_min_x, &d_min_y);\n\n    // step 3a: get the neighborhood range\n    int from_x = max(0, d_min_x - R);\n    int to_x = min(num_out, d_min_x + R + 1);\n    int from_y = max(0, d_min_y - R);\n    int to_y = min(num_out, d_min_y + R + 1);\n\n    // step 3b: update the weights of nodes in the\n    // neighborhood\n#ifdef _OPENMP\n#pragma omp for\n#endif\n    for (x = from_x; x < to_x; x++)\n    {\n        for (y = from_y; y < to_y; y++)\n        {\n            /* you can enable the following normalization if needed.\n               personally, I found it detrimental to convergence */\n            // const double s2pi = sqrt(2.f * M_PI);\n            // double normalize = 1.f / (alpha * s2pi);\n\n            /* apply scaling inversely proportional to distance from the\n               current node */\n            double d2 =\n                (d_min_x - x) * (d_min_x - x) + (d_min_y - y) * (d_min_y - y);\n            double scale_factor = exp(-d2 / (2.f * alpha * alpha));\n\n            for (k = 0; k < num_features; k++)\n            {\n                double *w = kohonen_data_3d(W, x, y, k);\n                // update weights of nodes in the neighborhood\n                w[0] += alpha * scale_factor * (X[k] - w[0]);\n            }\n        }\n    }\n    return d_min;\n}\n\n```\n\n**Dependencies**: get_min_2d, kohonen_data_3d\n\nWrite clear, concise documentation following the system prompt format.\nOutput only the /** ... */ block.\n"
+      }
+    ],
+    "model": "deepseek-chat",
+    "provider": "deepseek",
+    "temperature": 0.0,
+    "response_model": null,
+    "max_tokens": 8192,
+    "input_tokens": 1537
+  },
+  "response": {
+    "content": "/**\n * @brief Update Kohonen network weights for a single input sample.\n *\n * Processes one input vector through a 2D Self-Organizing Map (SOM). It finds the Best Matching Unit (BMU) and adjusts the weights of nodes within a neighborhood radius, scaling updates by distance from the BMU and the learning rate.\n *\n * @param X Input feature vector for the current sample. Must not be NULL.\n * @param W 3D weight matrix of the Kohonen network (dimensions: num_out x num_out x num_features). Modified in-place.\n * @param D Pre-allocated 2D distance matrix (num_out x num_out) used for temporary storage. Contents are overwritten.\n * @param num_out Size of the output grid (one side). The grid is num_out x num_out.\n * @param num_features Length of the input feature vector and depth of the weight matrix.\n * @param alpha Current learning rate. Must be non-negative.\n * @param R Neighborhood radius for weight updates.\n *\n * @return The Euclidean distance from the input sample to the Best Matching Unit (BMU).\n *\n * @note Memory: The function modifies the `W` and `D` arrays in-place. It does not allocate memory.\n * @note Parallel: The function contains OpenMP pragmas for parallel loops if compiled with OpenMP support.\n */",
+    "finish_reason": "stop",
+    "usage": {
+      "completion_tokens": 282,
+      "prompt_tokens": 1550,
+      "total_tokens": 1832,
+      "completion_tokens_details": null,
+      "prompt_tokens_details": {
+        "audio_tokens": null,
+        "cached_tokens": 1536
+      },
+      "prompt_cache_hit_tokens": 1536,
+      "prompt_cache_miss_tokens": 14
+    },
+    "response_id": "788d7d93-b565-4ac8-aa88-b32f48d3a8bc",
+    "created": 1768301273
+  }
+}

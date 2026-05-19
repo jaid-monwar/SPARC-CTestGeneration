@@ -1,0 +1,261 @@
+{
+  "timestamp": "2025-12-22T00:22:55.014821",
+  "context": "test_designer_deleteNode_4",
+  "model_type": "chat_structured",
+  "model": "gpt-4.1-2025-04-14",
+  "request": {
+    "messages": [
+      {
+        "role": "system",
+        "content": "You are a C test designer. Design high-level test scenarios (WHAT to test), not C code (HOW).\n\nROLE: Phase 1 of dual-phase architecture\n- You: Design test for ONE execution path\n- Phase 2: Converts your design to C code\n\nINPUTS PROVIDED:\n- Function signature, description, implementation (source code)\n- ONE target execution path with conditions\n- Operation map (available helper functions)\n\nYOUR TASKS:\n1. Analyze path: What conditions trigger it? What inputs? Expected behavior?\n2. Study implementation: Understand branches, variables, edge cases for this path\n3. Design test: Choose inputs that trigger path conditions (boundary, normal, edge, error cases)\n4. Specify helpers: Assertions, utilities, dependencies from operation map\n5. Define expectations: Return values, side effects, state changes, invariants\n6. Provide rationale: Why this test matters, what bugs it catches\n\nNO MOCKING ALLOWED:\nDo NOT design tests requiring: mock functions, forced failures, simulated allocation failures, faked system calls.\nONLY use: Real inputs, natural error conditions (NULL, invalid params), actual boundary values.\n\nExample - WRONG: \"Test malloc failure handling\" (requires mock_malloc_fail)\nExample - RIGHT: \"Test NULL pointer handling\" (pass NULL directly)\n\nSUCCESS CRITERIA:\n✓ Test exercises the target path with correct inputs\n✓ All assertions, helpers, dependencies specified\n✓ Rationale clear and convincing\n✓ Memory management specified (setup/cleanup)\n✓ Valid JSON output with all required fields\n✓ Test naming: test_<function>_<path_scenario>\n\nOUTPUT: JSON object with metadata, test_scenarios array (1 scenario for the path), test_suite_summary.\n"
+      },
+      {
+        "role": "user",
+        "content": "Design a test for the following execution path.\n\nFUNCTION UNDER TEST:\nName: deleteNode\nSignature: struct node* deleteNode(struct node* root, int key)\nDescription: /**\n * @brief Remove a node with a given key from a binary search tree.\n *\n * Deletes the node containing the specified key from the BST rooted at root,\n * maintaining BST properties. If the key is not found, the tree is unchanged.\n * Handles all cases: node with zero, one, or two children.\n *\n * @param root Root of the BST, or NULL for an empty tree. Caller retains ownership.\n * @param key Key to remove from the tree.\n *\n * @return Root of the modified tree. Returns NULL if the tree becomes empty.\n *\n * @note Memory: Frees the removed node. Caller must free the entire tree when done.\n */\nDependencies: deleteNode, minValueNode\n\nFUNCTION IMPLEMENTATION:\n```c\n// C program for the function called deleteNode\n// Contains target function implementation and dependency signatures\n\n#include <stdio.h>\n#include <stdlib.h>\n\nstruct node {\n\tint key;\n\tstruct node *left, *right;\n};\n\n// Forward declarations for dependency functions\nstruct node* minValueNode(struct node* node);\n\n// Target function implementation\nstruct node* deleteNode(struct node* root, int key)\n{\n\n\tif (root == NULL)\n\t\treturn root;\n\n\n\tif (key < root->key)\n\t\troot->left = deleteNode(root->left, key);\n\n\n\telse if (key > root->key)\n\t\troot->right = deleteNode(root->right, key);\n\n\n\telse {\n\t\tif (root->left == NULL) {\n\t\t\tstruct node* temp = root->right;\n\t\t\tfree(root);\n\t\t\treturn temp;\n\t\t}\n\t\telse if (root->right == NULL) {\n\t\t\tstruct node* temp = root->left;\n\t\t\tfree(root);\n\t\t\treturn temp;\n\t\t}\n\n\t\tstruct node* temp = minValueNode(root->right);\n\n\t\n\t\troot->key = temp->key;\n\n\t\troot->right = deleteNode(root->right, temp->key);\n\t}\n\treturn root;\n}\n\n```\n\nTARGET EXECUTION PATH:\nPath 4: START | START --> CONDITION | if-else head --> STATEMENT | (root == NULL) --> MERGE | if-else merge --> CONDITION | if-else head --> STATEMENT | (key < root->key) --> STATEMENT | root->left = deleteNode(root->left, key); --> MERGE | if-else merge --> RETURN | return root;\n\nIMPORTANT: Choose inputs that satisfy this path's conditions.\n\nAVAILABLE HELPERS (operation_map.json):\n{\\n  \"dependency_analysis\": {\\n    \"source_functions\": [\\n      {\\n        \"name\": \"deleteNode\",\\n        \"paths\": [\\n          {\\n            \"path_id\": 1,\\n            \"path\": \"START | START --> CONDITION | if-else head --> STATEMENT | (root == NULL) --> MERGE | if-else merge --> CONDITION | if-else head --> STATEMENT | (key < root->key) --> STATEMENT | (key > root->key) --> CONDITION | if-else head --> STATEMENT | (root->left == NULL) --> STATEMENT | struct node* temp = root->right; --> STATEMENT | free(root); --> RETURN | return temp;\"\\n          },\\n          {\\n            \"path_id\": 2,\\n            \"path\": \"START | START --> CONDITION | if-else head --> STATEMENT | (root == NULL) --> MERGE | if-else merge --> CONDITION | if-else head --> STATEMENT | (key < root->key) --> STATEMENT | (key > root->key) --> CONDITION | if-else head --> STATEMENT | (root->left == NULL) --> STATEMENT | (root->right == NULL) --> STATEMENT | struct node* temp = root->left; --> STATEMENT | free(root); --> RETURN | return temp;\"\\n          },\\n          {\\n            \"path_id\": 3,\\n            \"path\": \"START | START --> CONDITION | if-else head --> STATEMENT | (root == NULL) --> RETURN | return root;\"\\n          },\\n          {\\n            \"path_id\": 4,\\n            \"path\": \"START | START --> CONDITION | if-else head --> STATEMENT | (root == NULL) --> MERGE | if-else merge --> CONDITION | if-else head --> STATEMENT | (key < root->key) --> STATEMENT | root->left = deleteNode(root->left, key); --> MERGE | if-else merge --> RETURN | return root;\"\\n          },\\n          {\\n            \"path_id\": 5,\\n            \"path\": \"START | START --> CONDITION | if-else head --> STATEMENT | (root == NULL) --> MERGE | if-else merge --> CONDITION | if-else head --> STATEMENT | (key < root->key) --> STATEMENT | (key > root->key) --> STATEMENT | root->right = deleteNode(root->right, key); --> MERGE | if-else merge --> RETURN | return root;\"\\n          },\\n          {\\n            \"path_id\": 6,\\n            \"path\": \"START | START --> CONDITION | if-else head --> STATEMENT | (root == NULL) --> MERGE | if-else merge --> CONDITION | if-else head --> STATEMENT | (key < root->key) --> STATEMENT | (key > root->key) --> CONDITION | if-else head --> STATEMENT | (root->left == NULL) --> STATEMENT | (root->right == NULL) --> MERGE | if-else merge --> STATEMENT | struct node* temp = minValueNode(root->right); --> STATEMENT | root->key = temp->key; --> STATEMENT | root->right = deleteNode(root->right, temp->key); --> MERGE | if-else merge --> RETURN | return root;\"\\n          }\\n        ]\\n      },\\n      {\\n        \"name\": \"inorder\",\\n        \"paths\": [\\n          {\\n            \"path_id\": 1,\\n            \"path\": \"START | START --> CONDITION | if-else head --> STATEMENT | (root != NULL) --> STATEMENT | inorder(root->left); --> STATEMENT | printf(\\\\ --> STATEMENT | inorder(root->right); --> MERGE | if-else merge --> RETURN | implicit return\"\\n          },\\n          {\\n            \"path_id\": 2,\\n            \"path\": \"START | START --> CONDITION | if-else head --> STATEMENT | (root != NULL) --> MERGE | if-else merge --> RETURN | implicit return\"\\n          }\\n        ]\\n      },\\n      {\\n        \"name\": \"insert\",\\n        \"paths\": [\\n          {\\n            \"path_id\": 1,\\n            \"path\": \"START | START --> CONDITION | if-else head --> STATEMENT | (node == NULL) --> MERGE | if-else merge --> CONDITION | if-else head --> STATEMENT | (key < node->key) --> STATEMENT | node->left = insert(node->left, key); --> MERGE | if-else merge --> RETURN | return node;\"\\n          },\\n          {\\n            \"path_id\": 2,\\n            \"path\": \"START | START --> CONDITION | if-else head --> STATEMENT | (node == NULL) --> MERGE | if-else merge --> CONDITION | if-else head --> STATEMENT | (key < node->key) --> STATEMENT | node->right = insert(node->right, key); --> MERGE | if-else merge --> RETURN | return node;\"\\n          },\\n          {\\n            \"path_id\": 3,\\n            \"path\": \"START | START --> CONDITION | if-else head --> STATEMENT | (node == NULL) --> RETURN | return newNode(key);\"\\n          }\\n        ]\\n      },\\n      {\\n        \"name\": \"minValueNode\",\\n        \"paths\": [\\n          {\\n            \"path_id\": 1,\\n            \"path\": \"START | START --> STATEMENT | struct node* current = node; --> STATEMENT | (current && current->left != NULL) --> FOR_EXIT | loop exit --> RETURN | return current;\"\\n          }\\n        ]\\n      },\\n      {\\n        \"name\": \"newNode\",\\n        \"paths\": [\\n          {\\n            \"path_id\": 1,\\n            \"path\": \"START | START --> STATEMENT | struct node* temp\\n\\t\\t= (struct node*)malloc(sizeof(struct node)); --> STATEMENT | temp->key = item; --> STATEMENT | temp->left = NULL; --> STATEMENT | temp->right = NULL; --> RETURN | return temp;\"\\n          }\\n        ]\\n      }\\n    ],\\n    \"planned_created_functions\": [\\n      {\\n        \"name\": \"helper_build_tree\",\\n        \"calls\": [\\n          \"insert\",\\n          \"malloc\"\\n        ]\\n      },\\n      {\\n        \"name\": \"helper_tree_to_inorder_array\",\\n        \"calls\": [\\n          \"malloc\"\\n        ]\\n      },\\n      {\\n        \"name\": \"assert_tree_inorder_equal\",\\n        \"calls\": [\\n          \"helper_tree_to_inorder_array\",\\n          \"assert_array_equal\",\\n          \"free\"\\n        ]\\n      },\\n      {\\n        \"name\": \"helper_free_tree\",\\n        \"calls\": [\\n          \"free\"\\n        ]\\n      }\\n    ],\\n    \"required_from_pool\": [\\n      \"assert_array_equal\"\\n    ]\\n  },\\n  \"assertion_operations\": {\\n    \"searched_from_pool\": [\\n      {\\n        \"name\": \"assert_array_equal\",\\n        \"return_type\": \"void\",\\n        \"parameters\": [\\n          {\\n            \"name\": \"actual\",\\n            \"type\": \"const int *\"\\n          },\\n          {\\n            \"name\": \"expected\",\\n            \"type\": \"const int *\"\\n          },\\n          {\\n            \"name\": \"size\",\\n            \"type\": \"int\"\\n          }\\n        ]\\n      }\\n    ],\\n    \"created\": [\\n      {\\n        \"name\": \"assert_tree_inorder_equal\",\\n        \"description\": \"Asserts that the inorder traversal of the given tree matches the expected array.\",\\n        \"return_type\": \"void\",\\n        \"parameters\": [\\n          {\\n            \"name\": \"root\",\\n            \"type\": \"struct node *\"\\n          },\\n          {\\n            \"name\": \"expected\",\\n            \"type\": \"const int *\"\\n          },\\n          {\\n            \"name\": \"size\",\\n            \"type\": \"int\"\\n          }\\n        ]\\n      }\\n    ]\\n  },\\n  \"utility_operations\": {\\n    \"searched_from_pool\": [],\\n    \"created\": [\\n      {\\n        \"name\": \"helper_build_tree\",\\n        \"description\": \"Builds a binary search tree from an array of values using insert.\",\\n        \"return_type\": \"struct node *\",\\n        \"parameters\": [\\n          {\\n            \"name\": \"values\",\\n            \"type\": \"int *\"\\n          },\\n          {\\n            \"name\": \"size\",\\n            \"type\": \"int\"\\n          }\\n        ]\\n      },\\n      {\\n        \"name\": \"helper_tree_to_inorder_array\",\\n        \"description\": \"Converts the tree to an inorder array of keys. The size must be provided and match the number of nodes.\",\\n        \"return_type\": \"int *\",\\n        \"parameters\": [\\n          {\\n            \"name\": \"root\",\\n            \"type\": \"struct node *\"\\n          },\\n          {\\n            \"name\": \"size\",\\n            \"type\": \"int\"\\n          }\\n        ]\\n      },\\n      {\\n        \"name\": \"helper_free_tree\",\\n        \"description\": \"Frees all nodes in the binary search tree.\",\\n        \"return_type\": \"void\",\\n        \"parameters\": [\\n          {\\n            \"name\": \"root\",\\n            \"type\": \"struct node *\"\\n          }\\n        ]\\n      }\\n    ]\\n  }\\n}\n\nReference these by name for assertions, utilities, generators, cleanup.\n\nOUTPUT FORMAT (return valid JSON):\n{\n  \"metadata\": {\n    \"function_under_test\": \"deleteNode\",\n    \"target_path\": \"<path_id>\"\n  },\n  \"test_scenarios\": [{\n    \"test_metadata\": {\n      \"test_id\": \"<UNIQUE_ID>\",\n      \"test_name\": \"test_<function>_<scenario>\",\n      \"test_category\": \"boundary|normal_operation|edge_case|error_condition\",\n      \"description\": \"<one-sentence what this tests>\",\n      \"rationale\": \"<why this matters for this path>\"\n    },\n    \"path_coverage\": {\n      \"target_paths\": [\"<path_id>\"],\n      \"path_conditions\": [\"<condition1>\", ...],\n      \"expected_branches\": [\"<branch1>\", ...]\n    },\n    \"source_functions_required\": {\n      \"primary\": {\n        \"name\": \"deleteNode\",\n        \"signature\": \"<signature>\",\n        \"extract_from\": \"<source_file>\",\n        \"reason\": \"Function under test\"\n      },\n      \"dependencies\": [{\n        \"name\": \"<dep_name>\",\n        \"signature\": \"<signature>\",\n        \"extract_from\": \"<source_file>\",\n        \"reason\": \"<why needed>\",\n        \"call_path\": \"<chain>\"\n      }]\n    },\n    \"helper_functions_required\": {\n      \"assertions\": [{\n        \"name\": \"<helper_name>\",\n        \"purpose\": \"<what_to_verify>\",\n        \"from_pool\": true|false,\n        \"usage\": \"<how_used>\"\n      }],\n      \"utilities\": [{\n        \"name\": \"<helper_name>\",\n        \"purpose\": \"<what_it_does>\",\n        \"from_pool\": true|false,\n        \"from_operation_map\": true|false,\n        \"usage\": \"<when_used>\"\n      }]\n    },\n    \"test_design\": {\n      \"setup_requirements\": {\n        \"data_structures\": [\"<structures>\"],\n        \"preconditions\": [\"<conditions>\"],\n        \"initial_state\": \"<state_description>\"\n      },\n      \"test_inputs\": {\n        \"primary_function_args\": [{\n          \"param_name\": \"<name>\",\n          \"param_type\": \"<C_type>\",\n          \"test_value_semantic\": \"<description>\",\n          \"test_value_category\": \"boundary|normal|edge|error\",\n          \"concrete_value\": \"<value>\",\n          \"rationale\": \"<why_this_value>\"\n        }]\n      },\n      \"expected_behavior\": {\n        \"return_value\": {\n          \"type\": \"<type>\",\n          \"description\": \"<expected>\",\n          \"validation\": \"<check>\"\n        },\n        \"side_effects\": [{\n          \"effect\": \"<what_changes>\",\n          \"observable_via\": \"<how_to_check>\"\n        }],\n        \"state_changes\": [\"<before → after>\"],\n        \"invariants_maintained\": [\"<invariants>\"]\n      },\n      \"assertions_required\": [{\n        \"assertion_id\": \"<A1, A2, ...>\",\n        \"assertion_type\": \"<type>\",\n        \"target\": \"<what_to_check>\",\n        \"expected\": \"<value>\",\n        \"description\": \"<what_verified>\",\n        \"failure_meaning\": \"<what_failure_means>\"\n      }],\n      \"cleanup_requirements\": {\n        \"memory_to_free\": [\"<resources>\"],\n        \"resources_to_close\": [],\n        \"final_state\": \"<clean_state>\",\n        \"cleanup_order\": [\"<steps>\"]\n      }\n    },\n    \"implementation_hints\": {\n      \"variable_names\": [{\n        \"semantic_name\": \"<semantic>\",\n        \"c_variable_name\": \"<c_name>\"\n      }],\n      \"operation_sequence\": [\"<step1>\", \"<step2>\", ...],\n      \"edge_cases_to_note\": [\"<edge_cases>\"]\n    }\n  }],\n  \"test_suite_summary\": {\n    \"target_path_id\": \"<path_id>\",\n    \"path_description\": \"<description>\",\n    \"test_category\": \"<category>\",\n    \"required_helpers_aggregate\": {\n      \"from_pool\": {\n        \"assertions\": [\"<helpers>\"],\n        \"utilities\": [\"<helpers>\"]\n      },\n      \"from_operation_map\": {\n        \"assertions\": [],\n        \"utilities\": [\"<helpers>\"]\n      }\n    }\n  }\n}\n\nEXAMPLE - Testing insert() for Path P3 (NULL tree case):\n\nFunction: insert(struct node* node, int key)\nPath P3: node == NULL → return newNode(key)\n\n{\n  \"metadata\": {\n    \"function_under_test\": \"insert\",\n    \"target_path\": \"P3\"\n  },\n  \"test_scenarios\": [{\n    \"test_metadata\": {\n      \"test_id\": \"INSERT_P3_B1\",\n      \"test_name\": \"test_insert_null_tree\",\n      \"test_category\": \"boundary\",\n      \"description\": \"Verify insert creates new node when tree is NULL\",\n      \"rationale\": \"Tests base case where tree doesn't exist; NULL input is common edge case\"\n    },\n    \"path_coverage\": {\n      \"target_paths\": [\"P3\"],\n      \"path_conditions\": [\"node == NULL\"],\n      \"expected_branches\": [\"NULL check → true → return newNode(key)\"]\n    },\n    \"source_functions_required\": {\n      \"primary\": {\n        \"name\": \"insert\",\n        \"signature\": \"struct node* insert(struct node* node, int key)\",\n        \"extract_from\": \"subjects/bst/bst.c\",\n        \"reason\": \"Function under test\"\n      },\n      \"dependencies\": [{\n        \"name\": \"newNode\",\n        \"signature\": \"struct node* newNode(int item)\",\n        \"extract_from\": \"subjects/bst/bst.c\",\n        \"reason\": \"Called when node == NULL to allocate new node\",\n        \"call_path\": \"insert → newNode\"\n      }]\n    },\n    \"helper_functions_required\": {\n      \"assertions\": [{\n        \"name\": \"assert_not_null\",\n        \"purpose\": \"Verify returned node pointer is not NULL\",\n        \"from_pool\": true,\n        \"usage\": \"Check allocation succeeded\"\n      }, {\n        \"name\": \"assert_int_equal\",\n        \"purpose\": \"Verify node->key equals inserted key\",\n        \"from_pool\": true,\n        \"usage\": \"Validate key stored correctly\"\n      }],\n      \"utilities\": [{\n        \"name\": \"free\",\n        \"purpose\": \"Deallocate created node\",\n        \"from_pool\": false,\n        \"from_operation_map\": false,\n        \"usage\": \"Cleanup phase\"\n      }]\n    },\n    \"test_design\": {\n      \"setup_requirements\": {\n        \"data_structures\": [],\n        \"preconditions\": [\"No preconditions - testing NULL case\"],\n        \"initial_state\": \"No tree exists (NULL pointer)\"\n      },\n      \"test_inputs\": {\n        \"primary_function_args\": [{\n          \"param_name\": \"node\",\n          \"param_type\": \"struct node*\",\n          \"test_value_semantic\": \"NULL pointer (empty tree)\",\n          \"test_value_category\": \"boundary\",\n          \"concrete_value\": \"NULL\",\n          \"rationale\": \"Triggers P3 path condition (node == NULL)\"\n        }, {\n          \"param_name\": \"key\",\n          \"param_type\": \"int\",\n          \"test_value_semantic\": \"typical positive integer\",\n          \"test_value_category\": \"normal\",\n          \"concrete_value\": \"42\",\n          \"rationale\": \"Representative value to verify storage\"\n        }]\n      },\n      \"expected_behavior\": {\n        \"return_value\": {\n          \"type\": \"struct node*\",\n          \"description\": \"non-NULL pointer to newly allocated node\",\n          \"validation\": \"result != NULL\"\n        },\n        \"side_effects\": [{\n          \"effect\": \"new node allocated via newNode\",\n          \"observable_via\": \"return value is non-NULL\"\n        }, {\n          \"effect\": \"node->key initialized to 42\",\n          \"observable_via\": \"result->key == 42\"\n        }],\n        \"state_changes\": [\"No tree → Single-node tree\"],\n        \"invariants_maintained\": [\"BST property trivially satisfied\"]\n      },\n      \"assertions_required\": [{\n        \"assertion_id\": \"A1\",\n        \"assertion_type\": \"not_null\",\n        \"target\": \"return_value\",\n        \"expected\": \"non-NULL\",\n        \"description\": \"Verify node was created\",\n        \"failure_meaning\": \"Allocation failed\"\n      }, {\n        \"assertion_id\": \"A2\",\n        \"assertion_type\": \"int_equal\",\n        \"target\": \"return_value->key\",\n        \"expected\": \"42\",\n        \"description\": \"Verify key stored correctly\",\n        \"failure_meaning\": \"Key initialization failed\"\n      }],\n      \"cleanup_requirements\": {\n        \"memory_to_free\": [\"result node\"],\n        \"resources_to_close\": [],\n        \"final_state\": \"All memory freed\",\n        \"cleanup_order\": [\"free(result)\"]\n      }\n    },\n    \"implementation_hints\": {\n      \"variable_names\": [{\n        \"semantic_name\": \"return_value\",\n        \"c_variable_name\": \"result\"\n      }],\n      \"operation_sequence\": [\"call_insert_with_null\", \"assert_result_not_null\", \"assert_key_equals_42\", \"free_result\"],\n      \"edge_cases_to_note\": [\"Allocation failure not testable (no mocking)\"]\n    }\n  }],\n  \"test_suite_summary\": {\n    \"target_path_id\": \"P3\",\n    \"path_description\": \"NULL tree case - creates new node\",\n    \"test_category\": \"boundary\",\n    \"required_helpers_aggregate\": {\n      \"from_pool\": {\n        \"assertions\": [\"assert_not_null\", \"assert_int_equal\"],\n        \"utilities\": []\n      },\n      \"from_operation_map\": {\n        \"assertions\": [],\n        \"utilities\": []\n      }\n    }\n  }\n}\n\nNow design your test in valid JSON format.\n"
+      }
+    ],
+    "model": "gpt-4.1-2025-04-14",
+    "temperature": 0.0,
+    "response_model": "<class 'apis.formats.response_format.EnhancedTestDesigns'>",
+    "max_tokens": 8192,
+    "input_tokens": 5129
+  },
+  "response": {
+    "parsed_content": {
+      "metadata": {
+        "function_under_test": "deleteNode",
+        "target_path": "P4",
+        "source_file": null,
+        "total_paths": null,
+        "coverage_target": null
+      },
+      "test_scenarios": [
+        {
+          "test_metadata": {
+            "test_id": "DELETENODE_P4_N1",
+            "test_name": "test_deleteNode_key_less_than_root",
+            "test_category": "normal_operation",
+            "description": "Verify deleteNode recurses left when key is less than root's key and no deletion occurs.",
+            "rationale": "This test ensures the function correctly traverses the left subtree when the key is not found at the root, and the tree remains unchanged if the key is not present."
+          },
+          "path_coverage": {
+            "target_paths": [
+              "P4"
+            ],
+            "path_conditions": [
+              "root != NULL",
+              "key < root->key"
+            ],
+            "expected_branches": [
+              "root == NULL → false",
+              "key < root->key → true",
+              "root->left = deleteNode(root->left, key)",
+              "return root"
+            ]
+          },
+          "source_functions_required": {
+            "primary": {
+              "name": "deleteNode",
+              "signature": "struct node* deleteNode(struct node* root, int key)",
+              "extract_from": "subjects/bst/bst.c",
+              "reason": "Function under test"
+            },
+            "dependencies": [
+              {
+                "name": "deleteNode",
+                "signature": "struct node* deleteNode(struct node* root, int key)",
+                "extract_from": "subjects/bst/bst.c",
+                "reason": "Recursive call for left subtree",
+                "call_path": "deleteNode → deleteNode"
+              }
+            ]
+          },
+          "helper_functions_required": {
+            "assertions": [
+              {
+                "name": "assert_tree_inorder_equal",
+                "purpose": "Verify the inorder traversal of the tree matches the expected array after deletion attempt",
+                "from_pool": false,
+                "from_operation_map": true,
+                "usage": "Check that the tree structure is unchanged"
+              }
+            ],
+            "utilities": [
+              {
+                "name": "helper_build_tree",
+                "purpose": "Builds a BST from an array of values",
+                "from_pool": false,
+                "from_operation_map": true,
+                "usage": "Setup: create initial tree"
+              },
+              {
+                "name": "helper_free_tree",
+                "purpose": "Frees all nodes in the BST",
+                "from_pool": false,
+                "from_operation_map": true,
+                "usage": "Cleanup: free all allocated memory"
+              }
+            ]
+          },
+          "test_design": {
+            "setup_requirements": {
+              "data_structures": [
+                "struct node* (BST root)"
+              ],
+              "preconditions": [
+                "BST is non-empty",
+                "Key to delete is less than root's key and not present in the tree"
+              ],
+              "initial_state": "A BST with root key 10, left child 5, right child 15"
+            },
+            "test_inputs": {
+              "primary_function_args": [
+                {
+                  "param_name": "root",
+                  "param_type": "struct node*",
+                  "test_value_semantic": "Pointer to root of BST {10, 5, 15}",
+                  "test_value_category": "normal",
+                  "concrete_value": "BST built from [10, 5, 15]",
+                  "rationale": "Ensures root is not NULL and left subtree exists"
+                },
+                {
+                  "param_name": "key",
+                  "param_type": "int",
+                  "test_value_semantic": "Key less than root and not present in tree",
+                  "test_value_category": "normal",
+                  "concrete_value": "2",
+                  "rationale": "Triggers key < root->key and ensures no deletion occurs"
+                }
+              ]
+            },
+            "expected_behavior": {
+              "return_value": {
+                "type": "struct node*",
+                "description": "Pointer to unchanged BST root",
+                "validation": "Returned tree has same inorder traversal as original"
+              },
+              "side_effects": [
+                {
+                  "effect": "No nodes deleted; tree structure unchanged",
+                  "observable_via": "Inorder traversal before and after is identical"
+                }
+              ],
+              "state_changes": [
+                "BST unchanged: {10, 5, 15} → {10, 5, 15}"
+              ],
+              "invariants_maintained": [
+                "BST property is preserved",
+                "No memory leaks (all nodes freed at end)"
+              ]
+            },
+            "assertions_required": [
+              {
+                "assertion_id": "A1",
+                "assertion_type": "assert_tree_inorder_equal",
+                "target": "resulting tree vs expected inorder",
+                "expected": "[5, 10, 15]",
+                "description": "Verify tree is unchanged after attempting to delete absent key",
+                "failure_meaning": "Tree structure was incorrectly modified"
+              }
+            ],
+            "cleanup_requirements": {
+              "memory_to_free": [
+                "All nodes in resulting tree"
+              ],
+              "resources_to_close": [],
+              "final_state": "All memory freed, no resource leaks",
+              "cleanup_order": [
+                "helper_free_tree(resulting tree)"
+              ]
+            }
+          },
+          "implementation_hints": {
+            "variable_names": [
+              {
+                "semantic_name": "return_value",
+                "c_variable_name": "result"
+              },
+              {
+                "semantic_name": "initial_tree",
+                "c_variable_name": "root"
+              }
+            ],
+            "operation_sequence": [
+              "Build BST from [10, 5, 15] using helper_build_tree",
+              "Call deleteNode(root, 2)",
+              "Assert inorder traversal of result is [5, 10, 15] using assert_tree_inorder_equal",
+              "Free all nodes using helper_free_tree"
+            ],
+            "edge_cases_to_note": [
+              "Key is not present in the tree",
+              "Left subtree exists but does not contain the key"
+            ]
+          }
+        }
+      ],
+      "test_suite_summary": {
+        "total_tests_designed": 1,
+        "path_coverage_analysis": [
+          {
+            "path_id": "P4",
+            "covered_by": [
+              "DELETENODE_P4_N1"
+            ],
+            "description": "Recurses left when key < root->key; returns root if no deletion occurs",
+            "coverage_count": 1
+          }
+        ],
+        "category_distribution": {
+          "boundary": 0,
+          "normal_operation": 1,
+          "edge_case": 0,
+          "error_conditions": 0
+        },
+        "required_helpers_aggregate": {
+          "from_pool": {
+            "assertions": [],
+            "utilities": []
+          },
+          "from_operation_map": {
+            "assertions": [
+              "assert_tree_inorder_equal"
+            ],
+            "utilities": [
+              "helper_build_tree",
+              "helper_free_tree"
+            ]
+          }
+        },
+        "estimated_total_coverage": {
+          "path_coverage_percent": "100%",
+          "expected_line_coverage_percent": "90-100%",
+          "branch_coverage_percent": "100%"
+        },
+        "integration_test_suggestions": [
+          "Test deleting a key present in the left subtree (triggers actual deletion)",
+          "Test deleting a key present in the right subtree",
+          "Test deleting the root node"
+        ]
+      }
+    },
+    "raw_content": "{\n  \"metadata\": {\n    \"function_under_test\": \"deleteNode\",\n    \"target_path\": \"P4\"\n  ,\n  \"source_file\": null,\n  \"total_paths\": null,\n  \"coverage_target\": null\n  },\n  \"test_scenarios\": [\n    {\n      \"test_metadata\": {\n        \"test_id\": \"DELETENODE_P4_N1\",\n        \"test_name\": \"test_deleteNode_key_less_than_root\",\n        \"test_category\": \"normal_operation\",\n        \"description\": \"Verify deleteNode recurses left when key is less than root's key and no deletion occurs.\",\n        \"rationale\": \"This test ensures the function correctly traverses the left subtree when the key is not found at the root, and the tree remains unchanged if the key is not present.\"\n      },\n      \"path_coverage\": {\n        \"target_paths\": [\"P4\"],\n        \"path_conditions\": [\n          \"root != NULL\",\n          \"key < root->key\"\n        ],\n        \"expected_branches\": [\n          \"root == NULL → false\",\n          \"key < root->key → true\",\n          \"root->left = deleteNode(root->left, key)\",\n          \"return root\"\n        ]\n      },\n      \"source_functions_required\": {\n        \"primary\": {\n          \"name\": \"deleteNode\",\n          \"signature\": \"struct node* deleteNode(struct node* root, int key)\",\n          \"extract_from\": \"subjects/bst/bst.c\",\n          \"reason\": \"Function under test\"\n        },\n        \"dependencies\": [\n          {\n            \"name\": \"deleteNode\",\n            \"signature\": \"struct node* deleteNode(struct node* root, int key)\",\n            \"extract_from\": \"subjects/bst/bst.c\",\n            \"reason\": \"Recursive call for left subtree\",\n            \"call_path\": \"deleteNode → deleteNode\"\n          }\n        ]\n      },\n      \"helper_functions_required\": {\n        \"assertions\": [\n          {\n            \"name\": \"assert_tree_inorder_equal\",\n            \"purpose\": \"Verify the inorder traversal of the tree matches the expected array after deletion attempt\",\n            \"from_pool\": false,\n            \"from_operation_map\": true,\n            \"usage\": \"Check that the tree structure is unchanged\"\n          }\n        ],\n        \"utilities\": [\n          {\n            \"name\": \"helper_build_tree\",\n            \"purpose\": \"Builds a BST from an array of values\",\n            \"from_pool\": false,\n            \"from_operation_map\": true,\n            \"usage\": \"Setup: create initial tree\"\n          },\n          {\n            \"name\": \"helper_free_tree\",\n            \"purpose\": \"Frees all nodes in the BST\",\n            \"from_pool\": false,\n            \"from_operation_map\": true,\n            \"usage\": \"Cleanup: free all allocated memory\"\n          }\n        ]\n      },\n      \"test_design\": {\n        \"setup_requirements\": {\n          \"data_structures\": [\n            \"struct node* (BST root)\"\n          ],\n          \"preconditions\": [\n            \"BST is non-empty\",\n            \"Key to delete is less than root's key and not present in the tree\"\n          ],\n          \"initial_state\": \"A BST with root key 10, left child 5, right child 15\"\n        },\n        \"test_inputs\": {\n          \"primary_function_args\": [\n            {\n              \"param_name\": \"root\",\n              \"param_type\": \"struct node*\",\n              \"test_value_semantic\": \"Pointer to root of BST {10, 5, 15}\",\n              \"test_value_category\": \"normal\",\n              \"concrete_value\": \"BST built from [10, 5, 15]\",\n              \"rationale\": \"Ensures root is not NULL and left subtree exists\"\n            },\n            {\n              \"param_name\": \"key\",\n              \"param_type\": \"int\",\n              \"test_value_semantic\": \"Key less than root and not present in tree\",\n              \"test_value_category\": \"normal\",\n              \"concrete_value\": \"2\",\n              \"rationale\": \"Triggers key < root->key and ensures no deletion occurs\"\n            }\n          ]\n        },\n        \"expected_behavior\": {\n          \"return_value\": {\n            \"type\": \"struct node*\",\n            \"description\": \"Pointer to unchanged BST root\",\n            \"validation\": \"Returned tree has same inorder traversal as original\"\n          },\n          \"side_effects\": [\n            {\n              \"effect\": \"No nodes deleted; tree structure unchanged\",\n              \"observable_via\": \"Inorder traversal before and after is identical\"\n            }\n          ],\n          \"state_changes\": [\n            \"BST unchanged: {10, 5, 15} → {10, 5, 15}\"\n          ],\n          \"invariants_maintained\": [\n            \"BST property is preserved\",\n            \"No memory leaks (all nodes freed at end)\"\n          ]\n        },\n        \"assertions_required\": [\n          {\n            \"assertion_id\": \"A1\",\n            \"assertion_type\": \"assert_tree_inorder_equal\",\n            \"target\": \"resulting tree vs expected inorder\",\n            \"expected\": \"[5, 10, 15]\",\n            \"description\": \"Verify tree is unchanged after attempting to delete absent key\",\n            \"failure_meaning\": \"Tree structure was incorrectly modified\"\n          }\n        ],\n        \"cleanup_requirements\": {\n          \"memory_to_free\": [\n            \"All nodes in resulting tree\"\n          ],\n          \"resources_to_close\": [],\n          \"final_state\": \"All memory freed, no resource leaks\",\n          \"cleanup_order\": [\n            \"helper_free_tree(resulting tree)\"\n          ]\n        }\n      },\n      \"implementation_hints\": {\n        \"variable_names\": [\n          {\n            \"semantic_name\": \"return_value\",\n            \"c_variable_name\": \"result\"\n          },\n          {\n            \"semantic_name\": \"initial_tree\",\n            \"c_variable_name\": \"root\"\n          }\n        ],\n        \"operation_sequence\": [\n          \"Build BST from [10, 5, 15] using helper_build_tree\",\n          \"Call deleteNode(root, 2)\",\n          \"Assert inorder traversal of result is [5, 10, 15] using assert_tree_inorder_equal\",\n          \"Free all nodes using helper_free_tree\"\n        ],\n        \"edge_cases_to_note\": [\n          \"Key is not present in the tree\",\n          \"Left subtree exists but does not contain the key\"\n        ]\n      }\n    }\n  ],\n  \"test_suite_summary\": {\n    \"total_tests_designed\": 1,\n    \"path_coverage_analysis\": [\n      {\n        \"path_id\": \"P4\",\n        \"covered_by\": [\"DELETENODE_P4_N1\"],\n        \"description\": \"Recurses left when key < root->key; returns root if no deletion occurs\",\n        \"coverage_count\": 1\n      }\n    ],\n    \"category_distribution\": {\n      \"boundary\": 0,\n      \"normal_operation\": 1,\n      \"edge_case\": 0,\n      \"error_conditions\": 0\n    },\n    \"required_helpers_aggregate\": {\n      \"from_pool\": {\n        \"assertions\": [],\n        \"utilities\": []\n      },\n      \"from_operation_map\": {\n        \"assertions\": [\"assert_tree_inorder_equal\"],\n        \"utilities\": [\"helper_build_tree\", \"helper_free_tree\"]\n      }\n    },\n    \"estimated_total_coverage\": {\n      \"path_coverage_percent\": \"100%\",\n      \"expected_line_coverage_percent\": \"90-100%\",\n      \"branch_coverage_percent\": \"100%\"\n    },\n    \"integration_test_suggestions\": [\n      \"Test deleting a key present in the left subtree (triggers actual deletion)\",\n      \"Test deleting a key present in the right subtree\",\n      \"Test deleting the root node\"\n    ]\n  }\n}",
+    "finish_reason": "stop",
+    "usage": {
+      "completion_tokens": 1616,
+      "prompt_tokens": 10227,
+      "total_tokens": 11843,
+      "completion_tokens_details": {
+        "accepted_prediction_tokens": 0,
+        "audio_tokens": 0,
+        "reasoning_tokens": 0,
+        "rejected_prediction_tokens": 0
+      },
+      "prompt_tokens_details": {
+        "audio_tokens": 0,
+        "cached_tokens": 5120
+      }
+    },
+    "response_id": "chatcmpl-CpIMda0MUme8PpvbOeaEx8sPtJOGn",
+    "created": 1766341355
+  }
+}

@@ -1,0 +1,549 @@
+{
+  "main_file": "test/helper/functions/assert_helper_float.c",
+  "functions": [
+    {
+      "name": "assert_float_equal",
+      "return_type": "void",
+      "parameters": [
+        {
+          "name": "actual",
+          "type": "float"
+        },
+        {
+          "name": "expected",
+          "type": "float"
+        }
+      ],
+      "location": "test/helper/functions/assert_helper_float.c:12",
+      "source_file": "assert_helper_float.c",
+      "description": ""
+    },
+    {
+      "name": "assert_float_not_equal",
+      "return_type": "void",
+      "parameters": [
+        {
+          "name": "actual",
+          "type": "float"
+        },
+        {
+          "name": "not_expected",
+          "type": "float"
+        }
+      ],
+      "location": "test/helper/functions/assert_helper_float.c:20",
+      "source_file": "assert_helper_float.c",
+      "description": ""
+    },
+    {
+      "name": "assert_float_in_range",
+      "return_type": "void",
+      "parameters": [
+        {
+          "name": "actual",
+          "type": "float"
+        },
+        {
+          "name": "min_val",
+          "type": "float"
+        },
+        {
+          "name": "max_val",
+          "type": "float"
+        }
+      ],
+      "location": "test/helper/functions/assert_helper_float.c:30",
+      "source_file": "assert_helper_float.c",
+      "description": ""
+    },
+    {
+      "name": "assert_float_not_in_range",
+      "return_type": "void",
+      "parameters": [
+        {
+          "name": "actual",
+          "type": "float"
+        },
+        {
+          "name": "min_val",
+          "type": "float"
+        },
+        {
+          "name": "max_val",
+          "type": "float"
+        }
+      ],
+      "location": "test/helper/functions/assert_helper_float.c:38",
+      "source_file": "assert_helper_float.c",
+      "description": ""
+    },
+    {
+      "name": "assert_float_greater_than",
+      "return_type": "void",
+      "parameters": [
+        {
+          "name": "actual",
+          "type": "float"
+        },
+        {
+          "name": "threshold",
+          "type": "float"
+        }
+      ],
+      "location": "test/helper/functions/assert_helper_float.c:48",
+      "source_file": "assert_helper_float.c",
+      "description": ""
+    },
+    {
+      "name": "assert_float_less_than",
+      "return_type": "void",
+      "parameters": [
+        {
+          "name": "actual",
+          "type": "float"
+        },
+        {
+          "name": "threshold",
+          "type": "float"
+        }
+      ],
+      "location": "test/helper/functions/assert_helper_float.c:56",
+      "source_file": "assert_helper_float.c",
+      "description": ""
+    },
+    {
+      "name": "assert_float_greater_or_equal",
+      "return_type": "void",
+      "parameters": [
+        {
+          "name": "actual",
+          "type": "float"
+        },
+        {
+          "name": "threshold",
+          "type": "float"
+        }
+      ],
+      "location": "test/helper/functions/assert_helper_float.c:64",
+      "source_file": "assert_helper_float.c",
+      "description": ""
+    },
+    {
+      "name": "assert_float_less_or_equal",
+      "return_type": "void",
+      "parameters": [
+        {
+          "name": "actual",
+          "type": "float"
+        },
+        {
+          "name": "threshold",
+          "type": "float"
+        }
+      ],
+      "location": "test/helper/functions/assert_helper_float.c:72",
+      "source_file": "assert_helper_float.c",
+      "description": ""
+    },
+    {
+      "name": "assert_float_is_zero",
+      "return_type": "void",
+      "parameters": [
+        {
+          "name": "actual",
+          "type": "float"
+        }
+      ],
+      "location": "test/helper/functions/assert_helper_float.c:82",
+      "source_file": "assert_helper_float.c",
+      "description": ""
+    },
+    {
+      "name": "assert_float_is_positive",
+      "return_type": "void",
+      "parameters": [
+        {
+          "name": "actual",
+          "type": "float"
+        }
+      ],
+      "location": "test/helper/functions/assert_helper_float.c:89",
+      "source_file": "assert_helper_float.c",
+      "description": ""
+    },
+    {
+      "name": "assert_float_is_negative",
+      "return_type": "void",
+      "parameters": [
+        {
+          "name": "actual",
+          "type": "float"
+        }
+      ],
+      "location": "test/helper/functions/assert_helper_float.c:96",
+      "source_file": "assert_helper_float.c",
+      "description": ""
+    },
+    {
+      "name": "assert_float_is_nan",
+      "return_type": "void",
+      "parameters": [
+        {
+          "name": "actual",
+          "type": "float"
+        }
+      ],
+      "location": "test/helper/functions/assert_helper_float.c:103",
+      "source_file": "assert_helper_float.c",
+      "description": ""
+    },
+    {
+      "name": "assert_float_is_not_nan",
+      "return_type": "void",
+      "parameters": [
+        {
+          "name": "actual",
+          "type": "float"
+        }
+      ],
+      "location": "test/helper/functions/assert_helper_float.c:110",
+      "source_file": "assert_helper_float.c",
+      "description": ""
+    },
+    {
+      "name": "assert_float_is_infinite",
+      "return_type": "void",
+      "parameters": [
+        {
+          "name": "actual",
+          "type": "float"
+        }
+      ],
+      "location": "test/helper/functions/assert_helper_float.c:117",
+      "source_file": "assert_helper_float.c",
+      "description": ""
+    },
+    {
+      "name": "assert_float_is_not_infinite",
+      "return_type": "void",
+      "parameters": [
+        {
+          "name": "actual",
+          "type": "float"
+        }
+      ],
+      "location": "test/helper/functions/assert_helper_float.c:124",
+      "source_file": "assert_helper_float.c",
+      "description": ""
+    },
+    {
+      "name": "assert_float_is_finite",
+      "return_type": "void",
+      "parameters": [
+        {
+          "name": "actual",
+          "type": "float"
+        }
+      ],
+      "location": "test/helper/functions/assert_helper_float.c:131",
+      "source_file": "assert_helper_float.c",
+      "description": ""
+    },
+    {
+      "name": "assert_float_array_equal",
+      "return_type": "void",
+      "parameters": [
+        {
+          "name": "actual",
+          "type": "const float *"
+        },
+        {
+          "name": "expected",
+          "type": "const float *"
+        },
+        {
+          "name": "size",
+          "type": "int"
+        }
+      ],
+      "location": "test/helper/functions/assert_helper_float.c:140",
+      "source_file": "assert_helper_float.c",
+      "description": ""
+    }
+  ],
+  "source_files": {
+    "test/helper/functions/assert_helper_float.c": [
+      {
+        "name": "assert_float_equal",
+        "return_type": "void",
+        "parameters": [
+          {
+            "name": "actual",
+            "type": "float"
+          },
+          {
+            "name": "expected",
+            "type": "float"
+          }
+        ],
+        "location": "test/helper/functions/assert_helper_float.c:12",
+        "source_file": "assert_helper_float.c",
+        "description": ""
+      },
+      {
+        "name": "assert_float_not_equal",
+        "return_type": "void",
+        "parameters": [
+          {
+            "name": "actual",
+            "type": "float"
+          },
+          {
+            "name": "not_expected",
+            "type": "float"
+          }
+        ],
+        "location": "test/helper/functions/assert_helper_float.c:20",
+        "source_file": "assert_helper_float.c",
+        "description": ""
+      },
+      {
+        "name": "assert_float_in_range",
+        "return_type": "void",
+        "parameters": [
+          {
+            "name": "actual",
+            "type": "float"
+          },
+          {
+            "name": "min_val",
+            "type": "float"
+          },
+          {
+            "name": "max_val",
+            "type": "float"
+          }
+        ],
+        "location": "test/helper/functions/assert_helper_float.c:30",
+        "source_file": "assert_helper_float.c",
+        "description": ""
+      },
+      {
+        "name": "assert_float_not_in_range",
+        "return_type": "void",
+        "parameters": [
+          {
+            "name": "actual",
+            "type": "float"
+          },
+          {
+            "name": "min_val",
+            "type": "float"
+          },
+          {
+            "name": "max_val",
+            "type": "float"
+          }
+        ],
+        "location": "test/helper/functions/assert_helper_float.c:38",
+        "source_file": "assert_helper_float.c",
+        "description": ""
+      },
+      {
+        "name": "assert_float_greater_than",
+        "return_type": "void",
+        "parameters": [
+          {
+            "name": "actual",
+            "type": "float"
+          },
+          {
+            "name": "threshold",
+            "type": "float"
+          }
+        ],
+        "location": "test/helper/functions/assert_helper_float.c:48",
+        "source_file": "assert_helper_float.c",
+        "description": ""
+      },
+      {
+        "name": "assert_float_less_than",
+        "return_type": "void",
+        "parameters": [
+          {
+            "name": "actual",
+            "type": "float"
+          },
+          {
+            "name": "threshold",
+            "type": "float"
+          }
+        ],
+        "location": "test/helper/functions/assert_helper_float.c:56",
+        "source_file": "assert_helper_float.c",
+        "description": ""
+      },
+      {
+        "name": "assert_float_greater_or_equal",
+        "return_type": "void",
+        "parameters": [
+          {
+            "name": "actual",
+            "type": "float"
+          },
+          {
+            "name": "threshold",
+            "type": "float"
+          }
+        ],
+        "location": "test/helper/functions/assert_helper_float.c:64",
+        "source_file": "assert_helper_float.c",
+        "description": ""
+      },
+      {
+        "name": "assert_float_less_or_equal",
+        "return_type": "void",
+        "parameters": [
+          {
+            "name": "actual",
+            "type": "float"
+          },
+          {
+            "name": "threshold",
+            "type": "float"
+          }
+        ],
+        "location": "test/helper/functions/assert_helper_float.c:72",
+        "source_file": "assert_helper_float.c",
+        "description": ""
+      },
+      {
+        "name": "assert_float_is_zero",
+        "return_type": "void",
+        "parameters": [
+          {
+            "name": "actual",
+            "type": "float"
+          }
+        ],
+        "location": "test/helper/functions/assert_helper_float.c:82",
+        "source_file": "assert_helper_float.c",
+        "description": ""
+      },
+      {
+        "name": "assert_float_is_positive",
+        "return_type": "void",
+        "parameters": [
+          {
+            "name": "actual",
+            "type": "float"
+          }
+        ],
+        "location": "test/helper/functions/assert_helper_float.c:89",
+        "source_file": "assert_helper_float.c",
+        "description": ""
+      },
+      {
+        "name": "assert_float_is_negative",
+        "return_type": "void",
+        "parameters": [
+          {
+            "name": "actual",
+            "type": "float"
+          }
+        ],
+        "location": "test/helper/functions/assert_helper_float.c:96",
+        "source_file": "assert_helper_float.c",
+        "description": ""
+      },
+      {
+        "name": "assert_float_is_nan",
+        "return_type": "void",
+        "parameters": [
+          {
+            "name": "actual",
+            "type": "float"
+          }
+        ],
+        "location": "test/helper/functions/assert_helper_float.c:103",
+        "source_file": "assert_helper_float.c",
+        "description": ""
+      },
+      {
+        "name": "assert_float_is_not_nan",
+        "return_type": "void",
+        "parameters": [
+          {
+            "name": "actual",
+            "type": "float"
+          }
+        ],
+        "location": "test/helper/functions/assert_helper_float.c:110",
+        "source_file": "assert_helper_float.c",
+        "description": ""
+      },
+      {
+        "name": "assert_float_is_infinite",
+        "return_type": "void",
+        "parameters": [
+          {
+            "name": "actual",
+            "type": "float"
+          }
+        ],
+        "location": "test/helper/functions/assert_helper_float.c:117",
+        "source_file": "assert_helper_float.c",
+        "description": ""
+      },
+      {
+        "name": "assert_float_is_not_infinite",
+        "return_type": "void",
+        "parameters": [
+          {
+            "name": "actual",
+            "type": "float"
+          }
+        ],
+        "location": "test/helper/functions/assert_helper_float.c:124",
+        "source_file": "assert_helper_float.c",
+        "description": ""
+      },
+      {
+        "name": "assert_float_is_finite",
+        "return_type": "void",
+        "parameters": [
+          {
+            "name": "actual",
+            "type": "float"
+          }
+        ],
+        "location": "test/helper/functions/assert_helper_float.c:131",
+        "source_file": "assert_helper_float.c",
+        "description": ""
+      },
+      {
+        "name": "assert_float_array_equal",
+        "return_type": "void",
+        "parameters": [
+          {
+            "name": "actual",
+            "type": "const float *"
+          },
+          {
+            "name": "expected",
+            "type": "const float *"
+          },
+          {
+            "name": "size",
+            "type": "int"
+          }
+        ],
+        "location": "test/helper/functions/assert_helper_float.c:140",
+        "source_file": "assert_helper_float.c",
+        "description": ""
+      }
+    ]
+  },
+  "headers_processed": [],
+  "implementation_files": []
+}

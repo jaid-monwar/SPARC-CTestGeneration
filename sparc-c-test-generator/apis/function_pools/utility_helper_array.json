@@ -1,0 +1,105 @@
+{
+  "main_file": "test/helper/functions/utility_helper_array.c",
+  "functions": [
+    {
+      "name": "create_int_test_array",
+      "return_type": "int *",
+      "parameters": [
+        {
+          "name": "values",
+          "type": "const int *"
+        },
+        {
+          "name": "size",
+          "type": "int"
+        }
+      ],
+      "location": "test/helper/functions/utility_helper_array.c:3",
+      "source_file": "utility_helper_array.c",
+      "description": ""
+    },
+    {
+      "name": "reset_int_test_array",
+      "return_type": "void",
+      "parameters": [
+        {
+          "name": "array",
+          "type": "int *"
+        },
+        {
+          "name": "size",
+          "type": "int"
+        }
+      ],
+      "location": "test/helper/functions/utility_helper_array.c:16",
+      "source_file": "utility_helper_array.c",
+      "description": "Reset the contents of an array to zero."
+    },
+    {
+      "name": "cleanup_int_test_array",
+      "return_type": "void",
+      "parameters": [
+        {
+          "name": "array",
+          "type": "int *"
+        }
+      ],
+      "location": "test/helper/functions/utility_helper_array.c:24",
+      "source_file": "utility_helper_array.c",
+      "description": "Free the memory allocated for an array."
+    }
+  ],
+  "source_files": {
+    "test/helper/functions/utility_helper_array.c": [
+      {
+        "name": "create_int_test_array",
+        "return_type": "int *",
+        "parameters": [
+          {
+            "name": "values",
+            "type": "const int *"
+          },
+          {
+            "name": "size",
+            "type": "int"
+          }
+        ],
+        "location": "test/helper/functions/utility_helper_array.c:3",
+        "source_file": "utility_helper_array.c",
+        "description": ""
+      },
+      {
+        "name": "reset_int_test_array",
+        "return_type": "void",
+        "parameters": [
+          {
+            "name": "array",
+            "type": "int *"
+          },
+          {
+            "name": "size",
+            "type": "int"
+          }
+        ],
+        "location": "test/helper/functions/utility_helper_array.c:16",
+        "source_file": "utility_helper_array.c",
+        "description": "Reset the contents of an array to zero."
+      },
+      {
+        "name": "cleanup_int_test_array",
+        "return_type": "void",
+        "parameters": [
+          {
+            "name": "array",
+            "type": "int *"
+          }
+        ],
+        "location": "test/helper/functions/utility_helper_array.c:24",
+        "source_file": "utility_helper_array.c",
+        "description": "Free the memory allocated for an array."
+      }
+    ]
+  },
+  "headers_processed": [],
+  "implementation_files": []
+}

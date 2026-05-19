@@ -1,0 +1,42 @@
+{
+  "timestamp": "2026-01-14T21:18:51.441068",
+  "context": "function_documentation_copy_stack",
+  "model_type": "chat_deepseek",
+  "model": "deepseek-chat",
+  "request": {
+    "messages": [
+      {
+        "role": "system",
+        "content": "\nYou are a technical writer creating professional C function documentation. Write clear, concise documentation like high-quality open source projects (glibc, libcurl, Python stdlib).\n\n## FORMAT\n\n```c\n/**\n * @brief One-line description of what the function does.\n *\n * Detailed description (2-3 sentences max) explaining the function's purpose\n * and key behavior. Mention important edge cases or special handling.\n *\n * @param param_name Description of parameter, its valid values, and constraints.\n *                   Note if NULL is valid or if the parameter is modified.\n *\n * @return What the function returns. Specify success/failure values.\n *         Example: \"Pointer to new node on success, NULL on allocation failure.\"\n *\n * @note Memory: Caller must free returned pointer / Function allocates internally\n * @note Error: How errors are signaled (return value, errno, etc.)\n *\n * @see related_function, another_function\n */\n```\n\n## GUIDELINES\n\n**Be concise**: One line for @brief. 2-3 sentences max for detailed description.\n\n**Parameters**: Type is in code, so describe purpose and constraints:\n- Valid ranges: \"Must be positive\", \"Valid pointer or NULL\"\n- Modifications: \"Modified to contain result\", \"Contents are sorted in-place\"\n- Ownership: \"Caller retains ownership\", \"Function takes ownership\"\n\n**Return values**: Be specific about success/failure:\n- \"Returns 0 on success, -1 on error\"\n- \"Returns pointer to node, or NULL if not found\"\n\n**@note for important details** (only include if relevant):\n- Memory allocation/deallocation responsibility\n- Side effects that modify input or global state\n- Error handling mechanism\n\n**Omit @note/@see if not applicable.**\n\n## STYLE\n\n- Write naturally, not in bullet points or key-value format\n- Use present tense: \"Inserts a node\" not \"Will insert a node\"\n- Be precise: \"non-negative integer\" not \"valid number\"\n- Avoid redundancy: Don't repeat the function name in @brief\n\n## EXAMPLES\n\n```c\n/**\n * @brief Insert a key into a binary search tree.\n *\n * Creates a new node with the given key and inserts it at the correct\n * position to maintain BST ordering. If the tree is empty (node is NULL),\n * returns a new root node.\n *\n * @param node Root of the tree, or NULL for empty tree.\n * @param key Value to insert.\n *\n * @return Root of the modified tree. Returns newly allocated node if\n *         tree was empty, or existing root with new node inserted.\n *\n * @note Caller must free the returned tree.\n */\n```\n\n```c\n/**\n * @brief Partition array around a pivot for quicksort.\n *\n * Rearranges elements so values less than pivot come before it,\n * and values greater come after. Modifies array in-place.\n *\n * @param arr Array to partition. Must not be NULL.\n * @param low Starting index (inclusive).\n * @param high Ending index (inclusive). Must be >= low.\n *\n * @return Index of the pivot after partitioning.\n */\n```\n\nGenerate ONLY the documentation block. Start with /** and end with */.\n"
+      },
+      {
+        "role": "user",
+        "content": "\nGenerate documentation for this C function:\n\n**Function**: copy_stack\n\n```c\n// C program for the function called copy_stack\n// Contains target function implementation and dependency signatures\n\n#include <stdio.h>     /// for IO operations\n#include <stdlib.h>  /// for including functions involving memory allocation such as `malloc`\n#include <string.h>  /// for string operations\n\nstruct DArrayStack\n{\n    int capacity, top;  ///< to store capacity and top of the stack\n    int *arrPtr;        ///< array pointer\n};\n\n// Forward declarations for dependency functions\nDArrayStack *create_stack(int cap);\n\n// Target function implementation\nDArrayStack *copy_stack(DArrayStack *src)\n{\n    if (src == NULL)\n    {\n        return NULL;\n    }\n    DArrayStack *dest = create_stack(src->capacity);\n    if (dest == NULL)\n    {\n        return NULL;\n    }\n    for (int i = 0; i <= src->top; i++)\n    {\n        dest->arrPtr[i] = src->arrPtr[i];\n    }\n    dest->top = src->top;\n    return dest;\n}\n\n```\n\n**Dependencies**: create_stack\n\nWrite clear, concise documentation following the system prompt format.\nOutput only the /** ... */ block.\n"
+      }
+    ],
+    "model": "deepseek-chat",
+    "provider": "deepseek",
+    "temperature": 0.0,
+    "response_model": null,
+    "max_tokens": 8192,
+    "input_tokens": 939
+  },
+  "response": {
+    "content": "/**\n * @brief Create a deep copy of a stack.\n *\n * Allocates a new stack with the same capacity and copies all elements\n * from the source stack, preserving the top index. The copy is independent;\n * modifications to either stack do not affect the other.\n *\n * @param src Pointer to the source stack to copy. If NULL, the function\n *            returns NULL.\n *\n * @return Pointer to the newly allocated stack copy on success.\n *         Returns NULL if src is NULL or if memory allocation fails.\n *\n * @note Memory: The caller is responsible for freeing the returned stack\n *       and its internal array using an appropriate cleanup function.\n * @note Error: Errors are signaled by a NULL return value.\n *\n * @see create_stack\n */",
+    "finish_reason": "stop",
+    "usage": {
+      "completion_tokens": 158,
+      "prompt_tokens": 938,
+      "total_tokens": 1096,
+      "completion_tokens_details": null,
+      "prompt_tokens_details": {
+        "audio_tokens": null,
+        "cached_tokens": 640
+      },
+      "prompt_cache_hit_tokens": 640,
+      "prompt_cache_miss_tokens": 298
+    },
+    "response_id": "5d85b545-90a2-4e78-b5b6-bd7f4870c799",
+    "created": 1768425526
+  }
+}

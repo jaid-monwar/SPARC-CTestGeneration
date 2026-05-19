@@ -1,0 +1,45 @@
+{
+  "timestamp": "2026-02-03T21:13:38.862170",
+  "context": "function_documentation_printEPS",
+  "model_type": "chat",
+  "model": "gpt-4.1-2025-04-14",
+  "request": {
+    "messages": [
+      {
+        "role": "system",
+        "content": "\nYou are a technical writer creating professional C function documentation. Write clear, concise documentation like high-quality open source projects (glibc, libcurl, Python stdlib).\n\n## FORMAT\n\n```c\n/**\n * @brief One-line description of what the function does.\n *\n * Detailed description (2-3 sentences max) explaining the function's purpose\n * and key behavior. Mention important edge cases or special handling.\n *\n * @param param_name Description of parameter, its valid values, and constraints.\n *                   Note if NULL is valid or if the parameter is modified.\n *\n * @return What the function returns. Specify success/failure values.\n *         Example: \"Pointer to new node on success, NULL on allocation failure.\"\n *\n * @note Memory: Caller must free returned pointer / Function allocates internally\n * @note Error: How errors are signaled (return value, errno, etc.)\n *\n * @see related_function, another_function\n */\n```\n\n## GUIDELINES\n\n**Be concise**: One line for @brief. 2-3 sentences max for detailed description.\n\n**Parameters**: Type is in code, so describe purpose and constraints:\n- Valid ranges: \"Must be positive\", \"Valid pointer or NULL\"\n- Modifications: \"Modified to contain result\", \"Contents are sorted in-place\"\n- Ownership: \"Caller retains ownership\", \"Function takes ownership\"\n\n**Return values**: Be specific about success/failure:\n- \"Returns 0 on success, -1 on error\"\n- \"Returns pointer to node, or NULL if not found\"\n\n**@note for important details** (only include if relevant):\n- Memory allocation/deallocation responsibility\n- Side effects that modify input or global state\n- Error handling mechanism\n\n**Omit @note/@see if not applicable.**\n\n## STYLE\n\n- Write naturally, not in bullet points or key-value format\n- Use present tense: \"Inserts a node\" not \"Will insert a node\"\n- Be precise: \"non-negative integer\" not \"valid number\"\n- Avoid redundancy: Don't repeat the function name in @brief\n\n## EXAMPLES\n\n```c\n/**\n * @brief Insert a key into a binary search tree.\n *\n * Creates a new node with the given key and inserts it at the correct\n * position to maintain BST ordering. If the tree is empty (node is NULL),\n * returns a new root node.\n *\n * @param node Root of the tree, or NULL for empty tree.\n * @param key Value to insert.\n *\n * @return Root of the modified tree. Returns newly allocated node if\n *         tree was empty, or existing root with new node inserted.\n *\n * @note Caller must free the returned tree.\n */\n```\n\n```c\n/**\n * @brief Partition array around a pivot for quicksort.\n *\n * Rearranges elements so values less than pivot come before it,\n * and values greater come after. Modifies array in-place.\n *\n * @param arr Array to partition. Must not be NULL.\n * @param low Starting index (inclusive).\n * @param high Ending index (inclusive). Must be >= low.\n *\n * @return Index of the pivot after partitioning.\n */\n```\n\nGenerate ONLY the documentation block. Start with /** and end with */.\n"
+      },
+      {
+        "role": "user",
+        "content": "\nGenerate documentation for this C function:\n\n**Function**: printEPS\n\n```c\n// C program for the function called printEPS\n// Contains target function implementation and dependency signatures\n\n#include <float.h>        /* DBL_MAX, DBL_MIN */\n#include <math.h>         /* PI, sin, cos */\n#include <stdio.h>        /* printf */\n#include <stdlib.h>       /* rand */\n#include <string.h>       /* memset */\n#include <time.h>         /* time */\n\nstruct cluster\n{\n    double x;     /**< abscissa centroid of this cluster */\n    double y;     /**< ordinate of centroid of this cluster */\n    size_t count; /**< count of observations present in this cluster */\n};\n\nstruct observation\n{\n    double x;  /**< abscissa of 2D data point */\n    double y;  /**< ordinate of 2D data point */\n    int group; /**< the group no in which this observation would go */\n};\n\n// Target function implementation\nvoid printEPS(observation pts[], size_t len, cluster cent[], int k)\n{\n    int W = 400, H = 400;\n    double min_x = DBL_MAX, max_x = DBL_MIN, min_y = DBL_MAX, max_y = DBL_MIN;\n    double scale = 0, cx = 0, cy = 0;\n    double* colors = (double*)malloc(sizeof(double) * (k * 3));\n    int i;\n    size_t j;\n    double kd = k * 1.0;\n    for (i = 0; i < k; i++)\n    {\n        *(colors + 3 * i) = (3 * (i + 1) % k) / kd;\n        *(colors + 3 * i + 1) = (7 * i % k) / kd;\n        *(colors + 3 * i + 2) = (9 * i % k) / kd;\n    }\n\n    for (j = 0; j < len; j++)\n    {\n        if (max_x < pts[j].x)\n        {\n            max_x = pts[j].x;\n        }\n        if (min_x > pts[j].x)\n        {\n            min_x = pts[j].x;\n        }\n        if (max_y < pts[j].y)\n        {\n            max_y = pts[j].y;\n        }\n        if (min_y > pts[j].y)\n        {\n            min_y = pts[j].y;\n        }\n    }\n    scale = W / (max_x - min_x);\n    if (scale > (H / (max_y - min_y)))\n    {\n        scale = H / (max_y - min_y);\n    };\n    cx = (max_x + min_x) / 2;\n    cy = (max_y + min_y) / 2;\n\n    printf(\"%%!PS-Adobe-3.0 EPSF-3.0\\n%%%%BoundingBox: -5 -5 %d %d\\n\", W + 10,\n           H + 10);\n    printf(\n        \"/l {rlineto} def /m {rmoveto} def\\n\"\n        \"/c { .25 sub exch .25 sub exch .5 0 360 arc fill } def\\n\"\n        \"/s { moveto -2 0 m 2 2 l 2 -2 l -2 -2 l closepath \"\n        \"\tgsave 1 setgray fill grestore gsave 3 setlinewidth\"\n        \" 1 setgray stroke grestore 0 setgray stroke }def\\n\");\n    for (int i = 0; i < k; i++)\n    {\n        printf(\"%g %g %g setrgbcolor\\n\", *(colors + 3 * i),\n               *(colors + 3 * i + 1), *(colors + 3 * i + 2));\n        for (j = 0; j < len; j++)\n        {\n            if (pts[j].group != i)\n            {\n                continue;\n            }\n            printf(\"%.3f %.3f c\\n\", (pts[j].x - cx) * scale + W / 2,\n                   (pts[j].y - cy) * scale + H / 2);\n        }\n        printf(\"\\n0 setgray %g %g s\\n\", (cent[i].x - cx) * scale + W / 2,\n               (cent[i].y - cy) * scale + H / 2);\n    }\n    printf(\"\\n%%%%EOF\");\n\n    // free accquired memory\n    free(colors);\n}\n\n```\n\n**Dependencies**: None\n\nWrite clear, concise documentation following the system prompt format.\nOutput only the /** ... */ block.\n"
+      }
+    ],
+    "model": "gpt-4.1-2025-04-14",
+    "provider": "gpt",
+    "temperature": 0.0,
+    "response_model": null,
+    "max_tokens": 8192,
+    "input_tokens": 1657
+  },
+  "response": {
+    "content": "/**\n * @brief Output clustered 2D data and centroids as an EPS (Encapsulated PostScript) image.\n *\n * Generates an EPS file to standard output visualizing 2D observations colored by cluster,\n * along with cluster centroids. Each cluster is assigned a distinct color, and centroids are\n * marked with a special symbol. The output is scaled to fit a fixed-size canvas.\n *\n * @param pts    Array of 2D observations. Must not be NULL and must have at least one element.\n * @param len    Number of observations in pts. Must be greater than 0.\n * @param cent   Array of cluster centroids of length k. Must not be NULL.\n * @param k      Number of clusters. Must be positive and less than or equal to len.\n *\n * @return None.\n *\n * @note Output is written to stdout. The function allocates temporary memory internally.\n */",
+    "finish_reason": "stop",
+    "usage": {
+      "completion_tokens": 190,
+      "prompt_tokens": 1657,
+      "total_tokens": 1847,
+      "completion_tokens_details": {
+        "accepted_prediction_tokens": 0,
+        "audio_tokens": 0,
+        "reasoning_tokens": 0,
+        "rejected_prediction_tokens": 0
+      },
+      "prompt_tokens_details": {
+        "audio_tokens": 0,
+        "cached_tokens": 0
+      }
+    },
+    "response_id": "chatcmpl-D5CNrXowPga60keF87WOxvAW9VyJt",
+    "created": 1770131615
+  }
+}

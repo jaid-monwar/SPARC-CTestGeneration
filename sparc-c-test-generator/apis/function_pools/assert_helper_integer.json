@@ -1,0 +1,683 @@
+{
+  "main_file": "test/helper/functions/assert_helper_integer.c",
+  "functions": [
+    {
+      "name": "assert_int_equal",
+      "return_type": "void",
+      "parameters": [
+        {
+          "name": "actual",
+          "type": "int"
+        },
+        {
+          "name": "expected",
+          "type": "int"
+        }
+      ],
+      "location": "test/helper/functions/assert_helper_integer.c:7",
+      "source_file": "assert_helper_integer.c",
+      "description": "Assert that two int values are equal."
+    },
+    {
+      "name": "assert_uint8_equal",
+      "return_type": "void",
+      "parameters": [
+        {
+          "name": "actual",
+          "type": "uint8_t"
+        },
+        {
+          "name": "expected",
+          "type": "uint8_t"
+        }
+      ],
+      "location": "test/helper/functions/assert_helper_integer.c:17",
+      "source_file": "assert_helper_integer.c",
+      "description": "Assert that two uint8_t values are equal."
+    },
+    {
+      "name": "assert_uint16_equal",
+      "return_type": "void",
+      "parameters": [
+        {
+          "name": "actual",
+          "type": "uint16_t"
+        },
+        {
+          "name": "expected",
+          "type": "uint16_t"
+        }
+      ],
+      "location": "test/helper/functions/assert_helper_integer.c:27",
+      "source_file": "assert_helper_integer.c",
+      "description": "Assert that two uint16_t values are equal."
+    },
+    {
+      "name": "assert_uint32_equal",
+      "return_type": "void",
+      "parameters": [
+        {
+          "name": "actual",
+          "type": "uint32_t"
+        },
+        {
+          "name": "expected",
+          "type": "uint32_t"
+        }
+      ],
+      "location": "test/helper/functions/assert_helper_integer.c:37",
+      "source_file": "assert_helper_integer.c",
+      "description": "Assert that two uint32_t values are equal."
+    },
+    {
+      "name": "assert_uint64_equal",
+      "return_type": "void",
+      "parameters": [
+        {
+          "name": "actual",
+          "type": "uint64_t"
+        },
+        {
+          "name": "expected",
+          "type": "uint64_t"
+        }
+      ],
+      "location": "test/helper/functions/assert_helper_integer.c:47",
+      "source_file": "assert_helper_integer.c",
+      "description": "Assert that two uint64_t values are equal."
+    },
+    {
+      "name": "assert_int8_equal",
+      "return_type": "void",
+      "parameters": [
+        {
+          "name": "actual",
+          "type": "int8_t"
+        },
+        {
+          "name": "expected",
+          "type": "int8_t"
+        }
+      ],
+      "location": "test/helper/functions/assert_helper_integer.c:57",
+      "source_file": "assert_helper_integer.c",
+      "description": "Assert that two int8_t values are equal."
+    },
+    {
+      "name": "assert_int16_equal",
+      "return_type": "void",
+      "parameters": [
+        {
+          "name": "actual",
+          "type": "int16_t"
+        },
+        {
+          "name": "expected",
+          "type": "int16_t"
+        }
+      ],
+      "location": "test/helper/functions/assert_helper_integer.c:67",
+      "source_file": "assert_helper_integer.c",
+      "description": "Assert that two int16_t values are equal."
+    },
+    {
+      "name": "assert_int32_equal",
+      "return_type": "void",
+      "parameters": [
+        {
+          "name": "actual",
+          "type": "int32_t"
+        },
+        {
+          "name": "expected",
+          "type": "int32_t"
+        }
+      ],
+      "location": "test/helper/functions/assert_helper_integer.c:77",
+      "source_file": "assert_helper_integer.c",
+      "description": "Assert that two int32_t values are equal."
+    },
+    {
+      "name": "assert_int64_equal",
+      "return_type": "void",
+      "parameters": [
+        {
+          "name": "actual",
+          "type": "int64_t"
+        },
+        {
+          "name": "expected",
+          "type": "int64_t"
+        }
+      ],
+      "location": "test/helper/functions/assert_helper_integer.c:87",
+      "source_file": "assert_helper_integer.c",
+      "description": "Assert that two int64_t values are equal."
+    },
+    {
+      "name": "assert_int_in_range",
+      "return_type": "void",
+      "parameters": [
+        {
+          "name": "actual",
+          "type": "int"
+        },
+        {
+          "name": "min_val",
+          "type": "int"
+        },
+        {
+          "name": "max_val",
+          "type": "int"
+        }
+      ],
+      "location": "test/helper/functions/assert_helper_integer.c:99",
+      "source_file": "assert_helper_integer.c",
+      "description": "Assert that an int value is within the specified range (inclusive)."
+    },
+    {
+      "name": "assert_uint8_in_range",
+      "return_type": "void",
+      "parameters": [
+        {
+          "name": "actual",
+          "type": "uint8_t"
+        },
+        {
+          "name": "min_val",
+          "type": "uint8_t"
+        },
+        {
+          "name": "max_val",
+          "type": "uint8_t"
+        }
+      ],
+      "location": "test/helper/functions/assert_helper_integer.c:110",
+      "source_file": "assert_helper_integer.c",
+      "description": "Assert that a uint8_t value is within the specified range (inclusive)."
+    },
+    {
+      "name": "assert_uint32_in_range",
+      "return_type": "void",
+      "parameters": [
+        {
+          "name": "actual",
+          "type": "uint32_t"
+        },
+        {
+          "name": "min_val",
+          "type": "uint32_t"
+        },
+        {
+          "name": "max_val",
+          "type": "uint32_t"
+        }
+      ],
+      "location": "test/helper/functions/assert_helper_integer.c:121",
+      "source_file": "assert_helper_integer.c",
+      "description": "Assert that a uint32_t value is within the specified range (inclusive)."
+    },
+    {
+      "name": "assert_int_greater_than",
+      "return_type": "void",
+      "parameters": [
+        {
+          "name": "actual",
+          "type": "int"
+        },
+        {
+          "name": "threshold",
+          "type": "int"
+        }
+      ],
+      "location": "test/helper/functions/assert_helper_integer.c:134",
+      "source_file": "assert_helper_integer.c",
+      "description": "Assert that an int value is greater than the threshold."
+    },
+    {
+      "name": "assert_int_less_than",
+      "return_type": "void",
+      "parameters": [
+        {
+          "name": "actual",
+          "type": "int"
+        },
+        {
+          "name": "threshold",
+          "type": "int"
+        }
+      ],
+      "location": "test/helper/functions/assert_helper_integer.c:144",
+      "source_file": "assert_helper_integer.c",
+      "description": "Assert that an int value is less than the threshold."
+    },
+    {
+      "name": "assert_uint32_greater_than",
+      "return_type": "void",
+      "parameters": [
+        {
+          "name": "actual",
+          "type": "uint32_t"
+        },
+        {
+          "name": "threshold",
+          "type": "uint32_t"
+        }
+      ],
+      "location": "test/helper/functions/assert_helper_integer.c:154",
+      "source_file": "assert_helper_integer.c",
+      "description": "Assert that a uint32_t value is greater than the threshold."
+    },
+    {
+      "name": "assert_uint8_greater_than",
+      "return_type": "void",
+      "parameters": [
+        {
+          "name": "actual",
+          "type": "uint8_t"
+        },
+        {
+          "name": "threshold",
+          "type": "uint8_t"
+        }
+      ],
+      "location": "test/helper/functions/assert_helper_integer.c:164",
+      "source_file": "assert_helper_integer.c",
+      "description": "Assert that a uint8_t value is greater than the threshold."
+    },
+    {
+      "name": "assert_int_non_zero",
+      "return_type": "void",
+      "parameters": [
+        {
+          "name": "actual",
+          "type": "int"
+        }
+      ],
+      "location": "test/helper/functions/assert_helper_integer.c:176",
+      "source_file": "assert_helper_integer.c",
+      "description": "Assert that an int value is non-zero."
+    },
+    {
+      "name": "assert_int_positive",
+      "return_type": "void",
+      "parameters": [
+        {
+          "name": "actual",
+          "type": "int"
+        }
+      ],
+      "location": "test/helper/functions/assert_helper_integer.c:186",
+      "source_file": "assert_helper_integer.c",
+      "description": "Assert that an int value is positive (> 0)."
+    },
+    {
+      "name": "assert_int_negative",
+      "return_type": "void",
+      "parameters": [
+        {
+          "name": "actual",
+          "type": "int"
+        }
+      ],
+      "location": "test/helper/functions/assert_helper_integer.c:196",
+      "source_file": "assert_helper_integer.c",
+      "description": "Assert that an int value is negative (< 0)."
+    },
+    {
+      "name": "assert_uint_is_zero",
+      "return_type": "void",
+      "parameters": [
+        {
+          "name": "actual",
+          "type": "uint32_t"
+        }
+      ],
+      "location": "test/helper/functions/assert_helper_integer.c:206",
+      "source_file": "assert_helper_integer.c",
+      "description": "Assert that a uint32_t value is zero."
+    }
+  ],
+  "source_files": {
+    "test/helper/functions/assert_helper_integer.c": [
+      {
+        "name": "assert_int_equal",
+        "return_type": "void",
+        "parameters": [
+          {
+            "name": "actual",
+            "type": "int"
+          },
+          {
+            "name": "expected",
+            "type": "int"
+          }
+        ],
+        "location": "test/helper/functions/assert_helper_integer.c:7",
+        "source_file": "assert_helper_integer.c",
+        "description": "Assert that two int values are equal."
+      },
+      {
+        "name": "assert_uint8_equal",
+        "return_type": "void",
+        "parameters": [
+          {
+            "name": "actual",
+            "type": "uint8_t"
+          },
+          {
+            "name": "expected",
+            "type": "uint8_t"
+          }
+        ],
+        "location": "test/helper/functions/assert_helper_integer.c:17",
+        "source_file": "assert_helper_integer.c",
+        "description": "Assert that two uint8_t values are equal."
+      },
+      {
+        "name": "assert_uint16_equal",
+        "return_type": "void",
+        "parameters": [
+          {
+            "name": "actual",
+            "type": "uint16_t"
+          },
+          {
+            "name": "expected",
+            "type": "uint16_t"
+          }
+        ],
+        "location": "test/helper/functions/assert_helper_integer.c:27",
+        "source_file": "assert_helper_integer.c",
+        "description": "Assert that two uint16_t values are equal."
+      },
+      {
+        "name": "assert_uint32_equal",
+        "return_type": "void",
+        "parameters": [
+          {
+            "name": "actual",
+            "type": "uint32_t"
+          },
+          {
+            "name": "expected",
+            "type": "uint32_t"
+          }
+        ],
+        "location": "test/helper/functions/assert_helper_integer.c:37",
+        "source_file": "assert_helper_integer.c",
+        "description": "Assert that two uint32_t values are equal."
+      },
+      {
+        "name": "assert_uint64_equal",
+        "return_type": "void",
+        "parameters": [
+          {
+            "name": "actual",
+            "type": "uint64_t"
+          },
+          {
+            "name": "expected",
+            "type": "uint64_t"
+          }
+        ],
+        "location": "test/helper/functions/assert_helper_integer.c:47",
+        "source_file": "assert_helper_integer.c",
+        "description": "Assert that two uint64_t values are equal."
+      },
+      {
+        "name": "assert_int8_equal",
+        "return_type": "void",
+        "parameters": [
+          {
+            "name": "actual",
+            "type": "int8_t"
+          },
+          {
+            "name": "expected",
+            "type": "int8_t"
+          }
+        ],
+        "location": "test/helper/functions/assert_helper_integer.c:57",
+        "source_file": "assert_helper_integer.c",
+        "description": "Assert that two int8_t values are equal."
+      },
+      {
+        "name": "assert_int16_equal",
+        "return_type": "void",
+        "parameters": [
+          {
+            "name": "actual",
+            "type": "int16_t"
+          },
+          {
+            "name": "expected",
+            "type": "int16_t"
+          }
+        ],
+        "location": "test/helper/functions/assert_helper_integer.c:67",
+        "source_file": "assert_helper_integer.c",
+        "description": "Assert that two int16_t values are equal."
+      },
+      {
+        "name": "assert_int32_equal",
+        "return_type": "void",
+        "parameters": [
+          {
+            "name": "actual",
+            "type": "int32_t"
+          },
+          {
+            "name": "expected",
+            "type": "int32_t"
+          }
+        ],
+        "location": "test/helper/functions/assert_helper_integer.c:77",
+        "source_file": "assert_helper_integer.c",
+        "description": "Assert that two int32_t values are equal."
+      },
+      {
+        "name": "assert_int64_equal",
+        "return_type": "void",
+        "parameters": [
+          {
+            "name": "actual",
+            "type": "int64_t"
+          },
+          {
+            "name": "expected",
+            "type": "int64_t"
+          }
+        ],
+        "location": "test/helper/functions/assert_helper_integer.c:87",
+        "source_file": "assert_helper_integer.c",
+        "description": "Assert that two int64_t values are equal."
+      },
+      {
+        "name": "assert_int_in_range",
+        "return_type": "void",
+        "parameters": [
+          {
+            "name": "actual",
+            "type": "int"
+          },
+          {
+            "name": "min_val",
+            "type": "int"
+          },
+          {
+            "name": "max_val",
+            "type": "int"
+          }
+        ],
+        "location": "test/helper/functions/assert_helper_integer.c:99",
+        "source_file": "assert_helper_integer.c",
+        "description": "Assert that an int value is within the specified range (inclusive)."
+      },
+      {
+        "name": "assert_uint8_in_range",
+        "return_type": "void",
+        "parameters": [
+          {
+            "name": "actual",
+            "type": "uint8_t"
+          },
+          {
+            "name": "min_val",
+            "type": "uint8_t"
+          },
+          {
+            "name": "max_val",
+            "type": "uint8_t"
+          }
+        ],
+        "location": "test/helper/functions/assert_helper_integer.c:110",
+        "source_file": "assert_helper_integer.c",
+        "description": "Assert that a uint8_t value is within the specified range (inclusive)."
+      },
+      {
+        "name": "assert_uint32_in_range",
+        "return_type": "void",
+        "parameters": [
+          {
+            "name": "actual",
+            "type": "uint32_t"
+          },
+          {
+            "name": "min_val",
+            "type": "uint32_t"
+          },
+          {
+            "name": "max_val",
+            "type": "uint32_t"
+          }
+        ],
+        "location": "test/helper/functions/assert_helper_integer.c:121",
+        "source_file": "assert_helper_integer.c",
+        "description": "Assert that a uint32_t value is within the specified range (inclusive)."
+      },
+      {
+        "name": "assert_int_greater_than",
+        "return_type": "void",
+        "parameters": [
+          {
+            "name": "actual",
+            "type": "int"
+          },
+          {
+            "name": "threshold",
+            "type": "int"
+          }
+        ],
+        "location": "test/helper/functions/assert_helper_integer.c:134",
+        "source_file": "assert_helper_integer.c",
+        "description": "Assert that an int value is greater than the threshold."
+      },
+      {
+        "name": "assert_int_less_than",
+        "return_type": "void",
+        "parameters": [
+          {
+            "name": "actual",
+            "type": "int"
+          },
+          {
+            "name": "threshold",
+            "type": "int"
+          }
+        ],
+        "location": "test/helper/functions/assert_helper_integer.c:144",
+        "source_file": "assert_helper_integer.c",
+        "description": "Assert that an int value is less than the threshold."
+      },
+      {
+        "name": "assert_uint32_greater_than",
+        "return_type": "void",
+        "parameters": [
+          {
+            "name": "actual",
+            "type": "uint32_t"
+          },
+          {
+            "name": "threshold",
+            "type": "uint32_t"
+          }
+        ],
+        "location": "test/helper/functions/assert_helper_integer.c:154",
+        "source_file": "assert_helper_integer.c",
+        "description": "Assert that a uint32_t value is greater than the threshold."
+      },
+      {
+        "name": "assert_uint8_greater_than",
+        "return_type": "void",
+        "parameters": [
+          {
+            "name": "actual",
+            "type": "uint8_t"
+          },
+          {
+            "name": "threshold",
+            "type": "uint8_t"
+          }
+        ],
+        "location": "test/helper/functions/assert_helper_integer.c:164",
+        "source_file": "assert_helper_integer.c",
+        "description": "Assert that a uint8_t value is greater than the threshold."
+      },
+      {
+        "name": "assert_int_non_zero",
+        "return_type": "void",
+        "parameters": [
+          {
+            "name": "actual",
+            "type": "int"
+          }
+        ],
+        "location": "test/helper/functions/assert_helper_integer.c:176",
+        "source_file": "assert_helper_integer.c",
+        "description": "Assert that an int value is non-zero."
+      },
+      {
+        "name": "assert_int_positive",
+        "return_type": "void",
+        "parameters": [
+          {
+            "name": "actual",
+            "type": "int"
+          }
+        ],
+        "location": "test/helper/functions/assert_helper_integer.c:186",
+        "source_file": "assert_helper_integer.c",
+        "description": "Assert that an int value is positive (> 0)."
+      },
+      {
+        "name": "assert_int_negative",
+        "return_type": "void",
+        "parameters": [
+          {
+            "name": "actual",
+            "type": "int"
+          }
+        ],
+        "location": "test/helper/functions/assert_helper_integer.c:196",
+        "source_file": "assert_helper_integer.c",
+        "description": "Assert that an int value is negative (< 0)."
+      },
+      {
+        "name": "assert_uint_is_zero",
+        "return_type": "void",
+        "parameters": [
+          {
+            "name": "actual",
+            "type": "uint32_t"
+          }
+        ],
+        "location": "test/helper/functions/assert_helper_integer.c:206",
+        "source_file": "assert_helper_integer.c",
+        "description": "Assert that a uint32_t value is zero."
+      }
+    ]
+  },
+  "headers_processed": [],
+  "implementation_files": []
+}
